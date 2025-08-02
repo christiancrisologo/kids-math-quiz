@@ -45,8 +45,54 @@ const generateDivisionQuestion = (difficulty: Difficulty): { question: string; a
   };
 };
 
+const generateAlgebraicQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  if (difficulty === 'easy') {
+    // Single-step equations
+    const operations = ['addition', 'subtraction', 'multiplication'];
+    const operation = operations[getRandomNumber(0, operations.length - 1)];
+    
+    switch (operation) {
+      case 'addition': // x + a = b
+        const a1 = getRandomNumber(1, 20);
+        const x1 = getRandomNumber(1, 20);
+        return { question: `x + ${a1} = ${x1 + a1}`, answer: x1 };
+      
+      case 'subtraction': // x - a = b
+        const a2 = getRandomNumber(1, 15);
+        const x2 = getRandomNumber(a2 + 1, 25); // Ensure positive result
+        return { question: `x - ${a2} = ${x2 - a2}`, answer: x2 };
+      
+      case 'multiplication': // ax = b
+        const a3 = getRandomNumber(2, 10);
+        const x3 = getRandomNumber(1, 15);
+        return { question: `${a3}x = ${a3 * x3}`, answer: x3 };
+      
+      default:
+        const a4 = getRandomNumber(1, 20);
+        const x4 = getRandomNumber(1, 20);
+        return { question: `x + ${a4} = ${x4 + a4}`, answer: x4 };
+    }
+  } else {
+    // Multi-step equations: ax + b = c or ax - b = c
+    const useAddition = Math.random() > 0.5;
+    const a = getRandomNumber(2, 5);
+    const b = getRandomNumber(1, 10);
+    const x = getRandomNumber(-10, 15); // Allow negative solutions
+    
+    if (useAddition) {
+      // ax + b = c
+      const c = a * x + b;
+      return { question: `${a}x + ${b} = ${c}`, answer: x };
+    } else {
+      // ax - b = c
+      const c = a * x - b;
+      return { question: `${a}x - ${b} = ${c}`, answer: x };
+    }
+  }
+};
+
 const generateQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): { question: string; answer: number } => {
-  const operations = ['addition', 'subtraction', 'multiplication', 'division'];
+  const operations = ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'];
   const selectedOperation = operation === 'mixed' 
     ? operations[getRandomNumber(0, operations.length - 1)] as MathOperation
     : operation;
@@ -60,6 +106,8 @@ const generateQuestionByOperation = (operation: MathOperation, difficulty: Diffi
       return generateMultiplicationQuestion(difficulty);
     case 'division':
       return generateDivisionQuestion(difficulty);
+    case 'algebraic':
+      return generateAlgebraicQuestion(difficulty);
     default:
       return generateAdditionQuestion(difficulty);
   }
@@ -99,6 +147,16 @@ export const generateQuestions = (
       question,
       answer,
     };
+    
+    // For algebraic questions, add variable and equation info
+    const currentOperation = operation === 'mixed' 
+      ? ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'][Math.floor(Math.random() * 5)]
+      : operation;
+    
+    if (currentOperation === 'algebraic' || question.includes('x')) {
+      questionObj.variable = 'x';
+      questionObj.equation = question;
+    }
     
     if (questionType === 'multiple-choice') {
       questionObj.options = generateMultipleChoiceOptions(answer, difficulty);

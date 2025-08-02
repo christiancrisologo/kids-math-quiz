@@ -87,8 +87,8 @@ export default function Home() {
                   key={level}
                   onClick={() => handleInputChange('difficulty', level)}
                   className={`px-4 py-3 rounded-lg border-2 transition-all ${formData.difficulty === level
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
+                    ? 'border-purple-500 bg-purple-50 text-purple-700'
+                    : 'border-gray-300 hover:border-purple-300'
                     }`}
                 >
                   {level === 'easy' ? '🟢 Easy' : '🔴 Hard'}
@@ -141,8 +141,8 @@ export default function Home() {
                   key={type.value}
                   onClick={() => handleInputChange('questionType', type.value)}
                   className={`px-4 py-3 rounded-lg border-2 transition-all text-left ${formData.questionType === type.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
+                    ? 'border-purple-500 bg-purple-50 text-purple-700'
+                    : 'border-gray-300 hover:border-purple-300'
                     }`}
                 >
                   {type.label}
@@ -162,15 +162,16 @@ export default function Home() {
                 { value: 'subtraction', label: '➖ Subtraction' },
                 { value: 'multiplication', label: '✖️ Multiplication' },
                 { value: 'division', label: '➗ Division' },
+                { value: 'algebraic', label: '🔢 Algebraic Expressions' },
                 { value: 'mixed', label: '🎲 Mixed (All Types)' }
               ] as { value: MathOperation; label: string }[]).map((op) => (
                 <button
                   key={op.value}
                   onClick={() => handleInputChange('mathOperation', op.value)}
                   className={`px-3 py-2 rounded-lg border-2 transition-all text-sm ${formData.mathOperation === op.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
-                    } ${op.value === 'mixed' ? 'col-span-2' : ''}`}
+                    ? 'border-purple-500 bg-purple-50 text-purple-700'
+                    : 'border-gray-300 hover:border-purple-300'
+                    } ${op.value === 'mixed' || op.value === 'algebraic' ? 'col-span-2' : ''}`}
                 >
                   {op.label}
                 </button>
