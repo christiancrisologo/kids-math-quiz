@@ -56,9 +56,8 @@ export default function ResultsPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
             <div className={`${isMobile ? 'p-4' : 'flex items-center justify-center p-4 min-h-screen'}`}>
-                <div className={`bg-white rounded-2xl shadow-2xl w-full ${
-                    isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
-                } ${isMobile ? 'p-6' : 'p-8'}`}>
+                <div className={`bg-white rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
+                    } ${isMobile ? 'p-6' : 'p-8'}`}>
                     {/* Header */}
                     <div className="text-center mb-8">
                         <h1 className={`font-bold text-gray-800 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
@@ -70,9 +69,8 @@ export default function ResultsPage() {
                     </div>
 
                     {/* Score Summary */}
-                    <div className={`bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl text-center mb-8 ${
-                        isMobile ? 'p-6' : 'p-8'
-                    }`}>
+                    <div className={`bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl text-center mb-8 ${isMobile ? 'p-6' : 'p-8'
+                        }`}>
                         <div className={`mb-4 ${isMobile ? 'text-4xl' : 'text-6xl'}`}>{gradeInfo.emoji}</div>
                         <div className={`font-bold text-gray-800 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
                             {correctAnswers} / {totalQuestions}
@@ -94,11 +92,10 @@ export default function ResultsPage() {
                             {questions.map((question, index) => (
                                 <div
                                     key={question.id}
-                                    className={`rounded-lg border-2 ${
-                                        question.isCorrect
+                                    className={`rounded-lg border-2 ${question.isCorrect
                                             ? 'border-green-300 bg-green-50'
                                             : 'border-red-300 bg-red-50'
-                                    } ${isMobile ? 'p-3' : 'p-4'}`}
+                                        } ${isMobile ? 'p-3' : 'p-4'}`}
                                 >
                                     {isMobile ? (
                                         /* Mobile Layout - Stacked */

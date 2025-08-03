@@ -31,7 +31,7 @@ export default function Home() {
       ...prev,
       [field]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
@@ -43,19 +43,19 @@ export default function Home() {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.username.trim()) {
       newErrors.username = 'Please enter your name';
     }
-    
+
     if (formData.numberOfQuestions < 5) {
       newErrors.numberOfQuestions = 'Minimum 5 questions required';
     }
-    
+
     if (formData.timerPerQuestion < 5) {
       newErrors.timerPerQuestion = 'Minimum 5 seconds required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

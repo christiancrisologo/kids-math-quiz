@@ -130,15 +130,14 @@ export default function QuizPage() {
                             <span className="text-sm font-medium text-gray-600">
                                 {currentQuestionIndex + 1}/{questions.length}
                             </span>
-                            <div className={`text-xl font-bold px-3 py-1 rounded-lg ${
-                                timeRemaining <= 5 
-                                    ? 'text-red-500 bg-red-50 animate-pulse' 
+                            <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
+                                    ? 'text-red-500 bg-red-50 animate-pulse'
                                     : 'text-purple-600 bg-purple-50'
-                            }`}>
+                                }`}>
                                 ⏰ {timeRemaining}s
                             </div>
                         </div>
-                        
+
                         {/* Progress Bar */}
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
@@ -275,8 +274,8 @@ export default function QuizPage() {
                                             key={index}
                                             onClick={() => setSelectedOption(option)}
                                             className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedOption === option
-                                                    ? 'border-purple-500 bg-purple-50 text-purple-700'
-                                                    : 'border-gray-300 hover:border-purple-300 hover:bg-gray-50'
+                                                ? 'border-purple-500 bg-purple-50 text-purple-700'
+                                                : 'border-gray-300 hover:border-purple-300 hover:bg-gray-50'
                                                 }`}
                                         >
                                             {String.fromCharCode(65 + index)}. {option}
