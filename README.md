@@ -1,6 +1,15 @@
 # Math Quiz for Kids
 
+[![Deploy to GitHub Pages](https://github.com/christiancrisologo/kids-math-quiz/actions/workflows/deploy-gh-pages.yml/badge.svg)](https://github.com/christiancrisologo/kids-math-quiz/actions/workflows/deploy-gh-pages.yml)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat&logo=github)](https://christiancrisologo.github.io/kids-math-quiz/)
+
 A fun and interactive mobile-optimized math quiz application designed for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation.
+
+## 🌐 Live Demo
+
+**Try it now:** [Math Quiz for Kids on GitHub Pages](https://christiancrisologo.github.io/kids-math-quiz/)
+
+The app is automatically deployed to GitHub Pages whenever changes are pushed to the main branch.
 
 ## ✨ Features
 
@@ -156,6 +165,8 @@ See [DARK_MODE_IMPLEMENTATION.md](./DARK_MODE_IMPLEMENTATION.md) for detailed te
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run deploy` - Build for GitHub Pages deployment
+- `npm run build:gh-pages` - Build with production environment
 
 ### Environment Setup
 - TypeScript for type safety
@@ -163,8 +174,43 @@ See [DARK_MODE_IMPLEMENTATION.md](./DARK_MODE_IMPLEMENTATION.md) for detailed te
 - Tailwind CSS for styling
 - Mobile-first responsive design
 
-## 📖 Documentation
+## � Deployment
 
+### Automatic Deployment
+The app is automatically deployed to GitHub Pages using GitHub Actions:
+
+- **Trigger**: Every push to `main` branch
+- **Build**: Next.js static export optimized for GitHub Pages
+- **Deploy**: Automatic deployment to GitHub Pages
+- **URL**: [https://christiancrisologo.github.io/kids-math-quiz/](https://christiancrisologo.github.io/kids-math-quiz/)
+
+### GitHub Actions Workflow
+The deployment workflow includes:
+- ✅ Dependency installation with caching
+- ✅ TypeScript compilation and linting
+- ✅ Next.js build with static export
+- ✅ Automatic deployment to GitHub Pages
+- ✅ Build status notifications
+
+### Manual Deployment
+To deploy manually:
+```bash
+# Build for production
+npm run build:gh-pages
+
+# The built files will be in the 'out' directory
+# These are automatically deployed by GitHub Actions
+```
+
+### Deployment Configuration
+- **Base Path**: `/kids-math-quiz` (for GitHub Pages subdirectory)
+- **Asset Prefix**: Configured for GitHub Pages hosting
+- **Static Export**: Optimized for static file hosting
+- **Image Optimization**: Disabled for static export compatibility
+
+## �📖 Documentation
+
+- [CI/CD Deployment Guide](./.github/prompts/cicd-deploy-to-gh.md)
 - [Feature Implementation Guide](./.github/prompts/feature-03-dark-mode.md)
 - [Dark Mode Technical Documentation](./DARK_MODE_IMPLEMENTATION.md)
 - [Copilot Instructions](./.github/instructions/copilot-instructions.md)
