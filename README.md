@@ -1,6 +1,32 @@
 # Math Quiz for Kids
 
-[![Deploy to GitHub Pages](https://github.com/christiancrisologo/kids-math-quiz/actions/workflows/deploy-gh-pages.yml/badge.svg)](https://github.com/christiancrisologo/kids-math-quiz/actions/workflows/deploy-gh-pages.yml)
+[![Deploy to GitHub Pages](https://github.com/christiancrisologo/kids-math-quiz/actions/workflows/deploy-gh-pages.yml/badge.svg)](https://github.com/chris## 🚀 Deployment
+
+### 🚨 Manual Setup Required
+**Impo## 📖 Documentation
+
+- [**Manual Workflow Setup**](./MANUAL_WORKFLOW_SETUP.md) - **Required**: GitHub Actions setup guide
+- [Deployment Summary](./DEPLOYMENT_SUMMARY.md) - Complete deployment documentation
+- [CI/CD Deployment Guide](./.github/prompts/cicd-deploy-to-gh.md) - Implementation details
+- [Feature Implementation Guide](./.github/prompts/feature-03-dark-mode.md) - Dark mode specification
+- [Dark Mode Technical Documentation](./DARK_MODE_IMPLEMENTATION.md) - Implementation details
+- [Copilot Instructions](./.github/instructions/copilot-instructions.md) - Development guidelines*: The GitHub Actions workflow file needs to be created manually in the repository due to token permissions. See [`MANUAL_WORKFLOW_SETUP.md`](./MANUAL_WORKFLOW_SETUP.md) for step-by-step instructions.
+
+### Automatic Deployment
+Once the workflow is set up, the app is automatically deployed to GitHub Pages using GitHub Actions:
+
+- **Trigger**: Every push to `main` branch
+- **Build**: Next.js static export optimized for GitHub Pages
+- **Deploy**: Automatic deployment to GitHub Pages
+- **URL**: [https://christiancrisologo.github.io/kids-math-quiz/](https://christiancrisologo.github.io/kids-math-quiz/)
+
+### GitHub Actions Workflow
+The deployment workflow includes:
+- ✅ Dependency installation with caching
+- ✅ TypeScript compilation and linting
+- ✅ Next.js build with static export
+- ✅ Automatic deployment to GitHub Pages
+- ✅ Build status notificationss-math-quiz/actions/workflows/deploy-gh-pages.yml)
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat&logo=github)](https://christiancrisologo.github.io/kids-math-quiz/)
 
 A fun and interactive mobile-optimized math quiz application designed for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation.
