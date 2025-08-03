@@ -1,0 +1,187 @@
+/* Theme CSS Variables for Dark Mode Support */
+
+:root {
+  /* Light theme (default) */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-surface: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  
+  /* Primary colors */
+  --color-primary: #8B5CF6;
+  --color-primary-hover: #7c3aed;
+  --color-primary-light: #a855f7;
+  
+  /* Status colors */
+  --color-success: #10b981;
+  --color-success-bg: #dcfce7;
+  --color-success-border: #bbf7d0;
+  --color-error: #ef4444;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fecaca;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-warning-border: #fed7aa;
+  
+  /* Input colors */
+  --color-input-bg: #ffffff;
+  --color-input-border: #d1d5db;
+  --color-input-focus: #3b82f6;
+  
+  /* Card colors */
+  --color-card-bg: #ffffff;
+  --color-card-border: #e5e7eb;
+  
+  /* Gradient colors */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-quiz: linear-gradient(to bottom right, #60a5fa, #a855f7, #ec4899);
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --color-background: #0f172a;
+  --color-foreground: #f1f5f9;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-border: #334155;
+  --color-border-light: #475569;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  
+  /* Primary colors (adjusted for dark mode) */
+  --color-primary: #a855f7;
+  --color-primary-hover: #9333ea;
+  --color-primary-light: #c084fc;
+  
+  /* Status colors (adjusted for dark mode) */
+  --color-success: #34d399;
+  --color-success-bg: #064e3b;
+  --color-success-border: #065f46;
+  --color-error: #f87171;
+  --color-error-bg: #7f1d1d;
+  --color-error-border: #991b1b;
+  --color-warning: #fbbf24;
+  --color-warning-bg: #78350f;
+  --color-warning-border: #92400e;
+  
+  /* Input colors */
+  --color-input-bg: #1e293b;
+  --color-input-border: #475569;
+  --color-input-focus: #60a5fa;
+  
+  /* Card colors */
+  --color-card-bg: #1e293b;
+  --color-card-border: #334155;
+  
+  /* Gradient colors (adjusted for dark mode) */
+  --gradient-primary: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  --gradient-secondary: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  --gradient-quiz: linear-gradient(to bottom right, #1e40af, #7c3aed, #be185d);
+}
+
+/* Fun animations for kids */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes rainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes pulse-color {
+  0%, 100% { 
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+  }
+  50% { 
+    background: linear-gradient(45deg, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #ff6b6b);
+  }
+}
+
+/* Apply fun animations to backgrounds */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-rainbow {
+  animation: rainbow 8s linear infinite;
+}
+
+/* Smooth transitions for theme changes */
+*,
+*::before,
+*::after {
+  transition: background-color 200ms ease-in-out, 
+              border-color 200ms ease-in-out, 
+              color 200ms ease-in-out,
+              box-shadow 200ms ease-in-out;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Base theme classes for easy usage */
+.theme-bg {
+  background-color: var(--color-background);
+}
+
+.theme-text {
+  color: var(--color-foreground);
+}
+
+.theme-surface {
+  background-color: var(--color-surface);
+}
+
+.theme-border {
+  border-color: var(--color-border);
+}
+
+.theme-card {
+  background-color: var(--color-card-bg);
+  border-color: var(--color-card-border);
+}
+
+/* Theme-aware gradient backgrounds */
+.theme-gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.theme-gradient-quiz {
+  background: var(--gradient-quiz);
+}

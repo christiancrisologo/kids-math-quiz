@@ -59,7 +59,7 @@ MathQuiz is a mathematics learning application designed to help users practice a
 - Implement in phases with regular commits
 - Test on multiple devices before merge
 - Fetch the latest changes from the main branch before starting work
-- Rebase the branch with the main branch and fix conflicts
+- Rebase the branch with the main branch and fix the conflicts
 - Create pull request with mobile screenshots/videos
 - Deploy to staging for comprehensive mobile testing
 
