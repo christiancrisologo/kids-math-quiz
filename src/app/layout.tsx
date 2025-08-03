@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/mobile.css";
+import "../styles/themes.css";
+import { ThemeProvider } from "../contexts/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +18,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Math Quiz App - Mobile-Friendly Math Practice",
   description: "A fun and interactive mobile-optimized math quiz application for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
-  themeColor: "#8B5CF6",
   icons: {
     apple: "/apple-touch-icon.png",
   },
@@ -40,9 +40,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Math Quiz" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full touch-manipulation`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full touch-manipulation bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -24,13 +24,13 @@ export const MobileTile: React.FC<MobileTileProps> = ({
             onClick={onClick}
             disabled={disabled}
             className={`
-        w-full min-h-[80px] p-6 rounded-xl border-2 transition-all duration-200
+        w-full min-h-[80px] p-6 rounded-xl border-2 transition-all duration-200 cursor-pointer
         ${isSelected
-                    ? 'border-blue-500 bg-blue-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-md'
+                    : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700'
                 }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'active:scale-98 cursor-pointer'}
-        focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 shadow-sm
         ${className}
       `}
         >
@@ -40,11 +40,11 @@ export const MobileTile: React.FC<MobileTileProps> = ({
                         {icon}
                     </span>
                 )}
-                <span className="font-semibold text-gray-800 text-center">
+                <span className="font-semibold text-gray-800 dark:text-gray-200 text-center">
                     {title}
                 </span>
                 {subtitle && (
-                    <span className="text-sm text-gray-600 text-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400 text-center">
                         {subtitle}
                     </span>
                 )}
