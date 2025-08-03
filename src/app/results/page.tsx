@@ -83,14 +83,18 @@ export default function ResultsPage() {
                             <div
                                 key={question.id}
                                 className={`p-4 rounded-lg border-2 ${question.isCorrect
-                                        ? 'border-green-300 bg-green-50'
-                                        : 'border-red-300 bg-red-50'
+                                    ? 'border-green-300 bg-green-50'
+                                    : 'border-red-300 bg-red-50'
                                     }`}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex-1">
                                         <span className="font-medium text-gray-700">
-                                            Q{index + 1}: {question.question} = {question.answer}
+                                            Q{index + 1}: {
+                                                question.variable && question.equation
+                                                    ? `${question.equation} (${question.variable} = ${question.answer})`
+                                                    : `${question.question} = ${question.answer}`
+                                            }
                                         </span>
                                     </div>
                                     <div className="flex items-center space-x-3">

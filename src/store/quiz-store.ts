@@ -2,12 +2,14 @@ import { create } from 'zustand';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
-export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'mixed';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'mixed' | 'algebraic';
 
 export interface Question {
   id: string;
   question: string;
   answer: number;
+  variable?: string; // e.g., "x", "y" for algebraic questions
+  equation?: string; // Original equation for display
   userAnswer?: number;
   isCorrect?: boolean;
   options?: number[]; // For multiple choice questions

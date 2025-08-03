@@ -143,9 +143,18 @@ export default function QuizPage() {
 
                 {/* Question */}
                 <div className="text-center mb-8">
-                    <div className="text-4xl font-bold text-gray-800 mb-6 p-6 bg-gray-50 rounded-xl">
-                        {currentQuestion.question} = ?
-                    </div>
+                    {currentQuestion.variable ? (
+                        <div>
+                            <p className="text-lg text-gray-600 mb-4">Solve for {currentQuestion.variable}:</p>
+                            <div className="text-4xl font-bold text-gray-800 mb-6 p-6 bg-gray-50 rounded-xl">
+                                {currentQuestion.question}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-4xl font-bold text-gray-800 mb-6 p-6 bg-gray-50 rounded-xl">
+                            {currentQuestion.question} = ?
+                        </div>
+                    )}
                 </div>
 
                 {/* Answer Input */}
@@ -158,7 +167,7 @@ export default function QuizPage() {
                                 onChange={(e) => setUserInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSubmitAnswer()}
                                 className="w-full px-6 py-4 text-2xl text-center border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                placeholder="Enter your answer"
+                                placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
                                 autoFocus
                             />
                         </div>
@@ -169,8 +178,8 @@ export default function QuizPage() {
                                     key={index}
                                     onClick={() => setSelectedOption(option)}
                                     className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedOption === option
-                                            ? 'border-purple-500 bg-purple-50 text-purple-700'
-                                            : 'border-gray-300 hover:border-purple-300 hover:bg-gray-50'
+                                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                                        : 'border-gray-300 hover:border-purple-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     {String.fromCharCode(65 + index)}. {option}
