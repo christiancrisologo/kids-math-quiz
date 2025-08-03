@@ -1,0 +1,105 @@
+/* Mobile-specific enhancements for MathQuiz app */
+
+/* Prevent zoom on input focus (iOS Safari) */
+input[type="number"],
+input[type="text"] {
+  font-size: 16px !important;
+}
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Touch-friendly focus states */
+button:focus,
+input:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Active states for better touch feedback */
+button:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Prevent text selection on buttons (mobile) */
+button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Smooth animations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile viewport optimization */
+@media screen and (max-width: 768px) {
+  /* Ensure content doesn't get cut off on small screens */
+  .mobile-container {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  }
+  
+  /* Better spacing for thumb zones */
+  .mobile-action-zone {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  /* Optimized text sizes for mobile readability */
+  .mobile-text-lg {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+  
+  .mobile-text-xl {
+    font-size: 1.25rem;
+    line-height: 1.7;
+  }
+}
+
+/* Landscape mode adjustments */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+  .mobile-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .mobile-question-card {
+    min-height: auto;
+    padding: 1rem;
+  }
+}
+
+/* Progressive Web App enhancements */
+@media (display-mode: standalone) {
+  /* PWA-specific styles when app is installed */
+  .app-header {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be added here in the future */
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  button {
+    border: 2px solid currentColor;
+  }
+}

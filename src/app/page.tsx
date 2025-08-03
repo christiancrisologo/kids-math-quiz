@@ -4,11 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../store/quiz-store';
 import { generateQuestions } from '../utils/math/question-generator';
+import { useIsMobile } from '../utils/responsive';
+import { MobileButton } from '../components/ui/MobileButton';
+import { MobileTile } from '../components/ui/MobileTile';
+import { MobileInput } from '../components/ui/MobileInput';
 import type { Difficulty, QuestionType, MathOperation } from '../store/quiz-store';
 
 export default function Home() {
   const router = useRouter();
   const { updateSettings, setQuestions } = useQuizStore();
+  const isMobile = useIsMobile();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -19,21 +24,44 @@ export default function Home() {
     mathOperation: 'addition' as MathOperation,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'Please enter your name';
+    }
+    
+    if (formData.numberOfQuestions < 5) {
+      newErrors.numberOfQuestions = 'Minimum 5 questions required';
+    }
+    
+    if (formData.timerPerQuestion < 5) {
+      newErrors.timerPerQuestion = 'Minimum 5 seconds required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleStartQuiz = () => {
-    if (!formData.username.trim()) {
-      alert('Please enter your username!');
-      return;
-    }
-
-    if (formData.numberOfQuestions < 5) {
-      alert('Minimum 5 questions required!');
+    if (!validateForm()) {
       return;
     }
 
@@ -54,137 +82,131 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">🧮 Math Quiz App</h1>
-          <p className="text-gray-600">Test your math skills and have fun learning!</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+      <div className={`flex items-center justify-center ${isMobile ? 'p-4 pt-8' : 'p-4'} min-h-screen`}>
+        <div className={`bg-white rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md' : 'max-w-2xl'} ${isMobile ? 'p-6' : 'p-8'}`}>
+          <div className="text-center mb-8">
+            <h1 className={`font-bold text-gray-800 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
+              🧮 Math Quiz App
+            </h1>
+            <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-base'}`}>
+              Test your math skills and have fun learning!
+            </p>
+          </div>
 
-        <div className="space-y-6">
-          {/* Username Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Name
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          <div className="space-y-6">
+            {/* Username Input */}
+            <MobileInput
+              label="Your Name"
               placeholder="Enter your name"
+              value={formData.username}
+              onChange={(value) => handleInputChange('username', value)}
+              error={errors.username}
             />
-          </div>
 
-          {/* Difficulty Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Difficulty Level
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {(['easy', 'hard'] as Difficulty[]).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => handleInputChange('difficulty', level)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all ${formData.difficulty === level
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
-                    }`}
-                >
-                  {level === 'easy' ? '🟢 Easy' : '🔴 Hard'}
-                </button>
-              ))}
+            {/* Difficulty Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Difficulty Level
+              </label>
+              <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                {(['easy', 'hard'] as Difficulty[]).map((level) => (
+                  <MobileTile
+                    key={level}
+                    title={level === 'easy' ? '🟢 Easy' : '🔴 Hard'}
+                    subtitle={level === 'easy' ? 'Basic problems' : 'Challenging problems'}
+                    isSelected={formData.difficulty === level}
+                    onClick={() => handleInputChange('difficulty', level)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Number of Questions */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Questions (minimum 5)
-            </label>
-            <input
+            {/* Number of Questions */}
+            <MobileInput
               type="number"
-              min="5"
-              max="50"
+              label="Number of Questions"
+              placeholder="Minimum 5"
               value={formData.numberOfQuestions}
-              onChange={(e) => handleInputChange('numberOfQuestions', parseInt(e.target.value) || 5)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
+              error={errors.numberOfQuestions}
+              inputMode="numeric"
             />
-          </div>
 
-          {/* Timer per Question */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Time per Question (seconds)
-            </label>
-            <input
+            {/* Timer per Question */}
+            <MobileInput
               type="number"
-              min="5"
-              max="60"
+              label="Time per Question (seconds)"
+              placeholder="Minimum 5"
               value={formData.timerPerQuestion}
-              onChange={(e) => handleInputChange('timerPerQuestion', parseInt(e.target.value) || 10)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
+              error={errors.timerPerQuestion}
+              inputMode="numeric"
             />
-          </div>
 
-          {/* Question Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Question Type
-            </label>
-            <div className="grid grid-cols-1 gap-3">
-              {([
-                { value: 'expression', label: '📝 Math Expression (e.g., 4 + 3 = ?)' },
-                { value: 'multiple-choice', label: '🎯 Multiple Choice (3 options)' }
-              ] as { value: QuestionType; label: string }[]).map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => handleInputChange('questionType', type.value)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all text-left ${formData.questionType === type.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
-                    }`}
-                >
-                  {type.label}
-                </button>
-              ))}
+            {/* Question Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Question Type
+              </label>
+              <div className="space-y-3">
+                {([
+                  { value: 'expression', label: '📝 Math Expression', subtitle: 'e.g., 4 + 3 = ?' },
+                  { value: 'multiple-choice', label: '🎯 Multiple Choice', subtitle: '3 options' }
+                ] as { value: QuestionType; label: string; subtitle: string }[]).map((type) => (
+                  <MobileTile
+                    key={type.value}
+                    title={type.label}
+                    subtitle={type.subtitle}
+                    isSelected={formData.questionType === type.value}
+                    onClick={() => handleInputChange('questionType', type.value)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Math Operation */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Math Operation
+              </label>
+              <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                {([
+                  { value: 'addition', label: '➕ Addition', subtitle: 'Basic addition' },
+                  { value: 'subtraction', label: '➖ Subtraction', subtitle: 'Basic subtraction' },
+                  { value: 'multiplication', label: '✖️ Multiplication', subtitle: 'Times tables' },
+                  { value: 'division', label: '➗ Division', subtitle: 'Division problems' },
+                  { value: 'algebraic', label: '🔢 Algebraic', subtitle: 'Solve for x' },
+                  { value: 'mixed', label: '🎲 Mixed', subtitle: 'All types' }
+                ] as { value: MathOperation; label: string; subtitle: string }[]).map((op) => (
+                  <div
+                    key={op.value}
+                    className={op.value === 'mixed' && !isMobile ? 'col-span-2' : ''}
+                  >
+                    <MobileTile
+                      title={op.label}
+                      subtitle={op.subtitle}
+                      isSelected={formData.mathOperation === op.value}
+                      onClick={() => handleInputChange('mathOperation', op.value)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Math Operation */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Math Operation
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {([
-                { value: 'addition', label: '➕ Addition' },
-                { value: 'subtraction', label: '➖ Subtraction' },
-                { value: 'multiplication', label: '✖️ Multiplication' },
-                { value: 'division', label: '➗ Division' },
-                { value: 'mixed', label: '🎲 Mixed (All Types)' }
-              ] as { value: MathOperation; label: string }[]).map((op) => (
-                <button
-                  key={op.value}
-                  onClick={() => handleInputChange('mathOperation', op.value)}
-                  className={`px-3 py-2 rounded-lg border-2 transition-all text-sm ${formData.mathOperation === op.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-300 hover:border-purple-300'
-                    } ${op.value === 'mixed' ? 'col-span-2' : ''}`}
-                >
-                  {op.label}
-                </button>
-              ))}
-            </div>
+          {/* Start Quiz Button - Mobile Action Zone */}
+          <div className={`${isMobile ? 'mt-8 sticky bottom-0 bg-white pt-4 pb-2' : 'mt-8'}`}>
+            <MobileButton
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={handleStartQuiz}
+              icon="🚀"
+            >
+              Start Quiz!
+            </MobileButton>
           </div>
-
-          {/* Start Quiz Button */}
-          <button
-            onClick={handleStartQuiz}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-6 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
-          >
-            🚀 Start Quiz!
-          </button>
         </div>
       </div>
     </div>
