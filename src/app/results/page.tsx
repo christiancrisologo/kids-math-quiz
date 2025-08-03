@@ -102,7 +102,11 @@ export default function ResultsPage() {
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="font-medium text-gray-700 text-sm">
-                                                    Q{index + 1}: {question.question} = {question.answer}
+                                                    Q{index + 1}: {
+                                                        question.variable && question.equation
+                                                            ? `${question.equation} (${question.variable} = ${question.answer})`
+                                                            : `${question.question} = ${question.answer}`
+                                                    }
                                                 </span>
                                                 <span className="text-xl">
                                                     {question.isCorrect ? '✅' : '❌'}
@@ -129,7 +133,11 @@ export default function ResultsPage() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <span className="font-medium text-gray-700">
-                                                        Q{index + 1}: {question.question} = {question.answer}
+                                                        Q{index + 1}: {
+                                                            question.variable && question.equation
+                                                                ? `${question.equation} (${question.variable} = ${question.answer})`
+                                                                : `${question.question} = ${question.answer}`
+                                                        }
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-3">

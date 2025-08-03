@@ -160,7 +160,14 @@ export default function QuizPage() {
                         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 flex-1 flex items-center justify-center">
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-gray-800 mb-4">
-                                    {currentQuestion.question} = ?
+                                    {currentQuestion.variable ? (
+                                        <div>
+                                            <div className="text-sm text-purple-600 mb-2">Solve for {currentQuestion.variable}:</div>
+                                            <div>{currentQuestion.question}</div>
+                                        </div>
+                                    ) : (
+                                        `${currentQuestion.question} = ?`
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -171,7 +178,7 @@ export default function QuizPage() {
                                 <div className="space-y-4">
                                     <MobileInput
                                         type="number"
-                                        placeholder="Your answer"
+                                        placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Your answer"}
                                         value={userInput}
                                         onChange={setUserInput}
                                         inputMode="numeric"
@@ -248,7 +255,14 @@ export default function QuizPage() {
                         {/* Question */}
                         <div className="text-center mb-8">
                             <div className="text-4xl font-bold text-gray-800 mb-6 p-6 bg-gray-50 rounded-xl">
-                                {currentQuestion.question} = ?
+                                {currentQuestion.variable ? (
+                                    <div>
+                                        <div className="text-lg text-purple-600 mb-2">Solve for {currentQuestion.variable}:</div>
+                                        <div>{currentQuestion.question}</div>
+                                    </div>
+                                ) : (
+                                    `${currentQuestion.question} = ?`
+                                )}
                             </div>
                         </div>
 
@@ -262,7 +276,7 @@ export default function QuizPage() {
                                         onChange={(e) => setUserInput(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && handleSubmitAnswer()}
                                         className="w-full px-6 py-4 text-2xl text-center border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        placeholder="Enter your answer"
+                                        placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
                                         autoFocus
                                         inputMode="numeric"
                                     />
