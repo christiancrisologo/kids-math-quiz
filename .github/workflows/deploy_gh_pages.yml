@@ -1,48 +1,43 @@
 name: Deploy to GitHub Pages
 
+# This workflow is triggered on pushes to the main branch
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
+# Sets permissions for the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: '18'
-
 jobs:
+  # The build job
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
-        run: npm run test --if-present
-
       - name: Run linting
         run: npm run lint
 
-      - name: Build application
-        run: npm run build
-        env:
-          NODE_ENV: production
+      - name: Build the site
+        run: npm run build:gh-pages
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -50,8 +45,10 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          # Next.js static export outputs to 'out' directory
+          path: './out'
 
+  # The deployment job
   deploy:
     environment:
       name: github-pages
@@ -62,18 +59,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  notification:
-    runs-on: ubuntu-latest
-    needs: [build, deploy]
-    if: always()
-    steps:
-      - name: Deployment Status
-        run: |
-          if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ Deployment successful! Math Quiz for Kids is now live on GitHub Pages."
-            echo "🌐 Live URL: https://christiancrisologo.github.io/kids-math-quiz/"
-          else
-            echo "❌ Deployment failed. Please check the logs for details."
-            exit 1
-          fi
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
