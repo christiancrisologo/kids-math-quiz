@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
@@ -28,24 +28,6 @@ export default function QuizPage() {
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
     const currentQuestion = questions[currentQuestionIndex];
-
-    const handleTimeUp = useCallback(() => {
-        // Submit empty/null answer when time runs out
-        if (settings.questionType === 'expression') {
-            submitAnswer(userInput ? parseFloat(userInput) || 0 : 0);
-        } else {
-            submitAnswer(selectedOption || -1);
-        }
-
-        setUserInput('');
-        setSelectedOption(null);
-
-        if (currentQuestionIndex >= questions.length - 1) {
-            completeQuiz();
-        } else {
-            nextQuestion();
-        }
-    }, [settings.questionType, userInput, selectedOption, submitAnswer, currentQuestionIndex, questions.length, completeQuiz, nextQuestion]);
 
     // Start quiz when component mounts
     useEffect(() => {
@@ -86,6 +68,24 @@ export default function QuizPage() {
             router.push('/results');
         }
     }, [isQuizCompleted, router]);
+
+    const handleTimeUp = () => {
+        // Submit empty/null answer when time runs out
+        if (settings.questionType === 'expression') {
+            submitAnswer(userInput ? parseFloat(userInput) || 0 : 0);
+        } else {
+            submitAnswer(selectedOption || -1);
+        }
+
+        setUserInput('');
+        setSelectedOption(null);
+
+        if (currentQuestionIndex >= questions.length - 1) {
+            completeQuiz();
+        } else {
+            nextQuestion();
+        }
+    };
 
     const handleSubmitAnswer = () => {
         let answer: number;
