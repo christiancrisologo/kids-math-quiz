@@ -92,12 +92,7 @@ const generateAlgebraicQuestion = (difficulty: Difficulty): { question: string; 
 };
 
 const generateQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): { question: string; answer: number } => {
-  const operations = ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'];
-  const selectedOperation = operation === 'mixed' 
-    ? operations[getRandomNumber(0, operations.length - 1)] as MathOperation
-    : operation;
-
-  switch (selectedOperation) {
+  switch (operation) {
     case 'addition':
       return generateAdditionQuestion(difficulty);
     case 'subtraction':
@@ -133,13 +128,18 @@ const generateMultipleChoiceOptions = (correctAnswer: number, difficulty: Diffic
 export const generateQuestions = (
   count: number,
   difficulty: Difficulty,
-  operation: MathOperation,
+  operations: MathOperation[], // Changed to accept array of operations
   questionType: QuestionType
 ): Question[] => {
   const questions: Question[] = [];
   
+  // If no operations selected, default to addition
+  const selectedOperations = operations.length > 0 ? operations : ['addition'];
+  
   for (let i = 0; i < count; i++) {
-    const { question, answer } = generateQuestionByOperation(operation, difficulty);
+    // Randomly select one of the chosen operations for each question
+    const randomOperation = selectedOperations[getRandomNumber(0, selectedOperations.length - 1)] as MathOperation;
+    const { question, answer } = generateQuestionByOperation(randomOperation, difficulty);
     const id = `question-${i + 1}`;
     
     const questionObj: Question = {
@@ -149,11 +149,7 @@ export const generateQuestions = (
     };
     
     // For algebraic questions, add variable and equation info
-    const currentOperation = operation === 'mixed' 
-      ? ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'][Math.floor(Math.random() * 5)]
-      : operation;
-    
-    if (currentOperation === 'algebraic' || question.includes('x')) {
+    if (randomOperation === 'algebraic' || question.includes('x')) {
       questionObj.variable = 'x';
       questionObj.equation = question;
     }

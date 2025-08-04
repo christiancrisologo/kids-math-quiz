@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
-export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'mixed' | 'algebraic';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic';
 
 export interface Question {
   id: string;
@@ -22,7 +22,7 @@ export interface QuizSettings {
   numberOfQuestions: number;
   timerPerQuestion: number;
   questionType: QuestionType;
-  mathOperation: MathOperation;
+  mathOperations: MathOperation[]; // Changed from mathOperation to mathOperations array
 }
 
 export interface QuizState {
@@ -53,7 +53,7 @@ const defaultSettings: QuizSettings = {
   numberOfQuestions: 5,
   timerPerQuestion: 10,
   questionType: 'expression',
-  mathOperation: 'addition',
+  mathOperations: ['addition'], // Default to addition selected
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
