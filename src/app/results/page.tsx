@@ -5,36 +5,68 @@ import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
+import { ConfettiEffect } from '../../components/ui/ConfettiEffect';
+import { playSound } from '../../utils/sounds';
+import { checkAchievements } from '../../utils/achievements';
+import { generateQuestions } from '../../utils/math/question-generator';
 
 export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
-    const { settings, questions, resetQuiz } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, retryQuiz } = useQuizStore();
 
     // Redirect if no questions (shouldn't happen, but safety check)
     useEffect(() => {
         if (questions.length === 0) {
             router.push('/');
+        } else {
+            // Play completion sound when results load
+            setTimeout(() => playSound('completion'), 500);
         }
     }, [questions.length, router]);
 
     const correctAnswers = questions.filter(q => q.isCorrect).length;
     const totalQuestions = questions.length;
     const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+    const achievements = checkAchievements(correctAnswers, totalQuestions, bestStreak, settings);
 
     const getGradeMessage = (percentage: number) => {
-        if (percentage >= 90) return { emoji: '🌟', message: 'Outstanding! You\'re a math superstar!' };
-        if (percentage >= 80) return { emoji: '🎉', message: 'Excellent work! Keep it up!' };
-        if (percentage >= 70) return { emoji: '👏', message: 'Great job! You\'re doing well!' };
-        if (percentage >= 60) return { emoji: '👍', message: 'Good effort! Keep practicing!' };
-        return { emoji: '💪', message: 'Don\'t give up! Practice makes perfect!' };
+        const funnyQuotes = [
+            "You're like a calculator, but way cooler! 🧮✨",
+            "Math wizard in training! Your powers are growing! 🧙‍♂️📚",
+            "Houston, we have a math genius! 🚀🌟",
+            "You're making numbers dance! 💃🔢",
+            "Math superhero alert! 🦸‍♂️🔥",
+            "You're sharper than a pencil! ✏️⚡",
+            "Number ninja in action! 🥷🔢",
+            "You're solving problems faster than a cheetah! 🐆💨",
+            "Math magician extraordinaire! 🎩✨",
+            "You're cooking up some serious math skills! 👨‍🍳🔥"
+        ];
+
+        const randomQuote = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
+
+        if (percentage >= 90) return { emoji: '�', message: randomQuote };
+        if (percentage >= 80) return { emoji: '🎉', message: randomQuote };
+        if (percentage >= 70) return { emoji: '👏', message: randomQuote };
+        if (percentage >= 60) return { emoji: '👍', message: randomQuote };
+        return { emoji: '💪', message: randomQuote };
     };
 
     const gradeInfo = getGradeMessage(percentage);
 
     const handleRetryQuiz = () => {
-        // Keep the same settings but generate new questions
-        router.push('/');
+        // Generate new questions with the same settings and go directly to quiz
+        const newQuestions = generateQuestions(
+            settings.numberOfQuestions,
+            settings.difficulty,
+            settings.mathOperations,
+            settings.questionType
+        );
+        retryQuiz(newQuestions);
+        // Reset current streak for the new quiz
+        // Note: we keep bestStreak to maintain the user's record
+        router.push('/quiz');
     };
 
     const handleNewQuiz = () => {
@@ -62,10 +94,10 @@ export default function ResultsPage() {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <h1 className={`font-bold text-gray-800 dark:text-gray-200 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
-                            🎯🎉 Amazing Results! 🎉🌟
+                            🎯 Matherific Results!
                         </h1>
                         <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
-                            Fantastic job, {settings.username}! You&apos;re a math superstar! ⭐🚀
+                            {gradeInfo.message}
                         </p>
                     </div>
 
@@ -80,8 +112,18 @@ export default function ResultsPage() {
                             {percentage}% Correct
                         </div>
                         <div className={`text-gray-700 dark:text-gray-300 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                            {gradeInfo.message}
+                            Great job, {settings.username}! 🎉
                         </div>
+
+                        {/* Best Streak Display */}
+                        {bestStreak > 0 && (
+                            <div className="mt-4">
+                                <div className="bg-gradient-to-r from-orange-400 to-red-500 text-white px-4 py-2 rounded-full inline-flex items-center gap-2">
+                                    <span className="text-xl">🔥</span>
+                                    <span className="font-bold">Best Streak: {bestStreak}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Question Details */}
@@ -173,25 +215,43 @@ export default function ResultsPage() {
                         </div>
                     </div>
 
-                    {/* Quiz Stats */}
-                    <div className={`grid gap-4 mb-8 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-3'}`}>
-                        <div className="bg-gradient-to-br from-blue-100 to-cyan-100 dark:bg-blue-900/30 p-4 rounded-lg text-center animate-bounce-gentle">
-                            <div className={`font-bold text-blue-600 dark:text-blue-400 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-                                {settings.difficulty}
+                    {/* Achievements */}
+                    {achievements.length > 0 && (
+                        <div className="mb-8">
+                            <h2 className={`font-bold text-gray-800 dark:text-gray-200 mb-4 text-center ${isMobile ? 'text-lg' : 'text-2xl'}`}>
+                                🏆 Achievements Unlocked! 🏆
+                            </h2>
+                            <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                                {achievements.map((achievement, index) => (
+                                    <div
+                                        key={achievement.id}
+                                        className="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 text-center border-2 border-yellow-300 dark:border-yellow-600 animate-bounce-gentle"
+                                        style={{ animationDelay: `${index * 0.2}s` }}
+                                    >
+                                        <div className="text-2xl mb-1">{achievement.emoji}</div>
+                                        <div className="font-bold text-sm text-gray-800 dark:text-gray-200">{achievement.title}</div>
+                                        <div className="text-xs text-gray-600 dark:text-gray-400">{achievement.description}</div>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Difficulty</div>
                         </div>
-                        <div className="bg-gradient-to-br from-purple-100 to-violet-100 dark:bg-purple-900/30 p-4 rounded-lg text-center animate-bounce-gentle" style={{ animationDelay: '0.2s' }}>
-                            <div className={`font-bold text-purple-600 dark:text-purple-400 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-                                {settings.mathOperations.map(op => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}
+                    )}
+
+                    {/* Quiz Summary */}
+                    <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl mb-8 ${isMobile ? 'p-4' : 'p-6'}`}>
+                        <h3 className={`font-bold text-gray-800 dark:text-gray-200 mb-3 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                            📋 Quiz Settings
+                        </h3>
+                        <div className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                            <div className="mb-2">
+                                <span className="font-medium">Difficulty:</span> {settings.difficulty.charAt(0).toUpperCase() + settings.difficulty.slice(1)}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Operations</div>
-                        </div>
-                        <div className="bg-gradient-to-br from-pink-100 to-rose-100 dark:bg-pink-900/30 p-4 rounded-lg text-center animate-bounce-gentle" style={{ animationDelay: '0.4s' }}>
-                            <div className={`font-bold text-pink-600 dark:text-pink-400 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-                                {settings.questionType}
+                            <div className="mb-2">
+                                <span className="font-medium">Operations:</span> {settings.mathOperations.map(op => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Question Type</div>
+                            <div>
+                                <span className="font-medium">Question Type:</span> {settings.questionType.charAt(0).toUpperCase() + settings.questionType.slice(1)}
+                            </div>
                         </div>
                     </div>
 
@@ -204,20 +264,23 @@ export default function ResultsPage() {
                             onClick={handleRetryQuiz}
                             icon="🔄"
                         >
-                            Try Again (Same Settings)
+                            Try Again
                         </MobileButton>
                         <MobileButton
                             variant="primary"
                             size="lg"
                             fullWidth
                             onClick={handleNewQuiz}
-                            icon="🆕"
+                            icon="�"
                         >
-                            New Quiz (Change Settings)
+                            Back to Home
                         </MobileButton>
                     </div>
                 </div>
             </div>
+
+            {/* Confetti Effect for great results */}
+            <ConfettiEffect isVisible={percentage >= 80} />
         </div>
     );
 }

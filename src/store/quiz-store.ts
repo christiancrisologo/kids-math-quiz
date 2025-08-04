@@ -40,6 +40,8 @@ export interface QuizState {
   timeRemaining: number;
   isQuizActive: boolean;
   isQuizCompleted: boolean;
+  currentStreak: number;
+  bestStreak: number;
   
   // Actions
   updateSettings: (settings: Partial<QuizSettings>) => void;
@@ -51,6 +53,7 @@ export interface QuizState {
   setTimeRemaining: (time: number) => void;
   completeQuiz: () => void;
   resetQuiz: () => void;
+  retryQuiz: (questions: Question[]) => void;
 }
 
 const defaultSettings: QuizSettings = {
@@ -70,6 +73,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   timeRemaining: defaultSettings.timerPerQuestion,
   isQuizActive: false,
   isQuizCompleted: false,
+  currentStreak: 0,
+  bestStreak: 0,
   
   // Actions
   updateSettings: (newSettings) =>
@@ -110,6 +115,16 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         currentQuestion.userAnswer = answer;
         currentQuestion.isCorrect = Math.abs(currentQuestion.answer - answer) < 0.01;
         currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        
+        // Update streak
+        const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
+        const newBestStreak = Math.max(state.bestStreak, newStreak);
+        
+        return { 
+          questions: updatedQuestions,
+          currentStreak: newStreak,
+          bestStreak: newBestStreak
+        };
       }
       
       return { questions: updatedQuestions };
@@ -133,6 +148,16 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           currentQuestion.isCorrect = Math.abs(currentQuestion.answer - decimalValue) < 0.01;
         }
         currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        
+        // Update streak
+        const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
+        const newBestStreak = Math.max(state.bestStreak, newStreak);
+        
+        return { 
+          questions: updatedQuestions,
+          currentStreak: newStreak,
+          bestStreak: newBestStreak
+        };
       }
       
       return { questions: updatedQuestions };
@@ -151,5 +176,18 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       timeRemaining: get().settings.timerPerQuestion,
       isQuizActive: false,
       isQuizCompleted: false,
+      currentStreak: 0,
+      // Note: we keep bestStreak to maintain the user's record
+    }),
+
+  retryQuiz: (questions) =>
+    set({
+      questions,
+      currentQuestionIndex: 0,
+      timeRemaining: get().settings.timerPerQuestion,
+      isQuizActive: false,
+      isQuizCompleted: false,
+      currentStreak: 0,
+      // Note: we keep bestStreak to maintain the user's record
     }),
 }));

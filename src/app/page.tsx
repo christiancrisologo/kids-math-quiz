@@ -141,9 +141,8 @@ export default function Home() {
             />
           </div>
 
-          {/* Main Action Buttons */}
-          <div className="space-y-4 mb-6">
-            {/* Quiz Settings Toggle Button */}
+          {/* Quiz Settings Toggle Button */}
+          <div className="mb-6">
             <button
               onClick={() => setShowSettings(!showSettings)}
               className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer ${showSettings
@@ -154,22 +153,11 @@ export default function Home() {
               <span className="text-2xl">⚙️</span>
               <span>{showSettings ? 'Hide Quiz Settings' : 'Quiz Settings'}</span>
             </button>
-
-            {/* Start Quiz Button */}
-            <MobileButton
-              variant="primary"
-              size="lg"
-              fullWidth
-              onClick={handleStartQuiz}
-              icon="🚀"
-            >
-              Start Quiz!
-            </MobileButton>
           </div>
 
           {/* Settings Accordion */}
           {showSettings && (
-            <div className="space-y-4 animate-float">
+            <div className="space-y-4 animate-float mb-6">
               {/* Difficulty Level */}
               <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-4">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
@@ -289,6 +277,19 @@ export default function Home() {
               </div>
             </div>
           )}
+
+          {/* Start Quiz Button - Shows after settings or at bottom */}
+          <div className="mt-6">
+            <MobileButton
+              variant="primary"
+              size="lg"
+              fullWidth
+              onClick={handleStartQuiz}
+              icon="🚀"
+            >
+              Start Quiz!
+            </MobileButton>
+          </div>
         </div>
       </div>
     </div>
