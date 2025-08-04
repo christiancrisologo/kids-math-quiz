@@ -61,7 +61,8 @@ export default function ResultsPage() {
             settings.numberOfQuestions,
             settings.difficulty,
             settings.mathOperations,
-            settings.questionType
+            settings.questionType,
+            settings.numberTypes // Add number types parameter
         );
         retryQuiz(newQuestions);
         // Reset current streak for the new quiz
@@ -248,6 +249,9 @@ export default function ResultsPage() {
                             </div>
                             <div className="mb-2">
                                 <span className="font-medium">Operations:</span> {settings.mathOperations.map(op => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}
+                            </div>
+                            <div className="mb-2">
+                                <span className="font-medium">Number Types:</span> {settings.numberTypes?.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') || 'Integers'}
                             </div>
                             <div>
                                 <span className="font-medium">Question Type:</span> {settings.questionType.charAt(0).toUpperCase() + settings.questionType.slice(1)}

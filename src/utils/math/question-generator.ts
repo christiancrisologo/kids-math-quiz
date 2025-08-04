@@ -1,4 +1,4 @@
-import { Difficulty, MathOperation, Question, QuestionType } from '../../store/quiz-store';
+import { Difficulty, MathOperation, Question, QuestionType, NumberType } from '../../store/quiz-store';
 import Fraction from 'fraction.js';
 import { 
   generateRandomFraction, 
@@ -177,8 +177,6 @@ const generateQuestionByOperation = (operation: MathOperation, difficulty: Diffi
       return generateDivisionQuestion(difficulty);
     case 'algebraic':
       return generateAlgebraicQuestion(difficulty);
-    case 'fractions':
-      return generateFractionQuestion(difficulty);
     default:
       return generateAdditionQuestion(difficulty);
   }
@@ -201,21 +199,159 @@ const generateMultipleChoiceOptions = (correctAnswer: number, difficulty: Diffic
   return options.sort(() => Math.random() - 0.5);
 };
 
+// Decimal question generators
+const generateDecimalAdditionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  const max = difficulty === 'easy' ? 10 : 50;
+  const decimalPlaces = difficulty === 'easy' ? 1 : 2;
+  
+  const a = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const b = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const answer = parseFloat((a + b).toFixed(decimalPlaces));
+  
+  return {
+    question: `${a} + ${b}`,
+    answer: answer,
+  };
+};
+
+const generateDecimalSubtractionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  const max = difficulty === 'easy' ? 10 : 50;
+  const decimalPlaces = difficulty === 'easy' ? 1 : 2;
+  
+  const a = parseFloat((Math.random() * max + 5).toFixed(decimalPlaces));
+  const b = parseFloat((Math.random() * (a - 1) + 0.1).toFixed(decimalPlaces));
+  const answer = parseFloat((a - b).toFixed(decimalPlaces));
+  
+  return {
+    question: `${a} - ${b}`,
+    answer: answer,
+  };
+};
+
+const generateDecimalMultiplicationQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  const max = difficulty === 'easy' ? 5 : 10;
+  const decimalPlaces = difficulty === 'easy' ? 1 : 2;
+  
+  const a = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const b = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const answer = parseFloat((a * b).toFixed(decimalPlaces * 2));
+  
+  return {
+    question: `${a} × ${b}`,
+    answer: answer,
+  };
+};
+
+const generateDecimalDivisionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  const max = difficulty === 'easy' ? 5 : 10;
+  const decimalPlaces = difficulty === 'easy' ? 1 : 2;
+  
+  const divisor = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const quotient = parseFloat((Math.random() * max + 1).toFixed(decimalPlaces));
+  const dividend = parseFloat((divisor * quotient).toFixed(decimalPlaces * 2));
+  
+  return {
+    question: `${dividend} ÷ ${divisor}`,
+    answer: quotient,
+  };
+};
+
+const generateDecimalAlgebraicQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  const decimalPlaces = difficulty === 'easy' ? 1 : 2;
+  
+  if (difficulty === 'easy') {
+    // Simple decimal equations: x + a = b
+    const a = parseFloat((Math.random() * 10 + 1).toFixed(decimalPlaces));
+    const x = parseFloat((Math.random() * 10 + 1).toFixed(decimalPlaces));
+    const b = parseFloat((x + a).toFixed(decimalPlaces));
+    
+    return { 
+      question: `x + ${a} = ${b}`, 
+      answer: x 
+    };
+  } else {
+    // More complex decimal equations: ax + b = c
+    const a = parseFloat((Math.random() * 5 + 1).toFixed(decimalPlaces));
+    const b = parseFloat((Math.random() * 10 + 1).toFixed(decimalPlaces));
+    const x = parseFloat((Math.random() * 10 + 1).toFixed(decimalPlaces));
+    const c = parseFloat((a * x + b).toFixed(decimalPlaces * 2));
+    
+    return { 
+      question: `${a}x + ${b} = ${c}`, 
+      answer: x 
+    };
+  }
+};
+
+// New function to generate decimal questions
+const generateDecimalQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): {
+  question: string;
+  answer: number;
+} => {
+  switch (operation) {
+    case 'addition':
+      return generateDecimalAdditionQuestion(difficulty);
+    case 'subtraction':
+      return generateDecimalSubtractionQuestion(difficulty);
+    case 'multiplication':
+      return generateDecimalMultiplicationQuestion(difficulty);
+    case 'division':
+      return generateDecimalDivisionQuestion(difficulty);
+    case 'algebraic':
+      return generateDecimalAlgebraicQuestion(difficulty);
+    default:
+      return generateDecimalAdditionQuestion(difficulty);
+  }
+};
+
+// Main function to generate questions based on operation and number type
+const generateQuestionByOperationAndNumberType = (
+  operation: MathOperation, 
+  difficulty: Difficulty, 
+  numberType: NumberType
+): { 
+  question: string; 
+  answer: number; 
+  fractionAnswer?: string;
+} => {
+  // For fraction number type, use fraction-specific questions
+  if (numberType === 'fractions') {
+    return generateFractionQuestion(difficulty);
+  }
+  
+  // For decimals, modify the basic operation questions to use decimals
+  if (numberType === 'decimals') {
+    return generateDecimalQuestionByOperation(operation, difficulty);
+  }
+  
+  // For integers, use the standard integer questions
+  return generateQuestionByOperation(operation, difficulty);
+};
+
 export const generateQuestions = (
   count: number,
   difficulty: Difficulty,
   operations: MathOperation[], // Changed to accept array of operations
-  questionType: QuestionType
+  questionType: QuestionType,
+  numberTypes: NumberType[] // New parameter for number types
 ): Question[] => {
   const questions: Question[] = [];
   
   // If no operations selected, default to addition
   const selectedOperations = operations.length > 0 ? operations : ['addition'];
   
+  // If no number types selected, default to integers
+  const selectedNumberTypes = numberTypes.length > 0 ? numberTypes : ['integers'];
+  
   for (let i = 0; i < count; i++) {
     // Randomly select one of the chosen operations for each question
     const randomOperation = selectedOperations[getRandomNumber(0, selectedOperations.length - 1)] as MathOperation;
-    const result = generateQuestionByOperation(randomOperation, difficulty);
+    
+    // Randomly select one of the chosen number types for each question
+    const randomNumberType = selectedNumberTypes[getRandomNumber(0, selectedNumberTypes.length - 1)] as NumberType;
+    
+    // Generate question based on operation and number type
+    const result = generateQuestionByOperationAndNumberType(randomOperation, difficulty, randomNumberType);
     const id = `question-${i + 1}`;
     
     const questionObj: Question = {
@@ -225,7 +361,7 @@ export const generateQuestions = (
     };
     
     // For fraction questions, add fraction-specific properties
-    if (randomOperation === 'fractions' && result.fractionAnswer) {
+    if (randomNumberType === 'fractions' && result.fractionAnswer) {
       questionObj.fractionAnswer = result.fractionAnswer;
       
       if (questionType === 'multiple-choice') {
@@ -242,7 +378,7 @@ export const generateQuestions = (
     }
     
     // For non-fraction multiple choice questions
-    if (questionType === 'multiple-choice' && randomOperation !== 'fractions') {
+    if (questionType === 'multiple-choice' && randomNumberType !== 'fractions') {
       questionObj.options = generateMultipleChoiceOptions(result.answer, difficulty);
     }
     

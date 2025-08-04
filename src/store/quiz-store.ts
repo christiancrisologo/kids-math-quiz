@@ -3,7 +3,8 @@ import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
-export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic' | 'fractions';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic';
+export type NumberType = 'integers' | 'decimals' | 'fractions';
 
 export interface Question {
   id: string;
@@ -27,7 +28,8 @@ export interface QuizSettings {
   numberOfQuestions: number;
   timerPerQuestion: number;
   questionType: QuestionType;
-  mathOperations: MathOperation[]; // Changed from mathOperation to mathOperations array
+  mathOperations: MathOperation[];
+  numberTypes: NumberType[]; // New field for number types selection
 }
 
 export interface QuizState {
@@ -63,6 +65,7 @@ const defaultSettings: QuizSettings = {
   timerPerQuestion: 10,
   questionType: 'expression',
   mathOperations: ['addition'], // Default to addition selected
+  numberTypes: ['integers'], // Default to integers selected
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
