@@ -252,7 +252,8 @@ export default function Home() {
                     { value: 'subtraction', label: '➖ Subtraction', subtitle: 'Basic subtraction' },
                     { value: 'multiplication', label: '✖️ Multiplication', subtitle: 'Times tables' },
                     { value: 'division', label: '➗ Division', subtitle: 'Division problems' },
-                    { value: 'algebraic', label: '🔢 Algebraic', subtitle: 'Solve for x' }
+                    { value: 'algebraic', label: '🔢 Algebraic', subtitle: 'Solve for x' },
+                    { value: 'fractions', label: '🧮 Fractions', subtitle: 'Fraction operations' }
                   ] as { value: MathOperation; label: string; subtitle: string }[]).map((op) => (
                     <MobileTile
                       key={op.value}

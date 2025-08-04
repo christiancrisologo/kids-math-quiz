@@ -1,4 +1,12 @@
 import { Difficulty, MathOperation, Question, QuestionType } from '../../store/quiz-store';
+import Fraction from 'fraction.js';
+import { 
+  generateRandomFraction, 
+  generateProperFraction, 
+  generateImproperFraction,
+  toMixedNumber,
+  generateFractionOptions
+} from './fraction-utils';
 
 const getRandomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -91,7 +99,73 @@ const generateAlgebraicQuestion = (difficulty: Difficulty): { question: string; 
   }
 };
 
-const generateQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): { question: string; answer: number } => {
+const generateFractionQuestion = (difficulty: Difficulty): { question: string; answer: number; fractionAnswer: string } => {
+  const operations = ['addition', 'subtraction', 'multiplication', 'division'];
+  const operation = operations[getRandomNumber(0, operations.length - 1)];
+  
+  let fraction1: Fraction;
+  let fraction2: Fraction;
+  let result: Fraction;
+  let questionText: string;
+  
+  if (difficulty === 'easy') {
+    // Use proper fractions and simpler operations
+    fraction1 = generateProperFraction();
+    fraction2 = generateProperFraction();
+  } else {
+    // Use mixed numbers and improper fractions
+    if (Math.random() < 0.3) {
+      fraction1 = generateImproperFraction();
+      fraction2 = generateProperFraction();
+    } else {
+      fraction1 = generateRandomFraction('medium', true);
+      fraction2 = generateRandomFraction('medium', true);
+    }
+  }
+  
+  switch (operation) {
+    case 'addition':
+      result = fraction1.add(fraction2);
+      questionText = `${toMixedNumber(fraction1)} + ${toMixedNumber(fraction2)}`;
+      break;
+    case 'subtraction':
+      // Ensure positive result by making first fraction larger if needed
+      if (fraction1.compare(fraction2) < 0) {
+        [fraction1, fraction2] = [fraction2, fraction1];
+      }
+      result = fraction1.sub(fraction2);
+      questionText = `${toMixedNumber(fraction1)} - ${toMixedNumber(fraction2)}`;
+      break;
+    case 'multiplication':
+      result = fraction1.mul(fraction2);
+      questionText = `${toMixedNumber(fraction1)} × ${toMixedNumber(fraction2)}`;
+      break;
+    case 'division':
+      // Avoid division by zero and ensure reasonable results
+      if (fraction2.compare(0) === 0) {
+        fraction2 = new Fraction(1, 2);
+      }
+      result = fraction1.div(fraction2);
+      questionText = `${toMixedNumber(fraction1)} ÷ ${toMixedNumber(fraction2)}`;
+      break;
+    default:
+      // Fallback to addition
+      result = fraction1.add(fraction2);
+      questionText = `${toMixedNumber(fraction1)} + ${toMixedNumber(fraction2)}`;
+  }
+  
+  return {
+    question: questionText,
+    answer: Number(result.valueOf()), // Convert to decimal for compatibility
+    fractionAnswer: toMixedNumber(result)
+  };
+};
+
+const generateQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): { 
+  question: string; 
+  answer: number; 
+  fractionAnswer?: string;
+} => {
   switch (operation) {
     case 'addition':
       return generateAdditionQuestion(difficulty);
@@ -103,6 +177,8 @@ const generateQuestionByOperation = (operation: MathOperation, difficulty: Diffi
       return generateDivisionQuestion(difficulty);
     case 'algebraic':
       return generateAlgebraicQuestion(difficulty);
+    case 'fractions':
+      return generateFractionQuestion(difficulty);
     default:
       return generateAdditionQuestion(difficulty);
   }
@@ -139,23 +215,35 @@ export const generateQuestions = (
   for (let i = 0; i < count; i++) {
     // Randomly select one of the chosen operations for each question
     const randomOperation = selectedOperations[getRandomNumber(0, selectedOperations.length - 1)] as MathOperation;
-    const { question, answer } = generateQuestionByOperation(randomOperation, difficulty);
+    const result = generateQuestionByOperation(randomOperation, difficulty);
     const id = `question-${i + 1}`;
     
     const questionObj: Question = {
       id,
-      question,
-      answer,
+      question: result.question,
+      answer: result.answer,
     };
     
-    // For algebraic questions, add variable and equation info
-    if (randomOperation === 'algebraic' || question.includes('x')) {
-      questionObj.variable = 'x';
-      questionObj.equation = question;
+    // For fraction questions, add fraction-specific properties
+    if (randomOperation === 'fractions' && result.fractionAnswer) {
+      questionObj.fractionAnswer = result.fractionAnswer;
+      
+      if (questionType === 'multiple-choice') {
+        // Parse the fraction answer for generating options
+        const fractionResult = new Fraction(result.fractionAnswer);
+        questionObj.fractionOptions = generateFractionOptions(fractionResult, 3);
+      }
     }
     
-    if (questionType === 'multiple-choice') {
-      questionObj.options = generateMultipleChoiceOptions(answer, difficulty);
+    // For algebraic questions, add variable and equation info
+    if (randomOperation === 'algebraic' || result.question.includes('x')) {
+      questionObj.variable = 'x';
+      questionObj.equation = result.question;
+    }
+    
+    // For non-fraction multiple choice questions
+    if (questionType === 'multiple-choice' && randomOperation !== 'fractions') {
+      questionObj.options = generateMultipleChoiceOptions(result.answer, difficulty);
     }
     
     questions.push(questionObj);
