@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
-import { ThemeToggle } from '../../components/theme/ThemeToggle';
 
 export default function ResultsPage() {
     const router = useRouter();
@@ -59,11 +58,6 @@ export default function ResultsPage() {
             <div className={`${isMobile ? 'p-4' : 'flex items-center justify-center p-4 min-h-screen'}`}>
                 <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
                     } ${isMobile ? 'p-6' : 'p-8'} relative`}>
-
-                    {/* Theme Toggle */}
-                    <div className="absolute top-4 right-4">
-                        <ThemeToggle size={isMobile ? 'sm' : 'md'} />
-                    </div>
 
                     {/* Header */}
                     <div className="text-center mb-8">

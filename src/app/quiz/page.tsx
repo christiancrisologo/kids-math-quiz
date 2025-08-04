@@ -70,7 +70,8 @@ export default function QuizPage() {
         if (timeRemaining === 0 && isQuizActive) {
             handleTimeUp();
         }
-    }, [timeRemaining, isQuizActive, handleTimeUp]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [timeRemaining, isQuizActive]);
 
     // Redirect if no questions
     useEffect(() => {
