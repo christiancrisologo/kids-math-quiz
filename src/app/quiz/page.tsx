@@ -153,7 +153,7 @@ export default function QuizPage() {
                         {/* Greeting */}
                         <div className="text-center mb-6">
                             <h1 className="text-lg font-bold text-white">
-                                Hi {settings.username}! 👋🌟 Let&apos;s solve some fun problems! 🎲✨
+                                Hi {settings.username}! 👋🌟 Let's solve some fun problems! 🎲✨
                             </h1>
                         </div>
 
@@ -227,7 +227,7 @@ export default function QuizPage() {
                     </div>
                 </div>
             ) : (
-                /* Desktop Layout - Keep existing */
+                /* Desktop Layout */
                 <div className="flex items-center justify-center p-4 min-h-screen">
                     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl relative">
                         {/* Header */}
@@ -315,7 +315,9 @@ export default function QuizPage() {
 
                         {/* Quiz Info */}
                         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                            <p>Difficulty: {settings.difficulty} | Operation: {settings.mathOperation}</p>
+                            <p>Difficulty: {settings.difficulty} | Operations: {settings.mathOperations.map(op =>
+                                op.charAt(0).toUpperCase() + op.slice(1)
+                            ).join(', ')}</p>
                         </div>
                     </div>
                 </div>

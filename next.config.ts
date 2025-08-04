@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
   },
   
   // Configure base path and asset prefix for GitHub Pages
-  basePath: '/kids-math-quiz',
-  assetPrefix: '/kids-math-quiz',
+  basePath: process.env.NODE_ENV === 'production' ? '/kids-math-quiz' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/kids-math-quiz/' : '',
 };
 
 export default nextConfig;

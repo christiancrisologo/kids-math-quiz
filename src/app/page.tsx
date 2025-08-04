@@ -22,7 +22,7 @@ export default function Home() {
     numberOfQuestions: 5,
     timerPerQuestion: 10,
     questionType: 'expression' as QuestionType,
-    mathOperation: 'addition' as MathOperation,
+    mathOperations: ['addition'] as MathOperation[], // Changed to array with default selection
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,6 +43,36 @@ export default function Home() {
     }
   };
 
+  const handleMathOperationToggle = (operation: MathOperation) => {
+    setFormData(prev => {
+      const currentOperations = prev.mathOperations;
+      const isSelected = currentOperations.includes(operation);
+
+      if (isSelected) {
+        // Remove operation if already selected (but keep at least one)
+        const newOperations = currentOperations.filter(op => op !== operation);
+        return {
+          ...prev,
+          mathOperations: newOperations.length > 0 ? newOperations : [operation] // Always keep at least one
+        };
+      } else {
+        // Add operation if not selected
+        return {
+          ...prev,
+          mathOperations: [...currentOperations, operation]
+        };
+      }
+    });
+
+    // Clear math operations error when user makes a selection
+    if (errors.mathOperations) {
+      setErrors(prev => ({
+        ...prev,
+        mathOperations: ''
+      }));
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -56,6 +86,10 @@ export default function Home() {
 
     if (formData.timerPerQuestion < 5) {
       newErrors.timerPerQuestion = 'Minimum 5 seconds required';
+    }
+
+    if (formData.mathOperations.length === 0) {
+      newErrors.mathOperations = 'Please select at least one math operation';
     }
 
     setErrors(newErrors);
@@ -74,7 +108,7 @@ export default function Home() {
     const questions = generateQuestions(
       formData.numberOfQuestions,
       formData.difficulty,
-      formData.mathOperation,
+      formData.mathOperations, // Changed from mathOperation to mathOperations
       formData.questionType
     );
     setQuestions(questions);
@@ -210,7 +244,7 @@ export default function Home() {
               {/* Math Operation */}
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-                  🔢 Math Operation
+                  🔢 Math Operations (Select Multiple)
                 </h3>
                 <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                   {([
@@ -218,22 +252,29 @@ export default function Home() {
                     { value: 'subtraction', label: '➖ Subtraction', subtitle: 'Basic subtraction' },
                     { value: 'multiplication', label: '✖️ Multiplication', subtitle: 'Times tables' },
                     { value: 'division', label: '➗ Division', subtitle: 'Division problems' },
-                    { value: 'algebraic', label: '🔢 Algebraic', subtitle: 'Solve for x' },
-                    { value: 'mixed', label: '🎲 Mixed', subtitle: 'All types' }
+                    { value: 'algebraic', label: '🔢 Algebraic', subtitle: 'Solve for x' }
                   ] as { value: MathOperation; label: string; subtitle: string }[]).map((op) => (
-                    <div
+                    <MobileTile
                       key={op.value}
-                      className={op.value === 'mixed' && !isMobile ? 'col-span-2' : ''}
-                    >
-                      <MobileTile
-                        title={op.label}
-                        subtitle={op.subtitle}
-                        isSelected={formData.mathOperation === op.value}
-                        onClick={() => handleInputChange('mathOperation', op.value)}
-                      />
-                    </div>
+                      title={op.label}
+                      subtitle={op.subtitle}
+                      isSelected={formData.mathOperations.includes(op.value)}
+                      onClick={() => handleMathOperationToggle(op.value)}
+                    />
                   ))}
                 </div>
+                {formData.mathOperations.length > 0 && (
+                  <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                    Selected: {formData.mathOperations.map(op =>
+                      op.charAt(0).toUpperCase() + op.slice(1)
+                    ).join(', ')}
+                  </div>
+                )}
+                {errors.mathOperations && (
+                  <div className="mt-3 text-sm text-red-600 dark:text-red-400">
+                    {errors.mathOperations}
+                  </div>
+                )}
               </div>
 
               {/* Display Mode */}

@@ -179,9 +179,9 @@ export default function ResultsPage() {
                         </div>
                         <div className="bg-gradient-to-br from-purple-100 to-violet-100 dark:bg-purple-900/30 p-4 rounded-lg text-center animate-bounce-gentle" style={{ animationDelay: '0.2s' }}>
                             <div className={`font-bold text-purple-600 dark:text-purple-400 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
-                                {settings.mathOperation}
+                                {settings.mathOperations.map(op => op.charAt(0).toUpperCase() + op.slice(1)).join(', ')}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">Operation</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">Operations</div>
                         </div>
                         <div className="bg-gradient-to-br from-pink-100 to-rose-100 dark:bg-pink-900/30 p-4 rounded-lg text-center animate-bounce-gentle" style={{ animationDelay: '0.4s' }}>
                             <div className={`font-bold text-pink-600 dark:text-pink-400 ${isMobile ? 'text-lg' : 'text-2xl'}`}>
