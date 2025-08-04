@@ -7,6 +7,9 @@ import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
+import { FunProgressBar } from '../../components/ui/FunProgressBar';
+import { ConfettiEffect } from '../../components/ui/ConfettiEffect';
+import { playSound, vibrate } from '../../utils/sounds';
 
 export default function QuizPage() {
     const router = useRouter();
@@ -18,6 +21,7 @@ export default function QuizPage() {
         timeRemaining,
         isQuizActive,
         isQuizCompleted,
+        currentStreak,
         startQuiz,
         nextQuestion,
         submitAnswer,
@@ -30,6 +34,7 @@ export default function QuizPage() {
     const [userFractionInput, setUserFractionInput] = useState('');
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [selectedFractionOption, setSelectedFractionOption] = useState<string | null>(null);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -104,6 +109,8 @@ export default function QuizPage() {
     };
 
     const handleSubmitAnswer = () => {
+        let isCorrect = false;
+
         if (isFractionQuestion) {
             // Handle fraction questions
             if (settings.questionType === 'expression') {
@@ -125,6 +132,25 @@ export default function QuizPage() {
             submitAnswer(answer);
         }
 
+        // Check if answer was correct (we need to check the updated question)
+        const updatedQuestion = questions[currentQuestionIndex];
+        if (updatedQuestion) {
+            setTimeout(() => {
+                const question = useQuizStore.getState().questions[currentQuestionIndex];
+                isCorrect = question?.isCorrect || false;
+
+                // Show visual and audio feedback
+                if (isCorrect) {
+                    setShowConfetti(true);
+                    playSound('correct');
+                    vibrate([100, 50, 100]);
+                } else {
+                    playSound('incorrect');
+                    vibrate(200);
+                }
+            }, 100);
+        }
+
         // Clear all inputs
         setUserInput('');
         setUserFractionInput('');
@@ -132,9 +158,32 @@ export default function QuizPage() {
         setSelectedFractionOption(null);
 
         if (currentQuestionIndex >= questions.length - 1) {
-            completeQuiz();
+            setTimeout(() => {
+                playSound('completion');
+                completeQuiz();
+            }, 1500);
         } else {
-            nextQuestion();
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        }
+    };
+
+    // Handle Enter key press
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            // Check if user can submit
+            const canSubmit = isFractionQuestion
+                ? (settings.questionType === 'expression'
+                    ? userFractionInput.trim()
+                    : selectedFractionOption !== null)
+                : (settings.questionType === 'expression'
+                    ? userInput.trim()
+                    : selectedOption !== null);
+
+            if (canSubmit) {
+                handleSubmitAnswer();
+            }
         }
     };
 
@@ -171,12 +220,11 @@ export default function QuizPage() {
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-2">
-                            <div
-                                className="bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 dark:from-yellow-300 dark:via-pink-400 dark:to-purple-400 h-2 rounded-full transition-all duration-500 animate-shimmer"
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
+                        <FunProgressBar
+                            progress={progress}
+                            currentStreak={currentStreak}
+                            className="mb-4"
+                        />
                     </div>
 
                     {/* Mobile Content Area */}
@@ -191,7 +239,7 @@ export default function QuizPage() {
                         {/* Question Card */}
                         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 flex-1 flex items-center justify-center animate-bounce-gentle">
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+                                <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                                     {currentQuestion.variable ? (
                                         <div>
                                             <div className="text-sm text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
@@ -205,7 +253,7 @@ export default function QuizPage() {
                         </div>
 
                         {/* Mobile Answer Area - Bottom Sheet Style */}
-                        <div className="bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8">
+                        <div className="bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8" onKeyDown={handleKeyPress}>
                             {settings.questionType === 'expression' ? (
                                 <div className="space-y-4">
                                     {isFractionQuestion ? (
@@ -223,6 +271,7 @@ export default function QuizPage() {
                                             onChange={setUserInput}
                                             inputMode="numeric"
                                             fullWidth
+                                            onKeyDown={handleKeyPress}
                                         />
                                     )}
                                     <MobileButton
@@ -249,7 +298,7 @@ export default function QuizPage() {
                                                     fullWidth
                                                     onClick={() => setSelectedFractionOption(option)}
                                                 >
-                                                    {String.fromCharCode(65 + index)}. {option}
+                                                    <span className="text-lg">{String.fromCharCode(65 + index)}. {option}</span>
                                                 </MobileButton>
                                             ))
                                         ) : (
@@ -262,7 +311,7 @@ export default function QuizPage() {
                                                     fullWidth
                                                     onClick={() => setSelectedOption(option)}
                                                 >
-                                                    {String.fromCharCode(65 + index)}. {option}
+                                                    <span className="text-lg">{String.fromCharCode(65 + index)}. {option}</span>
                                                 </MobileButton>
                                             ))
                                         )}
@@ -301,20 +350,19 @@ export default function QuizPage() {
                             </div>
 
                             {/* Progress Bar */}
-                            <div className="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-3 mb-6">
-                                <div
-                                    className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 dark:from-green-300 dark:via-blue-400 dark:to-purple-500 h-3 rounded-full transition-all duration-500"
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </div>
+                            <FunProgressBar
+                                progress={progress}
+                                currentStreak={currentStreak}
+                                className="mb-6"
+                            />
                         </div>
 
                         {/* Question */}
                         <div className="text-center mb-8">
-                            <div className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-6 p-6 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                            <div className="text-5xl font-bold text-gray-800 dark:text-gray-200 mb-6 p-6 bg-gray-50 dark:bg-slate-800 rounded-xl">
                                 {currentQuestion.variable ? (
                                     <div>
-                                        <div className="text-lg text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
+                                        <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
                                         <div>{currentQuestion.question}</div>
                                     </div>
                                 ) : (
@@ -339,8 +387,8 @@ export default function QuizPage() {
                                             type="number"
                                             value={userInput}
                                             onChange={(e) => setUserInput(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && handleSubmitAnswer()}
-                                            className="w-full px-6 py-4 text-2xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+                                            onKeyDown={handleKeyPress}
+                                            className="w-full px-6 py-4 text-3xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
                                             placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
                                             autoFocus
                                             inputMode="numeric"
@@ -355,7 +403,8 @@ export default function QuizPage() {
                                             <button
                                                 key={index}
                                                 onClick={() => setSelectedFractionOption(option)}
-                                                className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedFractionOption === option
+                                                onKeyDown={handleKeyPress}
+                                                className={`px-6 py-4 text-2xl rounded-xl border-2 transition-all ${selectedFractionOption === option
                                                     ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                                                     : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
                                                     }`}
@@ -369,7 +418,8 @@ export default function QuizPage() {
                                             <button
                                                 key={index}
                                                 onClick={() => setSelectedOption(option)}
-                                                className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedOption === option
+                                                onKeyDown={handleKeyPress}
+                                                className={`px-6 py-4 text-2xl rounded-xl border-2 transition-all ${selectedOption === option
                                                     ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                                                     : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
                                                     }`}
@@ -408,6 +458,12 @@ export default function QuizPage() {
                     </div>
                 </div>
             )}
+
+            {/* Confetti Effect */}
+            <ConfettiEffect
+                isVisible={showConfetti}
+                onComplete={() => setShowConfetti(false)}
+            />
         </div>
     );
 }
