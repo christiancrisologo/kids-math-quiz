@@ -153,7 +153,7 @@ export default function QuizPage() {
                         {/* Greeting */}
                         <div className="text-center mb-6">
                             <h1 className="text-lg font-bold text-white">
-                                Hi {settings.username}! 👋🌟 Let's solve some fun problems! 🎲✨
+                                Hi {settings.username}! 👋🌟 Let&apos;s solve some fun problems! 🎲✨
                             </h1>
                         </div>
 
