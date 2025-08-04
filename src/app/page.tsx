@@ -44,11 +44,11 @@ export default function Home() {
     }
   };
 
-    const handleMathOperationToggle = (operation: MathOperation) => {
+  const handleMathOperationToggle = (operation: MathOperation) => {
     setFormData(prev => {
       const currentOperations = prev.mathOperations;
       const isSelected = currentOperations.includes(operation);
-      
+
       if (isSelected) {
         // Don't allow removing the last operation
         if (currentOperations.length === 1) {
@@ -79,7 +79,7 @@ export default function Home() {
     setFormData(prev => {
       const currentTypes = prev.numberTypes;
       const isSelected = currentTypes.includes(numberType);
-      
+
       if (isSelected) {
         // Don't allow removing the last number type
         if (currentTypes.length === 1) {

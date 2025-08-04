@@ -2,6 +2,8 @@
 
 A fun and interactive mobile-optimized math quiz application designed for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation.
 
+Checkout the [Live Demo](https://christiancrisologo.github.io/kids-math-quiz/)
+
 ## ✨ Features
 
 ### 🎯 **Core Features**
