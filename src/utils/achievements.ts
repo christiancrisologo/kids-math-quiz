@@ -1,3 +1,5 @@
+import { QuizSettings } from '../store/quiz-store';
+
 export interface Achievement {
   id: string;
   title: string;
@@ -10,7 +12,7 @@ export const checkAchievements = (
   correctAnswers: number,
   totalQuestions: number,
   bestStreak: number,
-  settings: any
+  settings: QuizSettings
 ): Achievement[] => {
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
   
