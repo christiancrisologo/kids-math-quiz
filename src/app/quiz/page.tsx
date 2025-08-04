@@ -6,6 +6,7 @@ import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
 import { MobileInput } from '../../components/ui/MobileInput';
+import { FractionInput } from '../../components/ui/FractionInput';
 
 export default function QuizPage() {
     const router = useRouter();
@@ -20,14 +21,20 @@ export default function QuizPage() {
         startQuiz,
         nextQuestion,
         submitAnswer,
+        submitFractionAnswer,
         setTimeRemaining,
         completeQuiz,
     } = useQuizStore();
 
     const [userInput, setUserInput] = useState('');
+    const [userFractionInput, setUserFractionInput] = useState('');
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [selectedFractionOption, setSelectedFractionOption] = useState<string | null>(null);
 
     const currentQuestion = questions[currentQuestionIndex];
+
+    // Helper function to check if current question is a fraction question
+    const isFractionQuestion = currentQuestion && currentQuestion.fractionAnswer !== undefined;
 
     // Start quiz when component mounts
     useEffect(() => {
@@ -71,14 +78,23 @@ export default function QuizPage() {
 
     const handleTimeUp = () => {
         // Submit empty/null answer when time runs out
-        if (settings.questionType === 'expression') {
+        if (isFractionQuestion) {
+            if (settings.questionType === 'expression') {
+                submitAnswer(0); // Submit 0 for timeout on fraction expression
+            } else {
+                submitAnswer(-1); // Submit -1 for timeout on fraction multiple choice
+            }
+        } else if (settings.questionType === 'expression') {
             submitAnswer(userInput ? parseFloat(userInput) || 0 : 0);
         } else {
             submitAnswer(selectedOption || -1);
         }
 
+        // Clear all inputs
         setUserInput('');
+        setUserFractionInput('');
         setSelectedOption(null);
+        setSelectedFractionOption(null);
 
         if (currentQuestionIndex >= questions.length - 1) {
             completeQuiz();
@@ -88,17 +104,32 @@ export default function QuizPage() {
     };
 
     const handleSubmitAnswer = () => {
-        let answer: number;
-
-        if (settings.questionType === 'expression') {
-            answer = parseFloat(userInput) || 0;
+        if (isFractionQuestion) {
+            // Handle fraction questions
+            if (settings.questionType === 'expression') {
+                submitFractionAnswer(userFractionInput.trim());
+            } else {
+                // Multiple choice fraction question
+                submitFractionAnswer(selectedFractionOption || '');
+            }
         } else {
-            answer = selectedOption !== null ? selectedOption : -1;
+            // Handle regular questions
+            let answer: number;
+
+            if (settings.questionType === 'expression') {
+                answer = parseFloat(userInput) || 0;
+            } else {
+                answer = selectedOption !== null ? selectedOption : -1;
+            }
+
+            submitAnswer(answer);
         }
 
-        submitAnswer(answer);
+        // Clear all inputs
         setUserInput('');
+        setUserFractionInput('');
         setSelectedOption(null);
+        setSelectedFractionOption(null);
 
         if (currentQuestionIndex >= questions.length - 1) {
             completeQuiz();
@@ -177,20 +208,29 @@ export default function QuizPage() {
                         <div className="bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8">
                             {settings.questionType === 'expression' ? (
                                 <div className="space-y-4">
-                                    <MobileInput
-                                        type="number"
-                                        placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Your answer"}
-                                        value={userInput}
-                                        onChange={setUserInput}
-                                        inputMode="numeric"
-                                        fullWidth
-                                    />
+                                    {isFractionQuestion ? (
+                                        <FractionInput
+                                            value={userFractionInput}
+                                            onChange={setUserFractionInput}
+                                            placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
+                                            fullWidth
+                                        />
+                                    ) : (
+                                        <MobileInput
+                                            type="number"
+                                            placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Your answer"}
+                                            value={userInput}
+                                            onChange={setUserInput}
+                                            inputMode="numeric"
+                                            fullWidth
+                                        />
+                                    )}
                                     <MobileButton
                                         variant="primary"
                                         size="lg"
                                         fullWidth
                                         onClick={handleSubmitAnswer}
-                                        disabled={!userInput.trim()}
+                                        disabled={isFractionQuestion ? !userFractionInput.trim() : !userInput.trim()}
                                         icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
@@ -199,24 +239,40 @@ export default function QuizPage() {
                             ) : (
                                 <div className="space-y-4">
                                     <div className="space-y-3">
-                                        {currentQuestion.options?.map((option, index) => (
-                                            <MobileButton
-                                                key={index}
-                                                variant={selectedOption === option ? 'primary' : 'tile'}
-                                                size="lg"
-                                                fullWidth
-                                                onClick={() => setSelectedOption(option)}
-                                            >
-                                                {String.fromCharCode(65 + index)}. {option}
-                                            </MobileButton>
-                                        ))}
+                                        {isFractionQuestion && currentQuestion.fractionOptions ? (
+                                            // Fraction multiple choice options
+                                            currentQuestion.fractionOptions.map((option, index) => (
+                                                <MobileButton
+                                                    key={index}
+                                                    variant={selectedFractionOption === option ? 'primary' : 'tile'}
+                                                    size="lg"
+                                                    fullWidth
+                                                    onClick={() => setSelectedFractionOption(option)}
+                                                >
+                                                    {String.fromCharCode(65 + index)}. {option}
+                                                </MobileButton>
+                                            ))
+                                        ) : (
+                                            // Regular multiple choice options
+                                            currentQuestion.options?.map((option, index) => (
+                                                <MobileButton
+                                                    key={index}
+                                                    variant={selectedOption === option ? 'primary' : 'tile'}
+                                                    size="lg"
+                                                    fullWidth
+                                                    onClick={() => setSelectedOption(option)}
+                                                >
+                                                    {String.fromCharCode(65 + index)}. {option}
+                                                </MobileButton>
+                                            ))
+                                        )}
                                     </div>
                                     <MobileButton
                                         variant="primary"
                                         size="lg"
                                         fullWidth
                                         onClick={handleSubmitAnswer}
-                                        disabled={selectedOption === null}
+                                        disabled={isFractionQuestion ? selectedFractionOption === null : selectedOption === null}
                                         icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
@@ -271,31 +327,57 @@ export default function QuizPage() {
                         <div className="mb-8">
                             {settings.questionType === 'expression' ? (
                                 <div>
-                                    <input
-                                        type="number"
-                                        value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSubmitAnswer()}
-                                        className="w-full px-6 py-4 text-2xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
-                                        placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
-                                        autoFocus
-                                        inputMode="numeric"
-                                    />
+                                    {isFractionQuestion ? (
+                                        <FractionInput
+                                            value={userFractionInput}
+                                            onChange={setUserFractionInput}
+                                            placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
+                                            fullWidth
+                                        />
+                                    ) : (
+                                        <input
+                                            type="number"
+                                            value={userInput}
+                                            onChange={(e) => setUserInput(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSubmitAnswer()}
+                                            className="w-full px-6 py-4 text-2xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+                                            placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
+                                            autoFocus
+                                            inputMode="numeric"
+                                        />
+                                    )}
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-4">
-                                    {currentQuestion.options?.map((option, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setSelectedOption(option)}
-                                            className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedOption === option
-                                                ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                                : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
-                                                }`}
-                                        >
-                                            {String.fromCharCode(65 + index)}. {option}
-                                        </button>
-                                    ))}
+                                    {isFractionQuestion && currentQuestion.fractionOptions ? (
+                                        // Fraction multiple choice options
+                                        currentQuestion.fractionOptions.map((option, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedFractionOption(option)}
+                                                className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedFractionOption === option
+                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
+                                                    }`}
+                                            >
+                                                {String.fromCharCode(65 + index)}. {option}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        // Regular multiple choice options
+                                        currentQuestion.options?.map((option, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedOption(option)}
+                                                className={`px-6 py-4 text-xl rounded-xl border-2 transition-all ${selectedOption === option
+                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
+                                                    }`}
+                                            >
+                                                {String.fromCharCode(65 + index)}. {option}
+                                            </button>
+                                        ))
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -304,9 +386,13 @@ export default function QuizPage() {
                         <button
                             onClick={handleSubmitAnswer}
                             disabled={
-                                settings.questionType === 'expression'
-                                    ? !userInput.trim()
-                                    : selectedOption === null
+                                isFractionQuestion
+                                    ? (settings.questionType === 'expression'
+                                        ? !userFractionInput.trim()
+                                        : selectedFractionOption === null)
+                                    : (settings.questionType === 'expression'
+                                        ? !userInput.trim()
+                                        : selectedOption === null)
                             }
                             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >

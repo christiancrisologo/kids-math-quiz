@@ -106,8 +106,8 @@ export default function ResultsPage() {
                                                 <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">
                                                     Q{index + 1}: {
                                                         question.variable && question.equation
-                                                            ? `${question.equation} (${question.variable} = ${question.answer})`
-                                                            : `${question.question} = ${question.answer}`
+                                                            ? `${question.equation} (${question.variable} = ${question.fractionAnswer || question.answer})`
+                                                            : `${question.question} = ${question.fractionAnswer || question.answer}`
                                                     }
                                                 </span>
                                                 <span className="text-xl">
@@ -116,11 +116,13 @@ export default function ResultsPage() {
                                             </div>
                                             <div className="text-xs text-gray-600 dark:text-gray-400">
                                                 Your answer: {
-                                                    question.userAnswer !== undefined
-                                                        ? question.userAnswer === -1
-                                                            ? 'No answer'
-                                                            : question.userAnswer
-                                                        : 'No answer'
+                                                    question.userFractionAnswer !== undefined
+                                                        ? question.userFractionAnswer || 'No answer'
+                                                        : question.userAnswer !== undefined
+                                                            ? question.userAnswer === -1
+                                                                ? 'No answer'
+                                                                : question.userAnswer
+                                                            : 'No answer'
                                                 }
                                             </div>
                                             {question.timeSpent !== undefined && (
@@ -137,19 +139,21 @@ export default function ResultsPage() {
                                                     <span className="font-medium text-gray-700 dark:text-gray-300">
                                                         Q{index + 1}: {
                                                             question.variable && question.equation
-                                                                ? `${question.equation} (${question.variable} = ${question.answer})`
-                                                                : `${question.question} = ${question.answer}`
+                                                                ? `${question.equation} (${question.variable} = ${question.fractionAnswer || question.answer})`
+                                                                : `${question.question} = ${question.fractionAnswer || question.answer}`
                                                         }
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-3">
                                                     <span className="text-sm text-gray-600 dark:text-gray-400">
                                                         Your answer: {
-                                                            question.userAnswer !== undefined
-                                                                ? question.userAnswer === -1
-                                                                    ? 'No answer'
-                                                                    : question.userAnswer
-                                                                : 'No answer'
+                                                            question.userFractionAnswer !== undefined
+                                                                ? question.userFractionAnswer || 'No answer'
+                                                                : question.userAnswer !== undefined
+                                                                    ? question.userAnswer === -1
+                                                                        ? 'No answer'
+                                                                        : question.userAnswer
+                                                                    : 'No answer'
                                                         }
                                                     </span>
                                                     <span className="text-2xl">

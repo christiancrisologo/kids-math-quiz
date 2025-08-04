@@ -1,8 +1,9 @@
 import { create } from 'zustand';
+import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
-export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic' | 'fractions';
 
 export interface Question {
   id: string;
@@ -14,6 +15,10 @@ export interface Question {
   isCorrect?: boolean;
   options?: number[]; // For multiple choice questions
   timeSpent?: number;
+  // Fraction-specific properties
+  fractionAnswer?: string; // e.g., "3/4", "1 2/3" for display
+  fractionOptions?: string[]; // For multiple choice fraction questions
+  userFractionAnswer?: string; // User's fraction input
 }
 
 export interface QuizSettings {
@@ -42,6 +47,7 @@ export interface QuizState {
   startQuiz: () => void;
   nextQuestion: () => void;
   submitAnswer: (answer: number) => void;
+  submitFractionAnswer: (fractionAnswer: string) => void;
   setTimeRemaining: (time: number) => void;
   completeQuiz: () => void;
   resetQuiz: () => void;
@@ -103,6 +109,29 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       if (currentQuestion) {
         currentQuestion.userAnswer = answer;
         currentQuestion.isCorrect = Math.abs(currentQuestion.answer - answer) < 0.01;
+        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+      }
+      
+      return { questions: updatedQuestions };
+    }),
+
+  submitFractionAnswer: (fractionAnswer) =>
+    set((state) => {
+      const updatedQuestions = [...state.questions];
+      const currentQuestion = updatedQuestions[state.currentQuestionIndex];
+      
+      if (currentQuestion) {
+        currentQuestion.userFractionAnswer = fractionAnswer;
+        // For fraction questions, compare with the expected fraction answer
+        if (currentQuestion.fractionAnswer) {
+          // Use areFractionsEqual for proper fraction comparison
+          currentQuestion.isCorrect = areFractionsEqual(fractionAnswer, currentQuestion.fractionAnswer);
+        } else {
+          // Fallback to decimal comparison if no fraction answer available
+          const parsedFraction = parseFraction(fractionAnswer);
+          const decimalValue = parsedFraction ? Number(parsedFraction.valueOf()) : 0;
+          currentQuestion.isCorrect = Math.abs(currentQuestion.answer - decimalValue) < 0.01;
+        }
         currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
       }
       
