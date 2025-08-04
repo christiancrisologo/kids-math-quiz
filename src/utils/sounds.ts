@@ -3,7 +3,7 @@ export const playSound = (type: 'correct' | 'incorrect' | 'button' | 'completion
   // Only play sounds if user has interacted with the page (browser requirement)
   if (typeof window === 'undefined') return;
 
-  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
   
   const playTone = (frequency: number, duration: number, type: OscillatorType = 'sine') => {
     const oscillator = audioContext.createOscillator();
