@@ -4,7 +4,7 @@ import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
 export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic';
-export type NumberType = 'integers' | 'decimals' | 'fractions';
+export type NumberType = 'integers' | 'decimals' | 'fractions' | 'currency' | 'time';
 
 export interface Question {
   id: string;
@@ -20,6 +20,10 @@ export interface Question {
   fractionAnswer?: string; // e.g., "3/4", "1 2/3" for display
   fractionOptions?: string[]; // For multiple choice fraction questions
   userFractionAnswer?: string; // User's fraction input
+  // Currency-specific properties
+  currencyOptions?: string[]; // For multiple choice currency questions (formatted)
+  // Time-specific properties
+  timeOptions?: string[]; // For multiple choice time questions (formatted)
 }
 
 export interface QuizSettings {
@@ -52,6 +56,8 @@ export interface QuizState {
   nextQuestion: () => void;
   submitAnswer: (answer: number) => void;
   submitFractionAnswer: (fractionAnswer: string) => void;
+  submitCurrencyAnswer: (currencyAnswer: string) => void;
+  submitTimeAnswer: (timeAnswer: string) => void;
   setTimeRemaining: (time: number) => void;
   completeQuiz: () => void;
   resetQuiz: () => void;
@@ -150,6 +156,70 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           const decimalValue = parsedFraction ? Number(parsedFraction.valueOf()) : 0;
           currentQuestion.isCorrect = Math.abs(currentQuestion.answer - decimalValue) < 0.01;
         }
+        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        
+        // Update streak
+        const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
+        const newBestStreak = Math.max(state.bestStreak, newStreak);
+        
+        return { 
+          questions: updatedQuestions,
+          currentStreak: newStreak,
+          bestStreak: newBestStreak
+        };
+      }
+      
+      return { questions: updatedQuestions };
+    }),
+
+  submitCurrencyAnswer: (currencyAnswer) =>
+    set((state) => {
+      const updatedQuestions = [...state.questions];
+      const currentQuestion = updatedQuestions[state.currentQuestionIndex];
+      
+      if (currentQuestion) {
+        // For currency questions, compare the formatted string or parsed value
+        const parsedCurrency = parseFloat(currencyAnswer.replace('$', '')) || 0;
+        currentQuestion.userAnswer = parsedCurrency;
+        currentQuestion.isCorrect = Math.abs(currentQuestion.answer - parsedCurrency) < 0.01;
+        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        
+        // Update streak
+        const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
+        const newBestStreak = Math.max(state.bestStreak, newStreak);
+        
+        return { 
+          questions: updatedQuestions,
+          currentStreak: newStreak,
+          bestStreak: newBestStreak
+        };
+      }
+      
+      return { questions: updatedQuestions };
+    }),
+
+  submitTimeAnswer: (timeAnswer) =>
+    set((state) => {
+      const updatedQuestions = [...state.questions];
+      const currentQuestion = updatedQuestions[state.currentQuestionIndex];
+      
+      if (currentQuestion) {
+        // For time questions, convert time string back to seconds for comparison
+        const parts = timeAnswer.split(':').map(Number);
+        let timeInSeconds = 0;
+        if (parts.length === 2) {
+          // Check if it's hours:minutes or minutes:seconds based on magnitude
+          if (currentQuestion.answer > 3600) {
+            // Hour format (HH:MM)
+            timeInSeconds = (parts[0] * 60 + parts[1]) * 60;
+          } else {
+            // Minute format (MM:SS)
+            timeInSeconds = parts[0] * 60 + parts[1];
+          }
+        }
+        
+        currentQuestion.userAnswer = timeInSeconds;
+        currentQuestion.isCorrect = Math.abs(currentQuestion.answer - timeInSeconds) < 1; // 1-second tolerance
         currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
         
         // Update streak

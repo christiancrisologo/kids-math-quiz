@@ -31,7 +31,7 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     timerPerQuestion: 10,
     questionType: ['expression', 'multiple-choice'],
     mathOperations: ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'],
-    numberTypes: ['integers', 'decimals', 'fractions'],
+    numberTypes: ['integers', 'decimals', 'fractions', 'currency', 'time'],
     description: 'Intermediate math concepts'
   },
   'senior-high': {
@@ -41,7 +41,7 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     timerPerQuestion: 8,
     questionType: ['expression', 'multiple-choice'],
     mathOperations: ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'],
-    numberTypes: ['integers', 'decimals', 'fractions'],
+    numberTypes: ['integers', 'decimals', 'fractions', 'currency', 'time'],
     description: 'Advanced math challenges'
   }
 };
