@@ -57,7 +57,7 @@ export const checkAchievements = (
       title: 'Fraction Hero',
       description: 'Completed a fraction quiz',
       emoji: '🧮',
-      unlocked: settings.mathOperations?.includes('fractions')
+      unlocked: settings.numberTypes?.includes('fractions')
     },
     {
       id: 'high_achiever',

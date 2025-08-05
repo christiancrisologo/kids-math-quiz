@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "npm run build",
-    "build:gh-pages": "NODE_ENV=production next build"
+    "build:gh-pages": "NODE_ENV=production next build",
+    "test:type-check": "tsc --noEmit",
+    "test:build": "npm run lint && npm run test:type-check && npm run build"
   },
   "dependencies": {
     "fraction.js": "^5.2.2",
