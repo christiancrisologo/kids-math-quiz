@@ -9,6 +9,7 @@ import { MobileButton } from '../components/ui/MobileButton';
 import { MobileTile } from '../components/ui/MobileTile';
 import { MobileInput } from '../components/ui/MobileInput';
 import { ThemeToggle } from '../components/theme/ThemeToggle';
+import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
 
 export default function Home() {
@@ -16,16 +17,20 @@ export default function Home() {
   const { updateSettings, setQuestions } = useQuizStore();
   const isMobile = useIsMobile();
 
+  // Get default settings from Primary school preset
+  const defaultPreset = applyYearLevelPreset('primary');
+
   const [formData, setFormData] = useState({
     username: '',
-    difficulty: 'easy' as Difficulty,
-    numberOfQuestions: 5,
-    timerPerQuestion: 10,
-    questionType: 'expression' as QuestionType,
-    mathOperations: ['addition'] as MathOperation[], // Changed to array with default selection
-    numberTypes: ['integers'] as NumberType[], // New field for number types
+    difficulty: defaultPreset.difficulty,
+    numberOfQuestions: defaultPreset.numberOfQuestions,
+    timerPerQuestion: defaultPreset.timerPerQuestion,
+    questionType: defaultPreset.questionType,
+    mathOperations: defaultPreset.mathOperations,
+    numberTypes: defaultPreset.numberTypes,
   });
 
+  const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
 
@@ -106,6 +111,23 @@ export default function Home() {
     }
   };
 
+  const handleYearLevelChange = (yearLevel: YearLevel) => {
+    setSelectedYearLevel(yearLevel);
+
+    // Apply the preset settings
+    const presetSettings = applyYearLevelPreset(yearLevel);
+    setFormData(prev => ({
+      ...prev,
+      ...presetSettings
+    }));
+
+    // Clear any validation errors since we're applying valid presets
+    setErrors({});
+
+    // Show settings so user can see what was applied
+    setShowSettings(true);
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -179,6 +201,33 @@ export default function Home() {
             />
           </div>
 
+          {/* Year Level Selection */}
+          <div className="mb-4">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-4">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
+                🎯 Select Your Year Level
+              </h3>
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                {(Object.entries(yearLevelPresets) as [YearLevel, typeof yearLevelPresets[YearLevel]][]).map(([level, preset]) => (
+                  <MobileTile
+                    key={level}
+                    title={preset.label}
+                    subtitle={preset.description}
+                    isSelected={selectedYearLevel === level}
+                    onClick={() => handleYearLevelChange(level)}
+                  />
+                ))}
+              </div>
+              {selectedYearLevel && (
+                <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    ✨ Settings automatically applied for {yearLevelPresets[selectedYearLevel].label}!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Quiz Settings Toggle Button */}
           <div className="mb-4">
             <button
@@ -212,6 +261,11 @@ export default function Home() {
                     />
                   ))}
                 </div>
+                {selectedYearLevel && (
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    💡 Recommended for {yearLevelPresets[selectedYearLevel].label}: {formData.difficulty}
+                  </div>
+                )}
               </div>
 
               {/* Number of Questions and Timer per Question - Combined Row */}
@@ -246,6 +300,11 @@ export default function Home() {
                     />
                   </div>
                 </div>
+                {selectedYearLevel && (
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
+                  </div>
+                )}
               </div>
 
               {/* Question Type */}
@@ -267,6 +326,13 @@ export default function Home() {
                     />
                   ))}
                 </div>
+                {selectedYearLevel && (
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    💡 Your year level supports: {yearLevelPresets[selectedYearLevel].questionType.map(type =>
+                      type === 'expression' ? 'Math Expression' : 'Multiple Choice'
+                    ).join(', ')}
+                  </div>
+                )}
               </div>
 
               {/* Number Types */}
@@ -292,6 +358,13 @@ export default function Home() {
                 {formData.numberTypes.length > 0 && (
                   <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                     Selected: {formData.numberTypes.map(type =>
+                      type.charAt(0).toUpperCase() + type.slice(1)
+                    ).join(', ')}
+                  </div>
+                )}
+                {selectedYearLevel && (
+                  <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                    💡 {yearLevelPresets[selectedYearLevel].label} includes: {yearLevelPresets[selectedYearLevel].numberTypes.map(type =>
                       type.charAt(0).toUpperCase() + type.slice(1)
                     ).join(', ')}
                   </div>
@@ -328,6 +401,13 @@ export default function Home() {
                 {formData.mathOperations.length > 0 && (
                   <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
                     Selected: {formData.mathOperations.map(op =>
+                      op.charAt(0).toUpperCase() + op.slice(1)
+                    ).join(', ')}
+                  </div>
+                )}
+                {selectedYearLevel && (
+                  <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                    💡 {yearLevelPresets[selectedYearLevel].label} includes: {yearLevelPresets[selectedYearLevel].mathOperations.map(op =>
                       op.charAt(0).toUpperCase() + op.slice(1)
                     ).join(', ')}
                   </div>
