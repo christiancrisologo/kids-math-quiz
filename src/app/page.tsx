@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../store/quiz-store';
 import { generateQuestions } from '../utils/math/question-generator';
@@ -17,22 +17,28 @@ export default function Home() {
   const { updateSettings, setQuestions } = useQuizStore();
   const isMobile = useIsMobile();
 
-  // Get default settings from Primary school preset
-  const defaultPreset = applyYearLevelPreset('primary');
-
   const [formData, setFormData] = useState({
     username: '',
-    difficulty: defaultPreset.difficulty,
-    numberOfQuestions: defaultPreset.numberOfQuestions,
-    timerPerQuestion: defaultPreset.timerPerQuestion,
-    questionType: defaultPreset.questionType,
-    mathOperations: defaultPreset.mathOperations,
-    numberTypes: defaultPreset.numberTypes,
+    difficulty: 'easy' as Difficulty,
+    numberOfQuestions: 5,
+    timerPerQuestion: 10,
+    questionType: 'expression' as QuestionType,
+    mathOperations: ['addition'] as MathOperation[], // Changed to array with default selection
+    numberTypes: ['integers'] as NumberType[], // New field for number types
   });
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
+
+  // Apply primary school preset on component mount
+  useEffect(() => {
+    const presetSettings = applyYearLevelPreset('primary');
+    setFormData(prev => ({
+      ...prev,
+      ...presetSettings
+    }));
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -344,7 +350,9 @@ export default function Home() {
                   {([
                     { value: 'integers', label: '🔢 Integers', subtitle: 'Whole numbers (1, 2, 3...)' },
                     { value: 'decimals', label: '🔸 Decimals', subtitle: 'Decimal numbers (1.5, 2.25...)' },
-                    { value: 'fractions', label: '🧮 Fractions', subtitle: 'Fraction numbers (1/2, 3/4...)' }
+                    { value: 'fractions', label: '🧮 Fractions', subtitle: 'Fraction numbers (1/2, 3/4...)' },
+                    { value: 'currency', label: '💰 Currency', subtitle: 'Money calculations ($1.50, $2.25...)' },
+                    { value: 'time', label: '⏰ Time', subtitle: 'Time calculations (1:30, 2:45...)' }
                   ] as { value: NumberType; label: string; subtitle: string }[]).map((type) => (
                     <MobileTile
                       key={type.value}

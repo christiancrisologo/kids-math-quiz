@@ -26,6 +26,8 @@ export default function QuizPage() {
         nextQuestion,
         submitAnswer,
         submitFractionAnswer,
+        submitCurrencyAnswer,
+        submitTimeAnswer,
         setTimeRemaining,
         completeQuiz,
     } = useQuizStore();
@@ -34,6 +36,8 @@ export default function QuizPage() {
     const [userFractionInput, setUserFractionInput] = useState('');
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [selectedFractionOption, setSelectedFractionOption] = useState<string | null>(null);
+    const [selectedCurrencyOption, setSelectedCurrencyOption] = useState<string | null>(null);
+    const [selectedTimeOption, setSelectedTimeOption] = useState<string | null>(null);
 
     // Refs for auto-focus
     const inputRef = useRef<HTMLInputElement>(null);
@@ -41,8 +45,10 @@ export default function QuizPage() {
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    // Helper function to check if current question is a fraction question
+    // Helper functions to check question types
     const isFractionQuestion = currentQuestion && currentQuestion.fractionAnswer !== undefined;
+    const isCurrencyQuestion = currentQuestion && currentQuestion.currencyOptions !== undefined;
+    const isTimeQuestion = currentQuestion && currentQuestion.timeOptions !== undefined;
 
     // Start quiz when component mounts
     useEffect(() => {
@@ -107,6 +113,18 @@ export default function QuizPage() {
             } else {
                 submitAnswer(-1); // Submit -1 for timeout on fraction multiple choice
             }
+        } else if (isCurrencyQuestion) {
+            if (settings.questionType === 'expression') {
+                submitCurrencyAnswer(userInput || '');
+            } else {
+                submitCurrencyAnswer(''); // Submit empty string for timeout
+            }
+        } else if (isTimeQuestion) {
+            if (settings.questionType === 'expression') {
+                submitTimeAnswer(userInput || '');
+            } else {
+                submitTimeAnswer(''); // Submit empty string for timeout
+            }
         } else if (settings.questionType === 'expression') {
             submitAnswer(userInput ? parseFloat(userInput) || 0 : 0);
         } else {
@@ -118,6 +136,8 @@ export default function QuizPage() {
         setUserFractionInput('');
         setSelectedOption(null);
         setSelectedFractionOption(null);
+        setSelectedCurrencyOption(null);
+        setSelectedTimeOption(null);
 
         if (currentQuestionIndex >= questions.length - 1) {
             completeQuiz();
@@ -137,8 +157,26 @@ export default function QuizPage() {
                 // Multiple choice fraction question
                 submitFractionAnswer(selectedFractionOption || '');
             }
+        } else if (isCurrencyQuestion) {
+            // Handle currency questions
+            if (settings.questionType === 'expression') {
+                // For expression, user enters currency value
+                submitCurrencyAnswer(userInput.trim());
+            } else {
+                // Multiple choice currency question
+                submitCurrencyAnswer(selectedCurrencyOption || '');
+            }
+        } else if (isTimeQuestion) {
+            // Handle time questions
+            if (settings.questionType === 'expression') {
+                // For expression, user enters time value
+                submitTimeAnswer(userInput.trim());
+            } else {
+                // Multiple choice time question
+                submitTimeAnswer(selectedTimeOption || '');
+            }
         } else {
-            // Handle regular questions
+            // Handle regular questions (integers, decimals)
             let answer: number;
 
             if (settings.questionType === 'expression') {
@@ -173,6 +211,8 @@ export default function QuizPage() {
         setUserFractionInput('');
         setSelectedOption(null);
         setSelectedFractionOption(null);
+        setSelectedCurrencyOption(null);
+        setSelectedTimeOption(null);
 
         if (currentQuestionIndex >= questions.length - 1) {
             setTimeout(() => {
@@ -308,7 +348,12 @@ export default function QuizPage() {
                                         size="lg"
                                         fullWidth
                                         onClick={handleSubmitAnswer}
-                                        disabled={isFractionQuestion ? !userFractionInput.trim() : !userInput.trim()}
+                                        disabled={
+                                            isFractionQuestion ? !userFractionInput.trim() :
+                                                isCurrencyQuestion ? !userInput.trim() :
+                                                    isTimeQuestion ? !userInput.trim() :
+                                                        !userInput.trim()
+                                        }
                                         icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
@@ -316,7 +361,7 @@ export default function QuizPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-3">
+                                    <div className="grid grid-cols-2 gap-3">
                                         {isFractionQuestion && currentQuestion.fractionOptions ? (
                                             // Fraction multiple choice options
                                             currentQuestion.fractionOptions.map((option, index) => (
@@ -328,8 +373,30 @@ export default function QuizPage() {
                                                     compact={true}
                                                 />
                                             ))
+                                        ) : isCurrencyQuestion && currentQuestion.currencyOptions ? (
+                                            // Currency multiple choice options
+                                            currentQuestion.currencyOptions.map((option, index) => (
+                                                <MobileTile
+                                                    key={index}
+                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                    isSelected={selectedCurrencyOption === option}
+                                                    onClick={() => setSelectedCurrencyOption(option)}
+                                                    compact={true}
+                                                />
+                                            ))
+                                        ) : isTimeQuestion && currentQuestion.timeOptions ? (
+                                            // Time multiple choice options
+                                            currentQuestion.timeOptions.map((option, index) => (
+                                                <MobileTile
+                                                    key={index}
+                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                    isSelected={selectedTimeOption === option}
+                                                    onClick={() => setSelectedTimeOption(option)}
+                                                    compact={true}
+                                                />
+                                            ))
                                         ) : (
-                                            // Regular multiple choice options
+                                            // Regular multiple choice options (integers and decimals)
                                             currentQuestion.options?.map((option, index) => (
                                                 <MobileTile
                                                     key={index}
@@ -346,7 +413,12 @@ export default function QuizPage() {
                                         size="lg"
                                         fullWidth
                                         onClick={handleSubmitAnswer}
-                                        disabled={isFractionQuestion ? selectedFractionOption === null : selectedOption === null}
+                                        disabled={
+                                            isFractionQuestion ? selectedFractionOption === null :
+                                                isCurrencyQuestion ? selectedCurrencyOption === null :
+                                                    isTimeQuestion ? selectedTimeOption === null :
+                                                        selectedOption === null
+                                        }
                                         icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
@@ -435,8 +507,30 @@ export default function QuizPage() {
                                                 compact={true}
                                             />
                                         ))
+                                    ) : isCurrencyQuestion && currentQuestion.currencyOptions ? (
+                                        // Currency multiple choice options
+                                        currentQuestion.currencyOptions.map((option, index) => (
+                                            <MobileTile
+                                                key={index}
+                                                title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                isSelected={selectedCurrencyOption === option}
+                                                onClick={() => setSelectedCurrencyOption(option)}
+                                                compact={true}
+                                            />
+                                        ))
+                                    ) : isTimeQuestion && currentQuestion.timeOptions ? (
+                                        // Time multiple choice options
+                                        currentQuestion.timeOptions.map((option, index) => (
+                                            <MobileTile
+                                                key={index}
+                                                title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                isSelected={selectedTimeOption === option}
+                                                onClick={() => setSelectedTimeOption(option)}
+                                                compact={true}
+                                            />
+                                        ))
                                     ) : (
-                                        // Regular multiple choice options
+                                        // Regular multiple choice options (integers and decimals)
                                         currentQuestion.options?.map((option, index) => (
                                             <MobileTile
                                                 key={index}
@@ -459,9 +553,17 @@ export default function QuizPage() {
                                     ? (settings.questionType === 'expression'
                                         ? !userFractionInput.trim()
                                         : selectedFractionOption === null)
-                                    : (settings.questionType === 'expression'
-                                        ? !userInput.trim()
-                                        : selectedOption === null)
+                                    : isCurrencyQuestion
+                                        ? (settings.questionType === 'expression'
+                                            ? !userInput.trim()
+                                            : selectedCurrencyOption === null)
+                                        : isTimeQuestion
+                                            ? (settings.questionType === 'expression'
+                                                ? !userInput.trim()
+                                                : selectedTimeOption === null)
+                                            : (settings.questionType === 'expression'
+                                                ? !userInput.trim()
+                                                : selectedOption === null)
                             }
                             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >

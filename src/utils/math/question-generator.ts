@@ -7,6 +7,26 @@ import {
   toMixedNumber,
   generateFractionOptions
 } from './fraction-utils';
+import {
+  generateCurrencyAddition,
+  generateCurrencySubtraction,
+  generateCurrencyMultiplication,
+  generateCurrencyDivision,
+  generateCurrencyOptions,
+  formatCurrency,
+  parseCurrency
+} from './currency-utils';
+import {
+  generateTimeAddition,
+  generateTimeSubtraction,
+  generateTimeMultiplication,
+  generateTimeDivision,
+  generateTimeAdditionHours,
+  generateTimeSubtractionHours,
+  generateTimeOptions,
+  secondsToTime,
+  minutesToTime
+} from './time-utils';
 
 const getRandomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -186,7 +206,8 @@ const generateMultipleChoiceOptions = (correctAnswer: number, difficulty: Diffic
   const options = [correctAnswer];
   const range = difficulty === 'easy' ? 10 : 50;
   
-  while (options.length < 3) {
+  // Generate only 2 options total (1 correct + 1 incorrect) as per requirements
+  while (options.length < 2) {
     const offset = getRandomNumber(-range, range);
     const option = Math.max(0, correctAnswer + offset);
     
@@ -304,6 +325,127 @@ const generateDecimalQuestionByOperation = (operation: MathOperation, difficulty
   }
 };
 
+// Currency question generators
+const generateCurrencyQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): {
+  question: string;
+  answer: number;
+  displayAnswer?: string;
+} => {
+  // Currency doesn't support algebraic expressions as per requirements
+  if (operation === 'algebraic') {
+    operation = 'addition'; // Fallback to addition
+  }
+
+  switch (operation) {
+    case 'addition':
+      const addResult = generateCurrencyAddition(difficulty);
+      return {
+        question: addResult.question,
+        answer: addResult.answer,
+        displayAnswer: addResult.displayAnswer
+      };
+    case 'subtraction':
+      const subResult = generateCurrencySubtraction(difficulty);
+      return {
+        question: subResult.question,
+        answer: subResult.answer,
+        displayAnswer: subResult.displayAnswer
+      };
+    case 'multiplication':
+      const mulResult = generateCurrencyMultiplication(difficulty);
+      return {
+        question: mulResult.question,
+        answer: mulResult.answer,
+        displayAnswer: mulResult.displayAnswer
+      };
+    case 'division':
+      const divResult = generateCurrencyDivision(difficulty);
+      return {
+        question: divResult.question,
+        answer: divResult.answer,
+        displayAnswer: divResult.displayAnswer
+      };
+    default:
+      const defaultResult = generateCurrencyAddition(difficulty);
+      return {
+        question: defaultResult.question,
+        answer: defaultResult.answer,
+        displayAnswer: defaultResult.displayAnswer
+      };
+  }
+};
+
+// Time question generators
+const generateTimeQuestionByOperation = (operation: MathOperation, difficulty: Difficulty): {
+  question: string;
+  answer: number;
+  displayAnswer?: string;
+} => {
+  // Time doesn't support algebraic expressions as per requirements
+  if (operation === 'algebraic') {
+    operation = 'addition'; // Fallback to addition
+  }
+
+  // Randomly choose between seconds (MM:SS) and hours (HH:MM) format
+  const useHourFormat = Math.random() > 0.6; // 40% chance for hour format
+
+  switch (operation) {
+    case 'addition':
+      if (useHourFormat) {
+        const result = generateTimeAdditionHours(difficulty);
+        return {
+          question: result.question,
+          answer: result.answer,
+          displayAnswer: result.displayAnswer
+        };
+      } else {
+        const result = generateTimeAddition(difficulty);
+        return {
+          question: result.question,
+          answer: result.answer,
+          displayAnswer: result.displayAnswer
+        };
+      }
+    case 'subtraction':
+      if (useHourFormat) {
+        const result = generateTimeSubtractionHours(difficulty);
+        return {
+          question: result.question,
+          answer: result.answer,
+          displayAnswer: result.displayAnswer
+        };
+      } else {
+        const result = generateTimeSubtraction(difficulty);
+        return {
+          question: result.question,
+          answer: result.answer,
+          displayAnswer: result.displayAnswer
+        };
+      }
+    case 'multiplication':
+      const mulResult = generateTimeMultiplication(difficulty);
+      return {
+        question: mulResult.question,
+        answer: mulResult.answer,
+        displayAnswer: mulResult.displayAnswer
+      };
+    case 'division':
+      const divResult = generateTimeDivision(difficulty);
+      return {
+        question: divResult.question,
+        answer: divResult.answer,
+        displayAnswer: divResult.displayAnswer
+      };
+    default:
+      const defaultResult = generateTimeAddition(difficulty);
+      return {
+        question: defaultResult.question,
+        answer: defaultResult.answer,
+        displayAnswer: defaultResult.displayAnswer
+      };
+  }
+};
+
 // Main function to generate questions based on operation and number type
 const generateQuestionByOperationAndNumberType = (
   operation: MathOperation, 
@@ -313,6 +455,7 @@ const generateQuestionByOperationAndNumberType = (
   question: string; 
   answer: number; 
   fractionAnswer?: string;
+  displayAnswer?: string; // For currency and time formatting
 } => {
   // For fraction number type, use fraction-specific questions
   if (numberType === 'fractions') {
@@ -322,6 +465,16 @@ const generateQuestionByOperationAndNumberType = (
   // For decimals, modify the basic operation questions to use decimals
   if (numberType === 'decimals') {
     return generateDecimalQuestionByOperation(operation, difficulty);
+  }
+  
+  // For currency, use currency-specific questions
+  if (numberType === 'currency') {
+    return generateCurrencyQuestionByOperation(operation, difficulty);
+  }
+  
+  // For time, use time-specific questions
+  if (numberType === 'time') {
+    return generateTimeQuestionByOperation(operation, difficulty);
   }
   
   // For integers, use the standard integer questions
@@ -365,9 +518,35 @@ export const generateQuestions = (
       questionObj.fractionAnswer = result.fractionAnswer;
       
       if (questionType === 'multiple-choice') {
-        // Parse the fraction answer for generating options
+        // Parse the fraction answer for generating options (only 2 options now)
         const fractionResult = new Fraction(result.fractionAnswer);
-        questionObj.fractionOptions = generateFractionOptions(fractionResult, 3);
+        questionObj.fractionOptions = generateFractionOptions(fractionResult, 2);
+      }
+    }
+    
+    // For currency questions, add currency-specific properties
+    if (randomNumberType === 'currency' && result.displayAnswer) {
+      if (questionType === 'multiple-choice') {
+        // Generate currency options
+        const currencyOptions = generateCurrencyOptions(result.answer);
+        questionObj.options = currencyOptions;
+        // Store display format for the options
+        questionObj.currencyOptions = currencyOptions.map(option => formatCurrency(option));
+      }
+    }
+    
+    // For time questions, add time-specific properties
+    if (randomNumberType === 'time' && result.displayAnswer) {
+      if (questionType === 'multiple-choice') {
+        // Generate time options
+        const timeOptions = generateTimeOptions(result.answer);
+        questionObj.options = timeOptions;
+        // Store display format for the options
+        questionObj.timeOptions = timeOptions.map(option => {
+          // Check if it's hour format based on the answer magnitude
+          const isHourFormat = result.answer > 3600; // More than 1 hour
+          return isHourFormat ? minutesToTime(Math.floor(option / 60)) : secondsToTime(option);
+        });
       }
     }
     
@@ -377,8 +556,11 @@ export const generateQuestions = (
       questionObj.equation = result.question;
     }
     
-    // For non-fraction multiple choice questions
-    if (questionType === 'multiple-choice' && randomNumberType !== 'fractions') {
+    // For regular multiple choice questions (integers and decimals)
+    if (questionType === 'multiple-choice' && 
+        randomNumberType !== 'fractions' && 
+        randomNumberType !== 'currency' && 
+        randomNumberType !== 'time') {
       questionObj.options = generateMultipleChoiceOptions(result.answer, difficulty);
     }
     
