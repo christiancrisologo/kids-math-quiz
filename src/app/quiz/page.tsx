@@ -316,7 +316,7 @@ export default function QuizPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="space-y-3">
+                                    <div className="grid grid-cols-1 gap-3">
                                         {isFractionQuestion && currentQuestion.fractionOptions ? (
                                             // Fraction multiple choice options
                                             currentQuestion.fractionOptions.map((option, index) => (
@@ -423,36 +423,28 @@ export default function QuizPage() {
                                     )}
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {isFractionQuestion && currentQuestion.fractionOptions ? (
                                         // Fraction multiple choice options
                                         currentQuestion.fractionOptions.map((option, index) => (
-                                            <button
+                                            <MobileTile
                                                 key={index}
+                                                title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                isSelected={selectedFractionOption === option}
                                                 onClick={() => setSelectedFractionOption(option)}
-                                                onKeyDown={handleKeyPress}
-                                                className={`px-6 py-6 text-xl rounded-xl border-2 transition-all hover:scale-102 shadow-sm min-h-[80px] flex items-center justify-center ${selectedFractionOption === option
-                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
-                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-800'
-                                                    }`}
-                                            >
-                                                <span className="font-semibold">{String.fromCharCode(65 + index)}. {option}</span>
-                                            </button>
+                                                compact={true}
+                                            />
                                         ))
                                     ) : (
                                         // Regular multiple choice options
                                         currentQuestion.options?.map((option, index) => (
-                                            <button
+                                            <MobileTile
                                                 key={index}
+                                                title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                isSelected={selectedOption === option}
                                                 onClick={() => setSelectedOption(option)}
-                                                onKeyDown={handleKeyPress}
-                                                className={`px-6 py-6 text-xl rounded-xl border-2 transition-all hover:scale-102 shadow-sm min-h-[80px] flex items-center justify-center ${selectedOption === option
-                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
-                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-800'
-                                                    }`}
-                                            >
-                                                <span className="font-semibold">{String.fromCharCode(65 + index)}. {option}</span>
-                                            </button>
+                                                compact={true}
+                                            />
                                         ))
                                     )}
                                 </div>

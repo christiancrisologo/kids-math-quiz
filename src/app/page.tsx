@@ -253,7 +253,7 @@ export default function Home() {
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
                   🎯 Question Type
                 </h3>
-                <div className="space-y-2">
+                <div className={`grid gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                   {([
                     { value: 'expression', label: '📝 Math Expression', subtitle: 'e.g., 4 + 3 = ?' },
                     { value: 'multiple-choice', label: '🎯 Multiple Choice', subtitle: '3 options' }
