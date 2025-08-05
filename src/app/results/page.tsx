@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
@@ -14,6 +14,8 @@ export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings, questions, resetQuiz, bestStreak, retryQuiz } = useQuizStore();
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
     // Redirect if no questions (shouldn't happen, but safety check)
     useEffect(() => {
@@ -22,13 +24,31 @@ export default function ResultsPage() {
         } else {
             // Play completion sound when results load
             setTimeout(() => playSound('completion'), 500);
+
+            // Show confetti with a slight delay for better effect
+            setTimeout(() => setShowConfetti(true), 800);
         }
     }, [questions.length, router]);
+
+    // Show bonus confetti for exceptional performance
+    useEffect(() => {
+        const percentage = Math.round((questions.filter(q => q.isCorrect).length / questions.length) * 100);
+        if (percentage >= 90) {
+            setTimeout(() => setShowBonusConfetti(true), 2500); // Show after first confetti
+        }
+    }, [questions]);
 
     const correctAnswers = questions.filter(q => q.isCorrect).length;
     const totalQuestions = questions.length;
     const percentage = Math.round((correctAnswers / totalQuestions) * 100);
     const achievements = checkAchievements(correctAnswers, totalQuestions, bestStreak, settings);
+
+    // Determine confetti intensity based on performance
+    const getConfettiIntensity = (percentage: number): 'low' | 'medium' | 'high' => {
+        if (percentage >= 90) return 'high';
+        if (percentage >= 70) return 'medium';
+        return 'low';
+    };
 
     const getGradeMessage = (percentage: number) => {
         const funnyQuotes = [
@@ -283,8 +303,21 @@ export default function ResultsPage() {
                 </div>
             </div>
 
-            {/* Confetti Effect for great results */}
-            <ConfettiEffect isVisible={percentage >= 80} />
+            {/* Confetti Effect for all results with dynamic intensity */}
+            <ConfettiEffect
+                isVisible={showConfetti}
+                intensity={getConfettiIntensity(percentage)}
+                onComplete={() => setShowConfetti(false)}
+            />
+
+            {/* Bonus confetti for exceptional performance (90%+) */}
+            {percentage >= 90 && (
+                <ConfettiEffect
+                    isVisible={showBonusConfetti}
+                    intensity="high"
+                    onComplete={() => setShowBonusConfetti(false)}
+                />
+            )}
         </div>
     );
 }

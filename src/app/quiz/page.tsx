@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
+import { MobileTile } from '../../components/ui/MobileTile';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
 import { FunProgressBar } from '../../components/ui/FunProgressBar';
-import { ConfettiEffect } from '../../components/ui/ConfettiEffect';
 import { playSound, vibrate } from '../../utils/sounds';
 
 export default function QuizPage() {
@@ -34,7 +34,10 @@ export default function QuizPage() {
     const [userFractionInput, setUserFractionInput] = useState('');
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [selectedFractionOption, setSelectedFractionOption] = useState<string | null>(null);
-    const [showConfetti, setShowConfetti] = useState(false);
+
+    // Refs for auto-focus
+    const inputRef = useRef<HTMLInputElement>(null);
+    const fractionInputRef = useRef<HTMLInputElement>(null);
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -80,6 +83,21 @@ export default function QuizPage() {
             router.push('/results');
         }
     }, [isQuizCompleted, router]);
+
+    // Auto-focus input when new question starts or settings change
+    useEffect(() => {
+        if (currentQuestion && isQuizActive) {
+            setTimeout(() => {
+                if (settings.questionType === 'expression') {
+                    if (isFractionQuestion && fractionInputRef.current) {
+                        fractionInputRef.current.focus();
+                    } else if (!isFractionQuestion && inputRef.current) {
+                        inputRef.current.focus();
+                    }
+                }
+            }, 100); // Small delay to ensure rendering is complete
+        }
+    }, [currentQuestion, isQuizActive, settings.questionType, isFractionQuestion]);
 
     const handleTimeUp = () => {
         // Submit empty/null answer when time runs out
@@ -141,7 +159,6 @@ export default function QuizPage() {
 
                 // Show visual and audio feedback
                 if (isCorrect) {
-                    setShowConfetti(true);
                     playSound('correct');
                     vibrate([100, 50, 100]);
                 } else {
@@ -165,6 +182,16 @@ export default function QuizPage() {
         } else {
             setTimeout(() => {
                 nextQuestion();
+                // Auto-focus after moving to next question
+                setTimeout(() => {
+                    if (settings.questionType === 'expression') {
+                        if (isFractionQuestion && fractionInputRef.current) {
+                            fractionInputRef.current.focus();
+                        } else if (!isFractionQuestion && inputRef.current) {
+                            inputRef.current.focus();
+                        }
+                    }
+                }, 100);
             }, 1500);
         }
     };
@@ -258,6 +285,7 @@ export default function QuizPage() {
                                 <div className="space-y-4">
                                     {isFractionQuestion ? (
                                         <FractionInput
+                                            ref={fractionInputRef}
                                             value={userFractionInput}
                                             onChange={setUserFractionInput}
                                             placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
@@ -265,6 +293,7 @@ export default function QuizPage() {
                                         />
                                     ) : (
                                         <MobileInput
+                                            ref={inputRef}
                                             type="number"
                                             placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Your answer"}
                                             value={userInput}
@@ -291,28 +320,24 @@ export default function QuizPage() {
                                         {isFractionQuestion && currentQuestion.fractionOptions ? (
                                             // Fraction multiple choice options
                                             currentQuestion.fractionOptions.map((option, index) => (
-                                                <MobileButton
+                                                <MobileTile
                                                     key={index}
-                                                    variant={selectedFractionOption === option ? 'primary' : 'tile'}
-                                                    size="lg"
-                                                    fullWidth
+                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                    isSelected={selectedFractionOption === option}
                                                     onClick={() => setSelectedFractionOption(option)}
-                                                >
-                                                    <span className="text-lg">{String.fromCharCode(65 + index)}. {option}</span>
-                                                </MobileButton>
+                                                    compact={true}
+                                                />
                                             ))
                                         ) : (
                                             // Regular multiple choice options
                                             currentQuestion.options?.map((option, index) => (
-                                                <MobileButton
+                                                <MobileTile
                                                     key={index}
-                                                    variant={selectedOption === option ? 'primary' : 'tile'}
-                                                    size="lg"
-                                                    fullWidth
+                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
+                                                    isSelected={selectedOption === option}
                                                     onClick={() => setSelectedOption(option)}
-                                                >
-                                                    <span className="text-lg">{String.fromCharCode(65 + index)}. {option}</span>
-                                                </MobileButton>
+                                                    compact={true}
+                                                />
                                             ))
                                         )}
                                     </div>
@@ -377,6 +402,7 @@ export default function QuizPage() {
                                 <div>
                                     {isFractionQuestion ? (
                                         <FractionInput
+                                            ref={fractionInputRef}
                                             value={userFractionInput}
                                             onChange={setUserFractionInput}
                                             placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
@@ -384,6 +410,7 @@ export default function QuizPage() {
                                         />
                                     ) : (
                                         <input
+                                            ref={inputRef}
                                             type="number"
                                             value={userInput}
                                             onChange={(e) => setUserInput(e.target.value)}
@@ -404,12 +431,12 @@ export default function QuizPage() {
                                                 key={index}
                                                 onClick={() => setSelectedFractionOption(option)}
                                                 onKeyDown={handleKeyPress}
-                                                className={`px-6 py-4 text-2xl rounded-xl border-2 transition-all ${selectedFractionOption === option
-                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
+                                                className={`px-6 py-6 text-xl rounded-xl border-2 transition-all hover:scale-102 shadow-sm min-h-[80px] flex items-center justify-center ${selectedFractionOption === option
+                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
+                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-800'
                                                     }`}
                                             >
-                                                {String.fromCharCode(65 + index)}. {option}
+                                                <span className="font-semibold">{String.fromCharCode(65 + index)}. {option}</span>
                                             </button>
                                         ))
                                     ) : (
@@ -419,12 +446,12 @@ export default function QuizPage() {
                                                 key={index}
                                                 onClick={() => setSelectedOption(option)}
                                                 onKeyDown={handleKeyPress}
-                                                className={`px-6 py-4 text-2xl rounded-xl border-2 transition-all ${selectedOption === option
-                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100'
+                                                className={`px-6 py-6 text-xl rounded-xl border-2 transition-all hover:scale-102 shadow-sm min-h-[80px] flex items-center justify-center ${selectedOption === option
+                                                    ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
+                                                    : 'border-gray-300 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-slate-800'
                                                     }`}
                                             >
-                                                {String.fromCharCode(65 + index)}. {option}
+                                                <span className="font-semibold">{String.fromCharCode(65 + index)}. {option}</span>
                                             </button>
                                         ))
                                     )}
@@ -458,12 +485,6 @@ export default function QuizPage() {
                     </div>
                 </div>
             )}
-
-            {/* Confetti Effect */}
-            <ConfettiEffect
-                isVisible={showConfetti}
-                onComplete={() => setShowConfetti(false)}
-            />
         </div>
     );
 }

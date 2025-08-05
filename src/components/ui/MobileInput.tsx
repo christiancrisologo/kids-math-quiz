@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 interface MobileInputProps {
     type?: 'text' | 'number' | 'email';
@@ -14,7 +14,7 @@ interface MobileInputProps {
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export const MobileInput: React.FC<MobileInputProps> = ({
+export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(({
     type = 'text',
     placeholder,
     value,
@@ -26,7 +26,7 @@ export const MobileInput: React.FC<MobileInputProps> = ({
     inputMode,
     className = '',
     onKeyDown
-}) => {
+}, ref) => {
     return (
         <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
             {label && (
@@ -35,6 +35,7 @@ export const MobileInput: React.FC<MobileInputProps> = ({
                 </label>
             )}
             <input
+                ref={ref}
                 type={type}
                 placeholder={placeholder}
                 value={value}
@@ -62,4 +63,6 @@ export const MobileInput: React.FC<MobileInputProps> = ({
             )}
         </div>
     );
-};
+});
+
+MobileInput.displayName = 'MobileInput';

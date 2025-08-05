@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useIsMobile } from '../../utils/responsive';
 
 interface FractionInputProps {
@@ -9,13 +9,13 @@ interface FractionInputProps {
     fullWidth?: boolean;
 }
 
-export const FractionInput: React.FC<FractionInputProps> = ({
+export const FractionInput = forwardRef<HTMLInputElement, FractionInputProps>(({
     value,
     onChange,
     placeholder = "Enter fraction (e.g., 3/4 or 1 2/3)",
     error,
     fullWidth = false
-}) => {
+}, ref) => {
     const isMobile = useIsMobile();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +26,7 @@ export const FractionInput: React.FC<FractionInputProps> = ({
         <div className={`${fullWidth ? 'w-full' : ''}`}>
             <div className="relative">
                 <input
+                    ref={ref}
                     type="text"
                     value={value}
                     onChange={handleInputChange}
@@ -56,4 +57,6 @@ export const FractionInput: React.FC<FractionInputProps> = ({
             )}
         </div>
     );
-};
+});
+
+FractionInput.displayName = 'FractionInput';

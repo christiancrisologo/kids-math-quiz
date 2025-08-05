@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 interface ConfettiProps {
     isVisible: boolean;
     onComplete?: () => void;
+    intensity?: 'low' | 'medium' | 'high'; // New prop for different intensities
 }
 
-export const ConfettiEffect: React.FC<ConfettiProps> = ({ isVisible, onComplete }) => {
+export const ConfettiEffect: React.FC<ConfettiProps> = ({ isVisible, onComplete, intensity = 'medium' }) => {
     const [particles, setParticles] = useState<Array<{
         id: number;
         x: number;
@@ -22,7 +23,19 @@ export const ConfettiEffect: React.FC<ConfettiProps> = ({ isVisible, onComplete 
         const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
         const emojis = ['⭐', '🎉', '🌟', '✨', '🎊', '🎈', '🎁', '🏆'];
 
-        const newParticles = Array.from({ length: 20 }, (_, i) => ({
+        // Determine particle count based on intensity
+        const getParticleCount = () => {
+            switch (intensity) {
+                case 'low': return 10;
+                case 'medium': return 20;
+                case 'high': return 40;
+                default: return 20;
+            }
+        };
+
+        const particleCount = getParticleCount();
+
+        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
             id: i,
             x: Math.random() * window.innerWidth,
             y: -10,
@@ -34,7 +47,17 @@ export const ConfettiEffect: React.FC<ConfettiProps> = ({ isVisible, onComplete 
 
         setParticles(newParticles);
 
-        const animationDuration = 3000;
+        // Determine animation duration based on intensity
+        const getAnimationDuration = () => {
+            switch (intensity) {
+                case 'low': return 2500;
+                case 'medium': return 3000;
+                case 'high': return 4000;
+                default: return 3000;
+            }
+        };
+
+        const animationDuration = getAnimationDuration();
         const interval = setInterval(() => {
             setParticles(prevParticles =>
                 prevParticles.map(particle => ({
@@ -56,7 +79,7 @@ export const ConfettiEffect: React.FC<ConfettiProps> = ({ isVisible, onComplete 
             clearInterval(interval);
             clearTimeout(timeout);
         };
-    }, [isVisible, onComplete]);
+    }, [isVisible, onComplete, intensity]);
 
     if (!isVisible) return null;
 
