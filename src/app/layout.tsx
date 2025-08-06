@@ -4,6 +4,7 @@ import "./globals.css";
 import "../styles/mobile.css";
 import "../styles/themes.css";
 import { ThemeProvider } from "../contexts/theme-context";
+import { SystemSettingsProvider } from "../contexts/system-settings-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,8 +43,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full touch-manipulation bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100`}
       >
-        <ThemeProvider>
-          {children}
+        <ThemeProvider defaultTheme="system">
+          <SystemSettingsProvider>
+            {children}
+          </SystemSettingsProvider>
         </ThemeProvider>
       </body>
     </html>

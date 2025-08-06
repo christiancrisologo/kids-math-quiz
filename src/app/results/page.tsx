@@ -5,14 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
-import { ConfettiEffect } from '../../components/ui/ConfettiEffect';
-import { playSound } from '../../utils/sounds';
+import { EnhancedConfettiEffect } from '../../components/ui/EnhancedConfettiEffect';
+import { playSound } from '../../utils/enhanced-sounds';
+import { useSystemSettings } from '../../contexts/system-settings-context';
+import { animationClasses } from '../../utils/enhanced-animations';
 import { checkAchievements } from '../../utils/achievements';
 import { generateQuestions } from '../../utils/math/question-generator';
 
 export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
+    const { settings: systemSettings } = useSystemSettings();
     const { settings, questions, resetQuiz, bestStreak, retryQuiz } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
@@ -23,7 +26,7 @@ export default function ResultsPage() {
             router.push('/');
         } else {
             // Play completion sound when results load
-            setTimeout(() => playSound('completion'), 500);
+            setTimeout(() => playSound('completion', systemSettings), 500);
 
             // Show confetti with a slight delay for better effect
             setTimeout(() => setShowConfetti(true), 800);
@@ -99,7 +102,7 @@ export default function ResultsPage() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 dark:from-emerald-900 dark:via-blue-800 dark:to-violet-900 flex items-center justify-center p-4">
                 <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto"></div>
+                    <div className={`${animationClasses.spin(systemSettings)} rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto`}></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">Loading results...</p>
                 </div>
             </div>
@@ -123,10 +126,10 @@ export default function ResultsPage() {
                     </div>
 
                     {/* Score Summary */}
-                    <div className={`bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 dark:from-yellow-900/30 dark:via-pink-900/30 dark:to-purple-900/30 rounded-2xl text-center mb-8 animate-float border-4 border-gradient-to-r from-rainbow-200 to-rainbow-400 ${isMobile ? 'p-6' : 'p-8'
+                    <div className={`bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 dark:from-yellow-900/30 dark:via-pink-900/30 dark:to-purple-900/30 rounded-2xl text-center mb-8 ${animationClasses.float(systemSettings)} border-4 border-gradient-to-r from-rainbow-200 to-rainbow-400 ${isMobile ? 'p-6' : 'p-8'
                         }`}>
-                        <div className={`mb-4 ${isMobile ? 'text-4xl' : 'text-6xl'} animate-bounce-gentle`}>{gradeInfo.emoji}</div>
-                        <div className={`font-bold text-gray-800 dark:text-gray-200 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'} animate-shimmer`}>
+                        <div className={`mb-4 ${isMobile ? 'text-4xl' : 'text-6xl'} ${animationClasses.bounceGentle(systemSettings)}`}>{gradeInfo.emoji}</div>
+                        <div className={`font-bold text-gray-800 dark:text-gray-200 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'} ${animationClasses.shimmer(systemSettings)}`}>
                             {correctAnswers} / {totalQuestions}
                         </div>
                         <div className={`font-semibold text-purple-600 dark:text-purple-400 mb-3 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
@@ -159,7 +162,7 @@ export default function ResultsPage() {
                                     className={`rounded-lg border-2 ${question.isCorrect
                                         ? 'border-green-300 dark:border-green-600 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
                                         : 'border-red-300 dark:border-red-600 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20'
-                                        } ${isMobile ? 'p-3' : 'p-4'} animate-bounce-gentle hover:shadow-lg transition-all duration-200`}
+                                        } ${isMobile ? 'p-3' : 'p-4'} ${animationClasses.bounceGentle(systemSettings)} hover:shadow-lg transition-all duration-200`}
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     {isMobile ? (
@@ -246,7 +249,7 @@ export default function ResultsPage() {
                                 {achievements.map((achievement, index) => (
                                     <div
                                         key={achievement.id}
-                                        className="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 text-center border-2 border-yellow-300 dark:border-yellow-600 animate-bounce-gentle"
+                                        className={`bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 text-center border-2 border-yellow-300 dark:border-yellow-600 ${animationClasses.bounceGentle(systemSettings)}`}
                                         style={{ animationDelay: `${index * 0.2}s` }}
                                     >
                                         <div className="text-2xl mb-1">{achievement.emoji}</div>
@@ -304,7 +307,7 @@ export default function ResultsPage() {
             </div>
 
             {/* Confetti Effect for all results with dynamic intensity */}
-            <ConfettiEffect
+            <EnhancedConfettiEffect
                 isVisible={showConfetti}
                 intensity={getConfettiIntensity(percentage)}
                 onComplete={() => setShowConfetti(false)}
@@ -312,7 +315,7 @@ export default function ResultsPage() {
 
             {/* Bonus confetti for exceptional performance (90%+) */}
             {percentage >= 90 && (
-                <ConfettiEffect
+                <EnhancedConfettiEffect
                     isVisible={showBonusConfetti}
                     intensity="high"
                     onComplete={() => setShowBonusConfetti(false)}
