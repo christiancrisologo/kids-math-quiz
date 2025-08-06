@@ -1,24 +1,25 @@
 1:"$Sreact.fragment"
-2:I[2905,["177","static/chunks/app/layout-d85683c46f37ed67.js"],"ThemeProvider"]
-3:I[7555,[],""]
-4:I[1295,[],""]
-5:I[9543,["345","static/chunks/app/not-found-20705e5ad5890874.js"],"default"]
-6:I[894,[],"ClientPageRoot"]
-7:I[4631,["595","static/chunks/595-10c2f84bd8f65f39.js","751","static/chunks/751-236d8596ed9a5330.js","139","static/chunks/app/results/page-ccca73fe118883e9.js"],"default"]
-a:I[9665,[],"OutletBoundary"]
-c:I[4911,[],"AsyncMetadataOutlet"]
-e:I[9665,[],"ViewportBoundary"]
-10:I[9665,[],"MetadataBoundary"]
-11:"$Sreact.suspense"
-13:I[8393,[],""]
+2:I[2905,["177","static/chunks/app/layout-5d150f9354e1a04b.js"],"ThemeProvider"]
+3:I[2325,["177","static/chunks/app/layout-5d150f9354e1a04b.js"],"SystemSettingsProvider"]
+4:I[7555,[],""]
+5:I[1295,[],""]
+6:I[9543,["345","static/chunks/app/not-found-20705e5ad5890874.js"],"default"]
+7:I[894,[],"ClientPageRoot"]
+8:I[5056,["595","static/chunks/595-10c2f84bd8f65f39.js","580","static/chunks/580-8b0692e0e6eda6e7.js","688","static/chunks/688-73610fbc3758a5b8.js","139","static/chunks/app/results/page-80875dd80aabf6f8.js"],"default"]
+b:I[9665,[],"OutletBoundary"]
+d:I[4911,[],"AsyncMetadataOutlet"]
+f:I[9665,[],"ViewportBoundary"]
+11:I[9665,[],"MetadataBoundary"]
+12:"$Sreact.suspense"
+14:I[8393,[],""]
 :HL["/kids-math-quiz/_next/static/media/569ce4b8f30dc480-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/kids-math-quiz/_next/static/media/93f479601ee12b01-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/kids-math-quiz/_next/static/css/3bd6536df215fc7a.css","style"]
-0:{"P":null,"b":"FnU_v0w1VsixarTqwB4NN","p":"/kids-math-quiz","c":["","results",""],"i":false,"f":[[["",{"children":["results",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/kids-math-quiz/_next/static/css/3bd6536df215fc7a.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"h-full","children":[["$","head",null,{"children":[["$","meta",null,{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}],["$","meta",null,{"name":"theme-color","content":"#8B5CF6"}],["$","meta",null,{"name":"mobile-web-app-capable","content":"yes"}],["$","meta",null,{"name":"apple-mobile-web-app-capable","content":"yes"}],["$","meta",null,{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","meta",null,{"name":"apple-mobile-web-app-title","content":"Math Quiz"}]]}],["$","body",null,{"className":"__variable_062e44 __variable_fb7b13 antialiased h-full touch-manipulation bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100","children":["$","$L2",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$L5",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]]}]]}],{"children":["results",["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L6",null,{"Component":"$7","searchParams":{},"params":{},"promises":["$@8","$@9"]}],null,["$","$La",null,{"children":["$Lb",["$","$Lc",null,{"promise":"$@d"}]]}]]}],{},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$Le",null,{"children":"$Lf"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L10",null,{"children":["$","div",null,{"hidden":true,"children":["$","$11",null,{"fallback":null,"children":"$L12"}]}]}]]}],false]],"m":"$undefined","G":["$13",[]],"s":false,"S":true}
-8:{}
-9:"$0:f:0:1:2:children:2:children:1:props:children:0:props:params"
-f:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-b:null
-14:I[8175,[],"IconMark"]
-d:{"metadata":[["$","title","0",{"children":"Math Quiz App - Mobile-Friendly Math Practice"}],["$","meta","1",{"name":"description","content":"A fun and interactive mobile-optimized math quiz application for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","link","3",{"rel":"apple-touch-icon","href":"/apple-touch-icon.png"}],["$","$L14","4",{}]],"error":null,"digest":"$undefined"}
-12:"$d:metadata"
+:HL["/kids-math-quiz/_next/static/css/f3fe54c2194f5e88.css","style"]
+0:{"P":null,"b":"nnRC-a8NsDRhtW5Xixg-g","p":"/kids-math-quiz","c":["","results",""],"i":false,"f":[[["",{"children":["results",{"children":["__PAGE__",{}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/kids-math-quiz/_next/static/css/f3fe54c2194f5e88.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"h-full","children":[["$","head",null,{"children":[["$","meta",null,{"name":"viewport","content":"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}],["$","meta",null,{"name":"theme-color","content":"#8B5CF6"}],["$","meta",null,{"name":"mobile-web-app-capable","content":"yes"}],["$","meta",null,{"name":"apple-mobile-web-app-capable","content":"yes"}],["$","meta",null,{"name":"apple-mobile-web-app-status-bar-style","content":"default"}],["$","meta",null,{"name":"apple-mobile-web-app-title","content":"Math Quiz"}]]}],["$","body",null,{"className":"__variable_062e44 __variable_fb7b13 antialiased h-full touch-manipulation bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100","children":["$","$L2",null,{"defaultTheme":"system","children":["$","$L3",null,{"children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[["$","$L6",null,{}],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]}]}]]}]]}],{"children":["results",["$","$1","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":[["$","$L7",null,{"Component":"$8","searchParams":{},"params":{},"promises":["$@9","$@a"]}],null,["$","$Lb",null,{"children":["$Lc",["$","$Ld",null,{"promise":"$@e"}]]}]]}],{},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$Lf",null,{"children":"$L10"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$L11",null,{"children":["$","div",null,{"hidden":true,"children":["$","$12",null,{"fallback":null,"children":"$L13"}]}]}]]}],false]],"m":"$undefined","G":["$14",[]],"s":false,"S":true}
+9:{}
+a:"$0:f:0:1:2:children:2:children:1:props:children:0:props:params"
+10:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+c:null
+15:I[8175,[],"IconMark"]
+e:{"metadata":[["$","title","0",{"children":"Math Quiz App - Mobile-Friendly Math Practice"}],["$","meta","1",{"name":"description","content":"A fun and interactive mobile-optimized math quiz application for kids to practice addition, subtraction, multiplication, division, and algebraic expressions with one-handed navigation"}],["$","link","2",{"rel":"manifest","href":"/manifest.json","crossOrigin":"$undefined"}],["$","link","3",{"rel":"apple-touch-icon","href":"/apple-touch-icon.png"}],["$","$L15","4",{}]],"error":null,"digest":"$undefined"}
+13:"$e:metadata"
