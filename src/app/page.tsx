@@ -9,6 +9,9 @@ import { MobileButton } from '../components/ui/MobileButton';
 import { MobileTile } from '../components/ui/MobileTile';
 import { MobileInput } from '../components/ui/MobileInput';
 import { ThemeToggle } from '../components/theme/ThemeToggle';
+import { SystemSettingsPanel } from '../components/ui/SystemSettings';
+import { useSystemSettings } from '../contexts/system-settings-context';
+import { animationClasses } from '../utils/enhanced-animations';
 import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
 
@@ -16,6 +19,7 @@ export default function Home() {
   const router = useRouter();
   const { updateSettings, setQuestions } = useQuizStore();
   const isMobile = useIsMobile();
+  const { settings: systemSettings } = useSystemSettings();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -187,7 +191,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-cyan-400 dark:from-purple-900 dark:via-blue-900 dark:to-pink-900">
       <div className={`flex items-center justify-center ${isMobile ? 'p-4 pt-8' : 'p-4'} min-h-screen`}>
         <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
-          } ${isMobile ? 'p-4' : 'p-6'} relative animate-float`}>
+          } ${isMobile ? 'p-4' : 'p-6'} relative ${animationClasses.float(systemSettings)}`}>
 
           {/* Header */}
           <div className="text-center mb-6">
@@ -250,7 +254,7 @@ export default function Home() {
 
           {/* Settings Accordion */}
           {showSettings && (
-            <div className="space-y-3 animate-float mb-4">
+            <div className={`space-y-3 ${animationClasses.float(systemSettings)} mb-4`}>
               {/* Difficulty Level */}
               <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
@@ -427,15 +431,8 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Display Mode */}
-              <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20 rounded-xl p-3">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
-                  🌙 Display Mode
-                </h3>
-                <div className="flex items-center justify-center">
-                  <ThemeToggle size={isMobile ? 'md' : 'lg'} />
-                </div>
-              </div>
+              {/* System Settings */}
+              <SystemSettingsPanel isMobile={isMobile} />
             </div>
           )}
 

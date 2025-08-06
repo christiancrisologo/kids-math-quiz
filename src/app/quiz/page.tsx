@@ -9,11 +9,15 @@ import { MobileTile } from '../../components/ui/MobileTile';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
 import { FunProgressBar } from '../../components/ui/FunProgressBar';
-import { playSound, vibrate } from '../../utils/sounds';
+import { playSound, vibrate } from '../../utils/enhanced-sounds';
+import { useSystemSettings } from '../../contexts/system-settings-context';
+import { animationClasses } from '../../utils/enhanced-animations';
+import { useQuestionTransition, getBlockingOverlayClasses } from '../../utils/question-transitions';
 
 export default function QuizPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
+    const { settings: systemSettings } = useSystemSettings();
     const {
         settings,
         questions,
@@ -43,6 +47,14 @@ export default function QuizPage() {
     const inputRef = useRef<HTMLInputElement>(null);
     const fractionInputRef = useRef<HTMLInputElement>(null);
 
+    // Question transition animations
+    const {
+        transitionClasses,
+        isUserInteractionBlocked,
+        animationKey,
+        animationPhase
+    } = useQuestionTransition(currentQuestionIndex, systemSettings.animations);
+
     const currentQuestion = questions[currentQuestionIndex];
 
     // Helper functions to check question types
@@ -57,16 +69,26 @@ export default function QuizPage() {
         }
     }, [questions, isQuizActive, isQuizCompleted, startQuiz]);
 
-    // Timer logic
+    // Clear all inputs and selections when question changes
     useEffect(() => {
-        if (!isQuizActive || timeRemaining <= 0) return;
+        setUserInput('');
+        setUserFractionInput('');
+        setSelectedOption(null);
+        setSelectedFractionOption(null);
+        setSelectedCurrencyOption(null);
+        setSelectedTimeOption(null);
+    }, [currentQuestionIndex]);
+
+    // Timer logic - pause during animations
+    useEffect(() => {
+        if (!isQuizActive || timeRemaining <= 0 || isUserInteractionBlocked) return;
 
         const timer = setInterval(() => {
             setTimeRemaining(timeRemaining - 1);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [isQuizActive, timeRemaining, setTimeRemaining]);
+    }, [isQuizActive, timeRemaining, setTimeRemaining, isUserInteractionBlocked]);
 
     // Auto-advance when timer reaches 0
     useEffect(() => {
@@ -104,6 +126,57 @@ export default function QuizPage() {
             }, 100); // Small delay to ensure rendering is complete
         }
     }, [currentQuestion, isQuizActive, settings.questionType, isFractionQuestion]);
+
+    // Global Enter key handler
+    useEffect(() => {
+        const handleGlobalKeyPress = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' && !isUserInteractionBlocked && isQuizActive) {
+                // Check if user can submit based on question type
+                let canSubmit = false;
+
+                if (isFractionQuestion) {
+                    canSubmit = settings.questionType === 'expression'
+                        ? userFractionInput.trim().length > 0
+                        : selectedFractionOption !== null;
+                } else if (isCurrencyQuestion) {
+                    canSubmit = settings.questionType === 'expression'
+                        ? userInput.trim().length > 0
+                        : selectedCurrencyOption !== null;
+                } else if (isTimeQuestion) {
+                    canSubmit = settings.questionType === 'expression'
+                        ? userInput.trim().length > 0
+                        : selectedTimeOption !== null;
+                } else {
+                    // Regular questions (integers, decimals)
+                    canSubmit = settings.questionType === 'expression'
+                        ? userInput.trim().length > 0
+                        : selectedOption !== null;
+                }
+
+                if (canSubmit) {
+                    e.preventDefault();
+                    handleSubmitAnswer();
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyPress);
+        return () => window.removeEventListener('keydown', handleGlobalKeyPress);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        isUserInteractionBlocked,
+        isQuizActive,
+        isFractionQuestion,
+        isCurrencyQuestion,
+        isTimeQuestion,
+        settings.questionType,
+        userInput,
+        userFractionInput,
+        selectedOption,
+        selectedFractionOption,
+        selectedCurrencyOption,
+        selectedTimeOption
+    ]);
 
     const handleTimeUp = () => {
         // Submit empty/null answer when time runs out
@@ -197,11 +270,11 @@ export default function QuizPage() {
 
                 // Show visual and audio feedback
                 if (isCorrect) {
-                    playSound('correct');
-                    vibrate([100, 50, 100]);
+                    playSound('correct', systemSettings);
+                    vibrate([100, 50, 100], systemSettings);
                 } else {
-                    playSound('incorrect');
-                    vibrate(200);
+                    playSound('incorrect', systemSettings);
+                    vibrate(200, systemSettings);
                 }
             }, 100);
         }
@@ -216,7 +289,7 @@ export default function QuizPage() {
 
         if (currentQuestionIndex >= questions.length - 1) {
             setTimeout(() => {
-                playSound('completion');
+                playSound('completion', systemSettings);
                 completeQuiz();
             }, 1500);
         } else {
@@ -238,15 +311,28 @@ export default function QuizPage() {
 
     // Handle Enter key press
     const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            // Check if user can submit
-            const canSubmit = isFractionQuestion
-                ? (settings.questionType === 'expression'
-                    ? userFractionInput.trim()
-                    : selectedFractionOption !== null)
-                : (settings.questionType === 'expression'
-                    ? userInput.trim()
-                    : selectedOption !== null);
+        if (e.key === 'Enter' && !isUserInteractionBlocked) {
+            // Check if user can submit based on question type
+            let canSubmit = false;
+
+            if (isFractionQuestion) {
+                canSubmit = settings.questionType === 'expression'
+                    ? userFractionInput.trim().length > 0
+                    : selectedFractionOption !== null;
+            } else if (isCurrencyQuestion) {
+                canSubmit = settings.questionType === 'expression'
+                    ? userInput.trim().length > 0
+                    : selectedCurrencyOption !== null;
+            } else if (isTimeQuestion) {
+                canSubmit = settings.questionType === 'expression'
+                    ? userInput.trim().length > 0
+                    : selectedTimeOption !== null;
+            } else {
+                // Regular questions (integers, decimals)
+                canSubmit = settings.questionType === 'expression'
+                    ? userInput.trim().length > 0
+                    : selectedOption !== null;
+            }
 
             if (canSubmit) {
                 handleSubmitAnswer();
@@ -258,7 +344,7 @@ export default function QuizPage() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-red-500 to-purple-600 dark:from-indigo-900 dark:via-purple-800 dark:to-pink-900 flex items-center justify-center p-4">
                 <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto"></div>
+                    <div className={`${animationClasses.spin(systemSettings)} rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto`}></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">Loading quiz...</p>
                 </div>
             </div>
@@ -279,7 +365,7 @@ export default function QuizPage() {
                                 {currentQuestionIndex + 1}/{questions.length}
                             </span>
                             <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
-                                ? 'text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 animate-pulse'
+                                ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
                                 : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
                                 }`}>
                                 ⏰ {timeRemaining}s
@@ -304,7 +390,7 @@ export default function QuizPage() {
                         </div>
 
                         {/* Question Card */}
-                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 flex-1 flex items-center justify-center animate-bounce-gentle">
+                        <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 flex-1 flex items-center justify-center ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">
                                     {currentQuestion.variable ? (
@@ -320,7 +406,7 @@ export default function QuizPage() {
                         </div>
 
                         {/* Mobile Answer Area - Bottom Sheet Style */}
-                        <div className="bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8" onKeyDown={handleKeyPress}>
+                        <div className={`bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`} onKeyDown={handleKeyPress}>
                             {settings.questionType === 'expression' ? (
                                 <div className="space-y-4">
                                     {isFractionQuestion ? (
@@ -441,7 +527,7 @@ export default function QuizPage() {
                                 <span className="text-sm text-gray-600 dark:text-gray-400">
                                     Question {currentQuestionIndex + 1} of {questions.length}
                                 </span>
-                                <div className={`text-2xl font-bold ${timeRemaining <= 5 ? 'text-red-500 dark:text-red-400 animate-pulse' : 'text-purple-600 dark:text-purple-400'}`}>
+                                <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
                                     ⏰ {timeRemaining}s
                                 </div>
                             </div>
@@ -456,7 +542,7 @@ export default function QuizPage() {
 
                         {/* Question */}
                         <div className="text-center mb-8">
-                            <div className="text-5xl font-bold text-gray-800 dark:text-gray-200 mb-6 p-6 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                            <div key={animationKey} className={`text-5xl font-bold text-gray-800 dark:text-gray-200 mb-6 p-6 bg-gray-50 dark:bg-slate-800 rounded-xl ${transitionClasses}`}>
                                 {currentQuestion.variable ? (
                                     <div>
                                         <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
@@ -469,7 +555,7 @@ export default function QuizPage() {
                         </div>
 
                         {/* Answer Input */}
-                        <div className="mb-8">
+                        <div className={`mb-8 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`}>
                             {settings.questionType === 'expression' ? (
                                 <div>
                                     {isFractionQuestion ? (
