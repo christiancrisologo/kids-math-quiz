@@ -23,7 +23,7 @@ export const getRandomTransition = (): TransitionConfig => {
 };
 
 // CSS classes for smooth transitions without freeze
-export const getTransitionClasses = (config: TransitionConfig, animationPhase: 'idle' | 'exiting' | 'entering', animationKey: string) => {
+export const getTransitionClasses = (config: TransitionConfig, animationPhase: 'idle' | 'exiting' | 'entering') => {
     const baseClasses = 'transition-all duration-1000 ease-in-out';
     
     switch (animationPhase) {
@@ -117,7 +117,7 @@ export const useQuestionTransition = (
     }, [currentQuestionIndex, animationsEnabled]);
 
     return {
-        transitionClasses: getTransitionClasses(transitionConfig, animationPhase, animationKey),
+        transitionClasses: getTransitionClasses(transitionConfig, animationPhase),
         isUserInteractionBlocked,
         transitionConfig,
         animationKey,

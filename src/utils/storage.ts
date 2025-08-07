@@ -92,7 +92,7 @@ export const gameHistoryStorage = {
       if (!stored) return [];
       
       const parsed = JSON.parse(stored);
-      return parsed.map((result: any) => ({
+      return parsed.map((result: GameResult) => ({
         ...result,
         completedAt: new Date(result.completedAt)
       }));
