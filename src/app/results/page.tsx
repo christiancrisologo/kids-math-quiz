@@ -16,7 +16,7 @@ export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
-    const { settings, questions, resetQuiz, bestStreak, retryQuiz } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
@@ -27,6 +27,12 @@ export default function ResultsPage() {
         } else {
             // Play completion sound when results load
             setTimeout(() => playSound('completion', systemSettings), 500);
+            // Save the game result
+            try {
+                saveGameResult();
+            } catch (error) {
+                console.error('Failed to save game result:', error);
+            }
 
             // Show confetti with a slight delay for better effect
             setTimeout(() => setShowConfetti(true), 800);
@@ -283,7 +289,7 @@ export default function ResultsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className={`space-y-4 ${!isMobile ? 'md:grid md:grid-cols-2 md:gap-4 md:space-y-0' : ''}`}>
+                    <div className={`space-y-4 ${!isMobile ? 'md:grid md:grid-cols-3 md:gap-4 md:space-y-0' : ''}`}>
                         <MobileButton
                             variant="secondary"
                             size="lg"
@@ -294,11 +300,20 @@ export default function ResultsPage() {
                             Try Again
                         </MobileButton>
                         <MobileButton
+                            variant="secondary"
+                            size="lg"
+                            fullWidth
+                            onClick={() => router.push('/history')}
+                            icon="📊"
+                        >
+                            View History
+                        </MobileButton>
+                        <MobileButton
                             variant="primary"
                             size="lg"
                             fullWidth
                             onClick={handleNewQuiz}
-                            icon="�"
+                            icon="🏠"
                         >
                             Back to Home
                         </MobileButton>

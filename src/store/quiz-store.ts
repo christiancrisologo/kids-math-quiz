@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
+import { userPreferencesStorage, gameHistoryStorage, GameResult } from '../utils/storage';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
@@ -62,6 +63,12 @@ export interface QuizState {
   completeQuiz: () => void;
   resetQuiz: () => void;
   retryQuiz: (questions: Question[]) => void;
+  
+  // Persistence actions
+  loadUserPreferences: () => void;
+  saveUserPreferences: () => void;
+  saveGameResult: () => GameResult | null;
+  clearUserData: () => void;
 }
 
 const defaultSettings: QuizSettings = {
@@ -263,4 +270,70 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       currentStreak: 0,
       // Note: we keep bestStreak to maintain the user's record
     }),
+
+  // Persistence methods
+  loadUserPreferences: () => {
+    const preferences = userPreferencesStorage.load();
+    if (preferences) {
+      set((state) => ({
+        settings: { ...state.settings, ...preferences.settings }
+      }));
+    }
+  },
+
+  saveUserPreferences: () => {
+    const state = get();
+    userPreferencesStorage.save({
+      username: state.settings.username,
+      settings: state.settings,
+      lastUpdated: new Date()
+    });
+  },
+
+  saveGameResult: () => {
+    const state = get();
+    
+    // Only save if quiz is completed and has questions
+    if (!state.isQuizCompleted || state.questions.length === 0) {
+      return null;
+    }
+
+    const correctAnswers = state.questions.filter(q => q.isCorrect).length;
+    const totalQuestions = state.questions.length;
+    const score = Math.round((correctAnswers / totalQuestions) * 100);
+    const totalTimeSpent = state.questions.reduce((total, q) => total + (q.timeSpent || 0), 0);
+
+    const gameResult = gameHistoryStorage.save({
+      username: state.settings.username,
+      settings: state.settings,
+      questions: state.questions.map(q => ({
+        question: q.question,
+        correctAnswer: q.fractionAnswer || q.answer.toString(),
+        userAnswer: q.userFractionAnswer || q.userAnswer?.toString() || '',
+        isCorrect: q.isCorrect || false,
+        timeSpent: q.timeSpent || 0
+      })),
+      totalQuestions,
+      correctAnswers,
+      score,
+      timeSpent: totalTimeSpent
+    });
+
+    return gameResult;
+  },
+
+  clearUserData: () => {
+    userPreferencesStorage.clear();
+    gameHistoryStorage.clear();
+    set({
+      settings: defaultSettings,
+      questions: [],
+      currentQuestionIndex: 0,
+      timeRemaining: defaultSettings.timerPerQuestion,
+      isQuizActive: false,
+      isQuizCompleted: false,
+      currentStreak: 0,
+      bestStreak: 0,
+    });
+  },
 }));

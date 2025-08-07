@@ -17,7 +17,7 @@ import type { Difficulty, QuestionType, MathOperation, NumberType } from '../sto
 
 export default function Home() {
   const router = useRouter();
-  const { updateSettings, setQuestions } = useQuizStore();
+  const { updateSettings, setQuestions, settings, loadUserPreferences, saveUserPreferences } = useQuizStore();
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
 
@@ -35,14 +35,50 @@ export default function Home() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
 
-  // Apply primary school preset on component mount
+  // Apply primary school preset on component mount and load saved preferences
   useEffect(() => {
-    const presetSettings = applyYearLevelPreset('primary');
-    setFormData(prev => ({
-      ...prev,
-      ...presetSettings
-    }));
+    // First load any saved preferences
+    loadUserPreferences();
+
+    // Also log what's currently in localStorage for debugging (browser only)
+    if (typeof window !== 'undefined') {
+      console.log('localStorage check:', {
+        userPreferences: localStorage.getItem('userPreferences'),
+        gameHistory: localStorage.getItem('gameHistory')
+      });
+    }
   }, []); // Empty dependency array means this runs once on mount
+
+  // Sync form data with loaded settings from store, or apply defaults if no saved data
+  useEffect(() => {
+    // Check if we have any meaningful saved settings (not just default values)
+    const hasSavedSettings = settings.username && settings.username.trim() !== '';
+
+    console.log('Loading preferences:', { settings, hasSavedSettings }); // Debug log
+
+    if (hasSavedSettings) {
+      console.log('Using saved settings from localStorage'); // Debug log
+      // Use saved settings
+      setFormData(prev => ({
+        ...prev,
+        username: settings.username || prev.username,
+        difficulty: settings.difficulty || prev.difficulty,
+        numberOfQuestions: settings.numberOfQuestions || prev.numberOfQuestions,
+        timerPerQuestion: settings.timerPerQuestion || prev.timerPerQuestion,
+        questionType: settings.questionType || prev.questionType,
+        mathOperations: settings.mathOperations?.length ? settings.mathOperations : prev.mathOperations,
+        numberTypes: settings.numberTypes?.length ? settings.numberTypes : prev.numberTypes,
+      }));
+    } else {
+      console.log('No saved settings found, applying primary school preset'); // Debug log
+      // No saved settings, apply primary school preset as default
+      const presetSettings = applyYearLevelPreset('primary');
+      setFormData(prev => ({
+        ...prev,
+        ...presetSettings
+      }));
+    }
+  }, [settings]); // Run when settings change
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -170,8 +206,13 @@ export default function Home() {
       return;
     }
 
+    console.log('Saving user preferences:', formData); // Debug log
+
     // Update store with settings
     updateSettings(formData);
+
+    // Save preferences to localStorage
+    saveUserPreferences();
 
     // Generate questions
     const questions = generateQuestions(
@@ -446,6 +487,19 @@ export default function Home() {
               icon="🚀"
             >
               Start Quiz!
+            </MobileButton>
+          </div>
+
+          {/* View History Button */}
+          <div className="mt-3">
+            <MobileButton
+              variant="secondary"
+              size="lg"
+              fullWidth
+              onClick={() => router.push('/history')}
+              icon="📊"
+            >
+              View History
             </MobileButton>
           </div>
         </div>
