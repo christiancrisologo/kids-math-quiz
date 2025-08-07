@@ -9,7 +9,6 @@ import type { Theme } from '../../contexts/theme-context';
 interface SystemSettingsToggleProps {
     setting: 'animations' | 'sounds';
     title: string;
-    subtitle: string;
     icon: string;
     className?: string;
 }
@@ -18,7 +17,6 @@ export const SystemSettingsToggle: React.FC<SystemSettingsToggleProps> = ({
     setting,
     icon,
     title,
-    subtitle,
     className = ''
 }) => {
     const { settings, updateSetting } = useSystemSettings();
@@ -114,7 +112,6 @@ export const SystemSettingsPanel: React.FC<SystemSettingsPanelProps> = ({
                 <SystemSettingsToggle
                     setting="animations"
                     title="Animations"
-                    subtitle="Visual effects & transitions"
                     icon="✨"
                 />
 
@@ -122,7 +119,6 @@ export const SystemSettingsPanel: React.FC<SystemSettingsPanelProps> = ({
                 <SystemSettingsToggle
                     setting="sounds"
                     title="Sounds"
-                    subtitle="Audio feedback & effects"
                     icon="🔊"
                 />
             </div>

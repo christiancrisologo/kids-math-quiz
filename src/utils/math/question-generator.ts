@@ -13,8 +13,7 @@ import {
   generateCurrencyMultiplication,
   generateCurrencyDivision,
   generateCurrencyOptions,
-  formatCurrency,
-  parseCurrency
+  formatCurrency
 } from './currency-utils';
 import {
   generateTimeAddition,

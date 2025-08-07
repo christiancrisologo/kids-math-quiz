@@ -37,7 +37,7 @@ export default function ResultsPage() {
             // Show confetti with a slight delay for better effect
             setTimeout(() => setShowConfetti(true), 800);
         }
-    }, [questions.length, router]);
+    }, [questions.length, router, saveGameResult, systemSettings]);
 
     // Show bonus confetti for exceptional performance
     useEffect(() => {
