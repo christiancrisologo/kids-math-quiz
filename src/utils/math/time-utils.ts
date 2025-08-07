@@ -162,7 +162,7 @@ export const generateTimeSubtractionHours = (difficulty: 'easy' | 'hard'): TimeR
 };
 
 // Generate multiple choice options for time
-export const generateTimeOptions = (correctAnswer: number, isHourFormat: boolean = false): number[] => {
+export const generateTimeOptions = (correctAnswer: number): number[] => {
   const options = [correctAnswer];
   
   while (options.length < 2) { // Only 2 options as per requirements
