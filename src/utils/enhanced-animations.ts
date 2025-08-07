@@ -41,7 +41,7 @@ export const getAnimationStyles = (
 ): React.CSSProperties => {
   // If animations are disabled, remove animation properties
   if (settings && !settings.animations) {
-    const { animation, transform, transition, ...otherStyles } = animationStyles;
+    const { animation: _, transform: __, transition: ___, ...otherStyles } = animationStyles;
     return otherStyles;
   }
   
@@ -49,7 +49,7 @@ export const getAnimationStyles = (
   if (typeof window !== 'undefined') {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-      const { animation, transform, transition, ...otherStyles } = animationStyles;
+      const { animation: _, transform: __, transition: ___, ...otherStyles } = animationStyles;
       return otherStyles;
     }
   }

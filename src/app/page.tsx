@@ -8,7 +8,6 @@ import { useIsMobile } from '../utils/responsive';
 import { MobileButton } from '../components/ui/MobileButton';
 import { MobileTile } from '../components/ui/MobileTile';
 import { MobileInput } from '../components/ui/MobileInput';
-import { ThemeToggle } from '../components/theme/ThemeToggle';
 import { SystemSettingsPanel } from '../components/ui/SystemSettings';
 import { useSystemSettings } from '../contexts/system-settings-context';
 import { animationClasses } from '../utils/enhanced-animations';
@@ -47,7 +46,7 @@ export default function Home() {
         gameHistory: localStorage.getItem('gameHistory')
       });
     }
-  }, []); // Empty dependency array means this runs once on mount
+  }, [loadUserPreferences]); // Include loadUserPreferences in dependency array
 
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {

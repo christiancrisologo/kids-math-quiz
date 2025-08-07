@@ -52,7 +52,6 @@ export default function QuizPage() {
         transitionClasses,
         isUserInteractionBlocked,
         animationKey,
-        animationPhase
     } = useQuestionTransition(currentQuestionIndex, systemSettings.animations);
 
     const currentQuestion = questions[currentQuestionIndex];
