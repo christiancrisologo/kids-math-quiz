@@ -39,6 +39,10 @@ export default function Home() {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 5,
     incorrectAnswersEnabled: false,
+    // Overall timer settings
+    overallTimerEnabled: false,
+    overallTimerDuration: 180, // 3 minutes default
+    countdownModeEnabled: false,
   });
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
@@ -87,6 +91,10 @@ export default function Home() {
         minIncorrectAnswers: settings.minIncorrectAnswers !== undefined ? settings.minIncorrectAnswers : prev.minIncorrectAnswers,
         maxIncorrectAnswers: settings.maxIncorrectAnswers !== undefined ? settings.maxIncorrectAnswers : prev.maxIncorrectAnswers,
         incorrectAnswersEnabled: settings.incorrectAnswersEnabled !== undefined ? settings.incorrectAnswersEnabled : prev.incorrectAnswersEnabled,
+        // Overall timer settings
+        overallTimerEnabled: settings.overallTimerEnabled !== undefined ? settings.overallTimerEnabled : prev.overallTimerEnabled,
+        overallTimerDuration: settings.overallTimerDuration !== undefined ? settings.overallTimerDuration : prev.overallTimerDuration,
+        countdownModeEnabled: settings.countdownModeEnabled !== undefined ? settings.countdownModeEnabled : prev.countdownModeEnabled,
       }));
     } else {
       console.log('No saved settings found, applying primary school preset'); // Debug log
@@ -104,6 +112,10 @@ export default function Home() {
         minIncorrectAnswers: prev.minIncorrectAnswers,
         maxIncorrectAnswers: presetSettings.numberOfQuestions || prev.maxIncorrectAnswers,
         incorrectAnswersEnabled: prev.incorrectAnswersEnabled,
+        // Keep overall timer defaults
+        overallTimerEnabled: prev.overallTimerEnabled,
+        overallTimerDuration: prev.overallTimerDuration,
+        countdownModeEnabled: prev.countdownModeEnabled,
       }));
     }
   }, [settings]); // Run when settings change
@@ -385,16 +397,21 @@ export default function Home() {
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
                   🎮 Game Mechanics
                 </h3>
-                
+
                 <div className="space-y-4">
-                  {/* Number of Questions and Timer per Question - Combined Row */}
+                  {/* Timer Settings - Combined Section */}
                   <div className="bg-gradient-to-r from-green-50 to-yellow-50 dark:from-green-900/20 dark:to-yellow-900/20 rounded-xl p-3">
-                    <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
+                      ⏰ Timer Settings
+                    </h4>
+
+                    <div className="space-y-4">
+                      {/* Number of Questions */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
+                          <h5 className="font-medium text-gray-700 dark:text-gray-300 text-sm">
                             📊 Number of Questions
-                          </h4>
+                          </h5>
                           <ToggleSwitch
                             label=""
                             icon=""
@@ -414,11 +431,13 @@ export default function Home() {
                           />
                         )}
                       </div>
+
+                      {/* Timer per Question */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
-                            ⏰ Timer per Question
-                          </h4>
+                          <h5 className="font-medium text-gray-700 dark:text-gray-300 text-sm">
+                            ⏱️ Timer per Question
+                          </h5>
                           <ToggleSwitch
                             label=""
                             icon=""
@@ -438,10 +457,71 @@ export default function Home() {
                           />
                         )}
                       </div>
+
+                      {/* Overall Timer Settings */}
+                      <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h5 className="font-medium text-gray-700 dark:text-gray-300 text-sm">
+                              🕐 Overall Game Timer
+                            </h5>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Set a time limit for the entire quiz
+                            </p>
+                          </div>
+                          <ToggleSwitch
+                            label=""
+                            icon=""
+                            enabled={formData.overallTimerEnabled}
+                            onToggle={(enabled) => handleInputChange('overallTimerEnabled', enabled)}
+                          />
+                        </div>
+
+                        {formData.overallTimerEnabled && (
+                          <div className="space-y-3">
+                            {/* Overall Timer Duration */}
+                            <div>
+                              <label className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                                Duration (minutes)
+                              </label>
+                              <MobileInput
+                                type="number"
+                                label=""
+                                placeholder="Duration in minutes"
+                                value={Math.round(formData.overallTimerDuration / 60)}
+                                onChange={(value) => handleInputChange('overallTimerDuration', (parseInt(value) || 5) * 60)}
+                                inputMode="numeric"
+                              />
+                            </div>
+
+                            {/* Countdown Mode */}
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                  Countdown Mode
+                                </label>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Count down from max time to 0 (forces quiz end at 0)
+                                </p>
+                              </div>
+                              <ToggleSwitch
+                                label=""
+                                icon=""
+                                enabled={formData.countdownModeEnabled}
+                                onToggle={(enabled) => handleInputChange('countdownModeEnabled', enabled)}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
+
                     {selectedYearLevel && (
-                      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                      <div className="mt-3 text-xs text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 rounded p-2">
                         💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
+                        {yearLevelPresets[selectedYearLevel].overallTimerEnabled && (
+                          <span>, Overall timer: {Math.round(yearLevelPresets[selectedYearLevel].overallTimerDuration / 60)}min</span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -460,7 +540,7 @@ export default function Home() {
                     onValuesChange={handleCorrectAnswersChange}
                     disabled={!formData.questionsEnabled}
                   />
-                  
+
                   {/* Incorrect Answers Setting */}
                   <SliderWithToggle
                     label="Incorrect Answers Limit"
