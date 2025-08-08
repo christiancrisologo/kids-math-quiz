@@ -11,6 +11,15 @@ export interface YearLevelPreset {
   mathOperations: MathOperation[];
   numberTypes: NumberType[];
   description: string;
+  // Enhanced settings
+  timerEnabled: boolean;
+  questionsEnabled: boolean;
+  minCorrectAnswers: number;
+  maxCorrectAnswers: number;
+  correctAnswersEnabled: boolean;
+  minIncorrectAnswers: number;
+  maxIncorrectAnswers: number;
+  incorrectAnswersEnabled: boolean;
 }
 
 export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
@@ -22,7 +31,16 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     questionType: ['multiple-choice'],
     mathOperations: ['addition', 'subtraction', 'multiplication', 'division'],
     numberTypes: ['integers'],
-    description: 'Basic math for young learners'
+    description: 'Basic math for young learners',
+    // Enhanced settings - simple for primary
+    timerEnabled: true,
+    questionsEnabled: true,
+    minCorrectAnswers: 0,
+    maxCorrectAnswers: 5,
+    correctAnswersEnabled: false,
+    minIncorrectAnswers: 0,
+    maxIncorrectAnswers: 3,
+    incorrectAnswersEnabled: false,
   },
   'junior-high': {
     label: '📚 Junior High School',
@@ -32,7 +50,16 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     questionType: ['expression', 'multiple-choice'],
     mathOperations: ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'],
     numberTypes: ['integers', 'decimals', 'fractions', 'currency', 'time'],
-    description: 'Intermediate math concepts'
+    description: 'Intermediate math concepts',
+    // Enhanced settings - moderate challenge
+    timerEnabled: true,
+    questionsEnabled: true,
+    minCorrectAnswers: 0,
+    maxCorrectAnswers: 10,
+    correctAnswersEnabled: false,
+    minIncorrectAnswers: 0,
+    maxIncorrectAnswers: 5,
+    incorrectAnswersEnabled: false,
   },
   'senior-high': {
     label: '🎓 Senior High School',
@@ -42,7 +69,16 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     questionType: ['expression', 'multiple-choice'],
     mathOperations: ['addition', 'subtraction', 'multiplication', 'division', 'algebraic'],
     numberTypes: ['integers', 'decimals', 'fractions', 'currency', 'time'],
-    description: 'Advanced math challenges'
+    description: 'Advanced math challenges',
+    // Enhanced settings - challenging
+    timerEnabled: true,
+    questionsEnabled: true,
+    minCorrectAnswers: 0,
+    maxCorrectAnswers: 15,
+    correctAnswersEnabled: false,
+    minIncorrectAnswers: 0,
+    maxIncorrectAnswers: 8,
+    incorrectAnswersEnabled: false,
   }
 };
 
@@ -58,6 +94,15 @@ export const applyYearLevelPreset = (yearLevel: YearLevel) => {
     timerPerQuestion: preset.timerPerQuestion,
     questionType: preset.questionType[0], // Take the first question type as default
     mathOperations: preset.mathOperations,
-    numberTypes: preset.numberTypes
+    numberTypes: preset.numberTypes,
+    // Enhanced settings
+    timerEnabled: preset.timerEnabled,
+    questionsEnabled: preset.questionsEnabled,
+    minCorrectAnswers: preset.minCorrectAnswers,
+    maxCorrectAnswers: preset.maxCorrectAnswers,
+    correctAnswersEnabled: preset.correctAnswersEnabled,
+    minIncorrectAnswers: preset.minIncorrectAnswers,
+    maxIncorrectAnswers: preset.maxIncorrectAnswers,
+    incorrectAnswersEnabled: preset.incorrectAnswersEnabled,
   };
 };

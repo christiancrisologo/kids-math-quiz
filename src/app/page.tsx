@@ -8,6 +8,8 @@ import { useIsMobile } from '../utils/responsive';
 import { MobileButton } from '../components/ui/MobileButton';
 import { MobileTile } from '../components/ui/MobileTile';
 import { MobileInput } from '../components/ui/MobileInput';
+import { ToggleSwitch } from '../components/ui/ToggleSwitch';
+import { SliderWithToggle } from '../components/ui/SliderWithToggle';
 import { SystemSettingsPanel } from '../components/ui/SystemSettings';
 import { useSystemSettings } from '../contexts/system-settings-context';
 import { animationClasses } from '../utils/enhanced-animations';
@@ -28,6 +30,15 @@ export default function Home() {
     questionType: 'expression' as QuestionType,
     mathOperations: ['addition'] as MathOperation[], // Changed to array with default selection
     numberTypes: ['integers'] as NumberType[], // New field for number types
+    // Enhanced settings
+    timerEnabled: true,
+    questionsEnabled: true,
+    minCorrectAnswers: 0,
+    maxCorrectAnswers: 5,
+    correctAnswersEnabled: false,
+    minIncorrectAnswers: 0,
+    maxIncorrectAnswers: 5,
+    incorrectAnswersEnabled: false,
   });
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
@@ -67,6 +78,15 @@ export default function Home() {
         questionType: settings.questionType || prev.questionType,
         mathOperations: settings.mathOperations?.length ? settings.mathOperations : prev.mathOperations,
         numberTypes: settings.numberTypes?.length ? settings.numberTypes : prev.numberTypes,
+        // Enhanced settings
+        timerEnabled: settings.timerEnabled !== undefined ? settings.timerEnabled : prev.timerEnabled,
+        questionsEnabled: settings.questionsEnabled !== undefined ? settings.questionsEnabled : prev.questionsEnabled,
+        minCorrectAnswers: settings.minCorrectAnswers !== undefined ? settings.minCorrectAnswers : prev.minCorrectAnswers,
+        maxCorrectAnswers: settings.maxCorrectAnswers !== undefined ? settings.maxCorrectAnswers : prev.maxCorrectAnswers,
+        correctAnswersEnabled: settings.correctAnswersEnabled !== undefined ? settings.correctAnswersEnabled : prev.correctAnswersEnabled,
+        minIncorrectAnswers: settings.minIncorrectAnswers !== undefined ? settings.minIncorrectAnswers : prev.minIncorrectAnswers,
+        maxIncorrectAnswers: settings.maxIncorrectAnswers !== undefined ? settings.maxIncorrectAnswers : prev.maxIncorrectAnswers,
+        incorrectAnswersEnabled: settings.incorrectAnswersEnabled !== undefined ? settings.incorrectAnswersEnabled : prev.incorrectAnswersEnabled,
       }));
     } else {
       console.log('No saved settings found, applying primary school preset'); // Debug log
@@ -74,16 +94,37 @@ export default function Home() {
       const presetSettings = applyYearLevelPreset('primary');
       setFormData(prev => ({
         ...prev,
-        ...presetSettings
+        ...presetSettings,
+        // Keep enhanced settings defaults
+        timerEnabled: prev.timerEnabled,
+        questionsEnabled: prev.questionsEnabled,
+        minCorrectAnswers: prev.minCorrectAnswers,
+        maxCorrectAnswers: presetSettings.numberOfQuestions || prev.maxCorrectAnswers,
+        correctAnswersEnabled: prev.correctAnswersEnabled,
+        minIncorrectAnswers: prev.minIncorrectAnswers,
+        maxIncorrectAnswers: presetSettings.numberOfQuestions || prev.maxIncorrectAnswers,
+        incorrectAnswersEnabled: prev.incorrectAnswersEnabled,
       }));
     }
   }, [settings]); // Run when settings change
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleInputChange = (field: string, value: string | number | boolean) => {
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value,
+      };
+
+      // Update max values for sliders when numberOfQuestions changes
+      if (field === 'numberOfQuestions' && typeof value === 'number') {
+        updated.maxCorrectAnswers = Math.min(updated.maxCorrectAnswers, value);
+        updated.maxIncorrectAnswers = Math.min(updated.maxIncorrectAnswers, value);
+        updated.minCorrectAnswers = Math.min(updated.minCorrectAnswers, value);
+        updated.minIncorrectAnswers = Math.min(updated.minIncorrectAnswers, value);
+      }
+
+      return updated;
+    });
 
     // Clear error when user starts typing
     if (errors[field]) {
@@ -156,6 +197,24 @@ export default function Home() {
     }
   };
 
+  // Handler for correct answers slider
+  const handleCorrectAnswersChange = (min: number, max: number) => {
+    setFormData(prev => ({
+      ...prev,
+      minCorrectAnswers: min,
+      maxCorrectAnswers: max,
+    }));
+  };
+
+  // Handler for incorrect answers slider
+  const handleIncorrectAnswersChange = (min: number, max: number) => {
+    setFormData(prev => ({
+      ...prev,
+      minIncorrectAnswers: min,
+      maxIncorrectAnswers: max,
+    }));
+  };
+
   const handleYearLevelChange = (yearLevel: YearLevel) => {
     setSelectedYearLevel(yearLevel);
 
@@ -163,7 +222,10 @@ export default function Home() {
     const presetSettings = applyYearLevelPreset(yearLevel);
     setFormData(prev => ({
       ...prev,
-      ...presetSettings
+      ...presetSettings,
+      // Update max values for correct/incorrect answer sliders based on number of questions
+      maxCorrectAnswers: presetSettings.numberOfQuestions,
+      maxIncorrectAnswers: presetSettings.numberOfQuestions,
     }));
 
     // Clear any validation errors since we're applying valid presets
@@ -318,46 +380,103 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Number of Questions and Timer per Question - Combined Row */}
-              <div className="bg-gradient-to-r from-green-50 to-yellow-50 dark:from-green-900/20 dark:to-yellow-900/20 rounded-xl p-3">
-                <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
-                      📊 Number of Questions
-                    </h3>
-                    <MobileInput
-                      type="number"
-                      label=""
-                      placeholder="Minimum 5"
-                      value={formData.numberOfQuestions}
-                      onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
-                      error={errors.numberOfQuestions}
-                      inputMode="numeric"
-                    />
+              {/* Enhanced Game Mechanics Settings */}
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-3">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
+                  🎮 Game Mechanics
+                </h3>
+                
+                <div className="space-y-4">
+                  {/* Number of Questions and Timer per Question - Combined Row */}
+                  <div className="bg-gradient-to-r from-green-50 to-yellow-50 dark:from-green-900/20 dark:to-yellow-900/20 rounded-xl p-3">
+                    <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
+                            📊 Number of Questions
+                          </h4>
+                          <ToggleSwitch
+                            label=""
+                            icon=""
+                            enabled={formData.questionsEnabled}
+                            onToggle={(enabled) => handleInputChange('questionsEnabled', enabled)}
+                          />
+                        </div>
+                        {formData.questionsEnabled && (
+                          <MobileInput
+                            type="number"
+                            label=""
+                            placeholder="Minimum 5"
+                            value={formData.numberOfQuestions}
+                            onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
+                            error={errors.numberOfQuestions}
+                            inputMode="numeric"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
+                            ⏰ Timer per Question
+                          </h4>
+                          <ToggleSwitch
+                            label=""
+                            icon=""
+                            enabled={formData.timerEnabled}
+                            onToggle={(enabled) => handleInputChange('timerEnabled', enabled)}
+                          />
+                        </div>
+                        {formData.timerEnabled && (
+                          <MobileInput
+                            type="number"
+                            label=""
+                            placeholder="Minimum 5 seconds"
+                            value={formData.timerPerQuestion}
+                            onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
+                            error={errors.timerPerQuestion}
+                            inputMode="numeric"
+                          />
+                        )}
+                      </div>
+                    </div>
+                    {selectedYearLevel && (
+                      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                        💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
-                      ⏰ Timer per Question
-                    </h3>
-                    <MobileInput
-                      type="number"
-                      label=""
-                      placeholder="Minimum 5 seconds"
-                      value={formData.timerPerQuestion}
-                      onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
-                      error={errors.timerPerQuestion}
-                      inputMode="numeric"
-                    />
-                  </div>
-                </div>
-                {selectedYearLevel && (
-                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                    💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
-                  </div>
-                )}
-              </div>
 
-              {/* Question Type */}
+                  {/* Correct Answers Setting */}
+                  <SliderWithToggle
+                    label="Correct Answers Goal"
+                    icon="✅"
+                    subtitle="End quiz when reaching this range of correct answers"
+                    enabled={formData.correctAnswersEnabled}
+                    min={0}
+                    max={formData.questionsEnabled ? formData.numberOfQuestions : 20}
+                    minValue={formData.minCorrectAnswers}
+                    maxValue={formData.maxCorrectAnswers}
+                    onEnabledChange={(enabled) => handleInputChange('correctAnswersEnabled', enabled)}
+                    onValuesChange={handleCorrectAnswersChange}
+                    disabled={!formData.questionsEnabled}
+                  />
+                  
+                  {/* Incorrect Answers Setting */}
+                  <SliderWithToggle
+                    label="Incorrect Answers Limit"
+                    icon="❌"
+                    subtitle="End quiz when reaching this range of incorrect answers"
+                    enabled={formData.incorrectAnswersEnabled}
+                    min={0}
+                    max={formData.questionsEnabled ? formData.numberOfQuestions : 20}
+                    minValue={formData.minIncorrectAnswers}
+                    maxValue={formData.maxIncorrectAnswers}
+                    onEnabledChange={(enabled) => handleInputChange('incorrectAnswersEnabled', enabled)}
+                    onValuesChange={handleIncorrectAnswersChange}
+                    disabled={!formData.questionsEnabled}
+                  />
+                </div>
+              </div>              {/* Question Type */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
                   🎯 Question Type
