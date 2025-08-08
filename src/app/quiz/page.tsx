@@ -9,7 +9,6 @@ import { MobileTile } from '../../components/ui/MobileTile';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
 import { FunProgressBar } from '../../components/ui/FunProgressBar';
-import { EnhancedProgressBar } from '../../components/ui/EnhancedProgressBar';
 import { playSound, vibrate } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
@@ -399,17 +398,14 @@ export default function QuizPage() {
                             )}
                         </div>
 
-                        {/* Enhanced Progress Bar */}
+                        {/* Enhanced Progress Bar - Only for questions enabled mode */}
                         {settings.questionsEnabled ? (
-                            <EnhancedProgressBar
-                                progress={progress}
-                                currentStreak={currentStreak}
-                                correctCount={correctAnswersCount}
-                                incorrectCount={incorrectAnswersCount}
-                                totalQuestions={questions.length}
-                                showQuestionProgress={true}
-                                className="mb-4"
-                            />
+                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-4">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-purple-400 to-blue-500 rounded-full transition-all duration-300"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
                         ) : (
                             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                                 <div 
@@ -625,17 +621,14 @@ export default function QuizPage() {
                                 )}
                             </div>
 
-                            {/* Enhanced Progress Bar */}
+                            {/* Enhanced Progress Bar - Only for questions enabled mode */}
                             {settings.questionsEnabled ? (
-                                <EnhancedProgressBar
-                                    progress={progress}
-                                    currentStreak={currentStreak}
-                                    correctCount={correctAnswersCount}
-                                    incorrectCount={incorrectAnswersCount}
-                                    totalQuestions={questions.length}
-                                    showQuestionProgress={true}
-                                    className="mb-6"
-                                />
+                                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
+                                    <div 
+                                        className="h-full bg-gradient-to-r from-purple-400 to-blue-500 rounded-full transition-all duration-300"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
                             ) : (
                                 <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
                                     <div 

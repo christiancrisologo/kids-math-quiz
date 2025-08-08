@@ -86,45 +86,48 @@ export function SliderWithToggle({
                 <div className="space-y-4">
                     {/* Min Value Slider */}
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                Minimum: {localMin}
-                            </label>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-base font-medium text-gray-700 dark:text-gray-300 min-w-[3rem]">
+                                {localMin}
+                            </span>
+                            <div className="flex-1">
+                                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    Minimum
+                                </label>
+                                <input
+                                    type="range"
+                                    min={min}
+                                    max={max}
+                                    value={localMin}
+                                    onChange={(e) => handleMinChange(parseInt(e.target.value))}
+                                    disabled={isDisabled}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider-thumb"
+                                />
+                            </div>
                         </div>
-                        <input
-                            type="range"
-                            min={min}
-                            max={max}
-                            value={localMin}
-                            onChange={(e) => handleMinChange(parseInt(e.target.value))}
-                            disabled={isDisabled}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider-thumb"
-                        />
                     </div>
 
                     {/* Max Value Slider */}
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                Maximum: {localMax}
-                            </label>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-base font-medium text-gray-700 dark:text-gray-300 min-w-[3rem]">
+                                {localMax}
+                            </span>
+                            <div className="flex-1">
+                                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    Maximum
+                                </label>
+                                <input
+                                    type="range"
+                                    min={min}
+                                    max={max}
+                                    value={localMax}
+                                    onChange={(e) => handleMaxChange(parseInt(e.target.value))}
+                                    disabled={isDisabled}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider-thumb"
+                                />
+                            </div>
                         </div>
-                        <input
-                            type="range"
-                            min={min}
-                            max={max}
-                            value={localMax}
-                            onChange={(e) => handleMaxChange(parseInt(e.target.value))}
-                            disabled={isDisabled}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 slider-thumb"
-                        />
-                    </div>
-
-                    {/* Range Display */}
-                    <div className="text-center">
-                        <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
-                            Range: {localMin} - {localMax}
-                        </span>
                     </div>
                 </div>
             )}
