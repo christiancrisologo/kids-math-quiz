@@ -9,6 +9,7 @@ import { MobileTile } from '../../components/ui/MobileTile';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
 import { FunProgressBar } from '../../components/ui/FunProgressBar';
+import { EnhancedProgressBar } from '../../components/ui/EnhancedProgressBar';
 import { playSound, vibrate } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
@@ -26,6 +27,8 @@ export default function QuizPage() {
         isQuizActive,
         isQuizCompleted,
         currentStreak,
+        correctAnswersCount,
+        incorrectAnswersCount,
         startQuiz,
         nextQuestion,
         submitAnswer,
@@ -78,24 +81,24 @@ export default function QuizPage() {
         setSelectedTimeOption(null);
     }, [currentQuestionIndex]);
 
-    // Timer logic - pause during animations
+    // Timer logic - pause during animations and check if timer is enabled
     useEffect(() => {
-        if (!isQuizActive || timeRemaining <= 0 || isUserInteractionBlocked) return;
+        if (!isQuizActive || !settings.timerEnabled || timeRemaining <= 0 || isUserInteractionBlocked) return;
 
         const timer = setInterval(() => {
             setTimeRemaining(timeRemaining - 1);
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [isQuizActive, timeRemaining, setTimeRemaining, isUserInteractionBlocked]);
+    }, [isQuizActive, timeRemaining, setTimeRemaining, isUserInteractionBlocked, settings.timerEnabled]);
 
-    // Auto-advance when timer reaches 0
+    // Auto-advance when timer reaches 0 (only if timer is enabled)
     useEffect(() => {
-        if (timeRemaining === 0 && isQuizActive) {
+        if (settings.timerEnabled && timeRemaining === 0 && isQuizActive) {
             handleTimeUp();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [timeRemaining, isQuizActive]);
+    }, [timeRemaining, isQuizActive, settings.timerEnabled]);
 
     // Redirect if no questions
     useEffect(() => {
@@ -360,23 +363,47 @@ export default function QuizPage() {
                     {/* Mobile Header - Fixed Top */}
                     <div className="bg-white dark:bg-slate-800 shadow-lg p-4 sticky top-0 z-10">
                         <div className="flex justify-between items-center mb-3">
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                {currentQuestionIndex + 1}/{questions.length}
-                            </span>
-                            <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
-                                ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
-                                }`}>
-                                ⏰ {timeRemaining}s
-                            </div>
+                            {settings.questionsEnabled ? (
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    {currentQuestionIndex + 1}/{questions.length}
+                                </span>
+                            ) : (
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    Question {currentQuestionIndex + 1}
+                                </span>
+                            )}
+                            {settings.timerEnabled && (
+                                <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
+                                    ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                    : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
+                                    }`}>
+                                    ⏰ {timeRemaining}s
+                                </div>
+                            )}
                         </div>
 
-                        {/* Progress Bar */}
-                        <FunProgressBar
-                            progress={progress}
-                            currentStreak={currentStreak}
-                            className="mb-4"
-                        />
+                        {/* Enhanced Progress Bar */}
+                        {settings.questionsEnabled ? (
+                            <EnhancedProgressBar
+                                progress={progress}
+                                currentStreak={currentStreak}
+                                correctCount={correctAnswersCount}
+                                incorrectCount={incorrectAnswersCount}
+                                totalQuestions={questions.length}
+                                showQuestionProgress={true}
+                                className="mb-4"
+                            />
+                        ) : (
+                            <EnhancedProgressBar
+                                progress={0}
+                                currentStreak={currentStreak}
+                                correctCount={correctAnswersCount}
+                                incorrectCount={incorrectAnswersCount}
+                                totalQuestions={0}
+                                showQuestionProgress={false}
+                                className="mb-4"
+                            />
+                        )}
                     </div>
 
                     {/* Mobile Content Area */}
@@ -523,20 +550,44 @@ export default function QuizPage() {
                                 Hi {settings.username}! 👋
                             </h1>
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
-                                    Question {currentQuestionIndex + 1} of {questions.length}
-                                </span>
-                                <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
-                                    ⏰ {timeRemaining}s
-                                </div>
+                                {settings.questionsEnabled ? (
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        Question {currentQuestionIndex + 1} of {questions.length}
+                                    </span>
+                                ) : (
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        Question {currentQuestionIndex + 1}
+                                    </span>
+                                )}
+                                {settings.timerEnabled && (
+                                    <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
+                                        ⏰ {timeRemaining}s
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Progress Bar */}
-                            <FunProgressBar
-                                progress={progress}
-                                currentStreak={currentStreak}
-                                className="mb-6"
-                            />
+                            {/* Enhanced Progress Bar */}
+                            {settings.questionsEnabled ? (
+                                <EnhancedProgressBar
+                                    progress={progress}
+                                    currentStreak={currentStreak}
+                                    correctCount={correctAnswersCount}
+                                    incorrectCount={incorrectAnswersCount}
+                                    totalQuestions={questions.length}
+                                    showQuestionProgress={true}
+                                    className="mb-6"
+                                />
+                            ) : (
+                                <EnhancedProgressBar
+                                    progress={0}
+                                    currentStreak={currentStreak}
+                                    correctCount={correctAnswersCount}
+                                    incorrectCount={incorrectAnswersCount}
+                                    totalQuestions={0}
+                                    showQuestionProgress={false}
+                                    className="mb-6"
+                                />
+                            )}
                         </div>
 
                         {/* Question */}

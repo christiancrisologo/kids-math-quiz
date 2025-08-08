@@ -16,7 +16,7 @@ export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
-    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, correctAnswersCount, incorrectAnswersCount, quizStartTime } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
@@ -154,6 +154,47 @@ export default function ResultsPage() {
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* Enhanced Statistics */}
+                    <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl mt-6 ${isMobile ? 'p-4' : 'p-6'}`}>
+                        <h3 className={`font-bold text-gray-800 dark:text-gray-200 mb-3 text-center ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                            📊 Detailed Statistics
+                        </h3>
+
+                        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                            {/* Correct Answers */}
+                            <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-3 text-center">
+                                <div className="text-2xl mb-1">✅</div>
+                                <div className="font-bold text-green-800 dark:text-green-300 text-lg">{correctAnswers}</div>
+                                <div className="text-xs text-green-600 dark:text-green-400">Correct Answers</div>
+                            </div>
+
+                            {/* Incorrect Answers */}
+                            <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-3 text-center">
+                                <div className="text-2xl mb-1">❌</div>
+                                <div className="font-bold text-red-800 dark:text-red-300 text-lg">{totalQuestions - correctAnswers}</div>
+                                <div className="text-xs text-red-600 dark:text-red-400">Incorrect Answers</div>
+                            </div>
+
+                            {/* Quiz Duration */}
+                            <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3 text-center">
+                                <div className="text-2xl mb-1">⏱️</div>
+                                <div className="font-bold text-purple-800 dark:text-purple-300 text-lg">
+                                    {quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : 0}s
+                                </div>
+                                <div className="text-xs text-purple-600 dark:text-purple-400">Total Duration</div>
+                            </div>
+                        </div>
+
+                        {/* Average Score */}
+                        <div className="mt-4 text-center">
+                            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 inline-block">
+                                <div className="font-bold text-gray-800 dark:text-gray-200">
+                                    📈 Average Score: {questions.length > 0 ? Math.round(questions.reduce((total, q) => total + (q.timeSpent || 0), 0) / questions.length) : 0}s per question
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Question Details */}

@@ -13,9 +13,12 @@ export interface GameResult {
   }>;
   totalQuestions: number;
   correctAnswers: number;
+  incorrectAnswers: number;
   score: number;
   completedAt: Date;
   timeSpent: number;
+  quizDuration: number;
+  averageTimePerQuestion: number;
 }
 
 export interface UserPreferences {

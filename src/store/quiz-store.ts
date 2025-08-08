@@ -35,6 +35,15 @@ export interface QuizSettings {
   questionType: QuestionType;
   mathOperations: MathOperation[];
   numberTypes: NumberType[]; // New field for number types selection
+  // Enhanced settings for game mechanics
+  timerEnabled: boolean;
+  questionsEnabled: boolean;
+  minCorrectAnswers: number;
+  maxCorrectAnswers: number;
+  correctAnswersEnabled: boolean;
+  minIncorrectAnswers: number;
+  maxIncorrectAnswers: number;
+  incorrectAnswersEnabled: boolean;
 }
 
 export interface QuizState {
@@ -49,6 +58,11 @@ export interface QuizState {
   isQuizCompleted: boolean;
   currentStreak: number;
   bestStreak: number;
+  
+  // Enhanced game mechanics tracking
+  correctAnswersCount: number;
+  incorrectAnswersCount: number;
+  quizStartTime: number | null;
   
   // Actions
   updateSettings: (settings: Partial<QuizSettings>) => void;
@@ -79,6 +93,15 @@ const defaultSettings: QuizSettings = {
   questionType: 'expression',
   mathOperations: ['addition'], // Default to addition selected
   numberTypes: ['integers'], // Default to integers selected
+  // Enhanced settings with defaults
+  timerEnabled: true,
+  questionsEnabled: true,
+  minCorrectAnswers: 0,
+  maxCorrectAnswers: 5,
+  correctAnswersEnabled: false,
+  minIncorrectAnswers: 0,
+  maxIncorrectAnswers: 5,
+  incorrectAnswersEnabled: false,
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
@@ -91,6 +114,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   isQuizCompleted: false,
   currentStreak: 0,
   bestStreak: 0,
+  correctAnswersCount: 0,
+  incorrectAnswersCount: 0,
+  quizStartTime: null,
   
   // Actions
   updateSettings: (newSettings) =>
@@ -106,7 +132,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       isQuizActive: true,
       isQuizCompleted: false,
       currentQuestionIndex: 0,
-      timeRemaining: state.settings.timerPerQuestion,
+      timeRemaining: state.settings.timerEnabled ? state.settings.timerPerQuestion : 0,
+      correctAnswersCount: 0,
+      incorrectAnswersCount: 0,
+      quizStartTime: Date.now(),
     })),
   
   nextQuestion: () =>
@@ -114,11 +143,19 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       const nextIndex = state.currentQuestionIndex + 1;
       const isCompleted = nextIndex >= state.questions.length;
       
+      // Check if quiz should end based on enhanced settings
+      const shouldEndBasedOnCorrect = state.settings.correctAnswersEnabled && 
+        state.correctAnswersCount >= state.settings.maxCorrectAnswers;
+      const shouldEndBasedOnIncorrect = state.settings.incorrectAnswersEnabled && 
+        state.incorrectAnswersCount >= state.settings.maxIncorrectAnswers;
+      
+      const shouldComplete = isCompleted || shouldEndBasedOnCorrect || shouldEndBasedOnIncorrect;
+      
       return {
         currentQuestionIndex: nextIndex,
-        timeRemaining: isCompleted ? 0 : state.settings.timerPerQuestion,
-        isQuizCompleted: isCompleted,
-        isQuizActive: !isCompleted,
+        timeRemaining: shouldComplete ? 0 : (state.settings.timerEnabled ? state.settings.timerPerQuestion : 0),
+        isQuizCompleted: shouldComplete,
+        isQuizActive: !shouldComplete,
       };
     }),
   
@@ -130,16 +167,25 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       if (currentQuestion) {
         currentQuestion.userAnswer = answer;
         currentQuestion.isCorrect = Math.abs(currentQuestion.answer - answer) < 0.01;
-        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        currentQuestion.timeSpent = state.settings.timerEnabled ? 
+          (state.settings.timerPerQuestion - state.timeRemaining) : 0;
         
         // Update streak
         const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
         const newBestStreak = Math.max(state.bestStreak, newStreak);
         
+        // Update correct/incorrect counts
+        const newCorrectCount = currentQuestion.isCorrect ? 
+          state.correctAnswersCount + 1 : state.correctAnswersCount;
+        const newIncorrectCount = !currentQuestion.isCorrect ? 
+          state.incorrectAnswersCount + 1 : state.incorrectAnswersCount;
+        
         return { 
           questions: updatedQuestions,
           currentStreak: newStreak,
-          bestStreak: newBestStreak
+          bestStreak: newBestStreak,
+          correctAnswersCount: newCorrectCount,
+          incorrectAnswersCount: newIncorrectCount,
         };
       }
       
@@ -163,16 +209,25 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           const decimalValue = parsedFraction ? Number(parsedFraction.valueOf()) : 0;
           currentQuestion.isCorrect = Math.abs(currentQuestion.answer - decimalValue) < 0.01;
         }
-        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        currentQuestion.timeSpent = state.settings.timerEnabled ? 
+          (state.settings.timerPerQuestion - state.timeRemaining) : 0;
         
         // Update streak
         const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
         const newBestStreak = Math.max(state.bestStreak, newStreak);
         
+        // Update correct/incorrect counts
+        const newCorrectCount = currentQuestion.isCorrect ? 
+          state.correctAnswersCount + 1 : state.correctAnswersCount;
+        const newIncorrectCount = !currentQuestion.isCorrect ? 
+          state.incorrectAnswersCount + 1 : state.incorrectAnswersCount;
+        
         return { 
           questions: updatedQuestions,
           currentStreak: newStreak,
-          bestStreak: newBestStreak
+          bestStreak: newBestStreak,
+          correctAnswersCount: newCorrectCount,
+          incorrectAnswersCount: newIncorrectCount,
         };
       }
       
@@ -189,16 +244,25 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         const parsedCurrency = parseFloat(currencyAnswer.replace('$', '')) || 0;
         currentQuestion.userAnswer = parsedCurrency;
         currentQuestion.isCorrect = Math.abs(currentQuestion.answer - parsedCurrency) < 0.01;
-        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        currentQuestion.timeSpent = state.settings.timerEnabled ? 
+          (state.settings.timerPerQuestion - state.timeRemaining) : 0;
         
         // Update streak
         const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
         const newBestStreak = Math.max(state.bestStreak, newStreak);
         
+        // Update correct/incorrect counts
+        const newCorrectCount = currentQuestion.isCorrect ? 
+          state.correctAnswersCount + 1 : state.correctAnswersCount;
+        const newIncorrectCount = !currentQuestion.isCorrect ? 
+          state.incorrectAnswersCount + 1 : state.incorrectAnswersCount;
+        
         return { 
           questions: updatedQuestions,
           currentStreak: newStreak,
-          bestStreak: newBestStreak
+          bestStreak: newBestStreak,
+          correctAnswersCount: newCorrectCount,
+          incorrectAnswersCount: newIncorrectCount,
         };
       }
       
@@ -227,16 +291,25 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         
         currentQuestion.userAnswer = timeInSeconds;
         currentQuestion.isCorrect = Math.abs(currentQuestion.answer - timeInSeconds) < 1; // 1-second tolerance
-        currentQuestion.timeSpent = state.settings.timerPerQuestion - state.timeRemaining;
+        currentQuestion.timeSpent = state.settings.timerEnabled ? 
+          (state.settings.timerPerQuestion - state.timeRemaining) : 0;
         
         // Update streak
         const newStreak = currentQuestion.isCorrect ? state.currentStreak + 1 : 0;
         const newBestStreak = Math.max(state.bestStreak, newStreak);
         
+        // Update correct/incorrect counts
+        const newCorrectCount = currentQuestion.isCorrect ? 
+          state.correctAnswersCount + 1 : state.correctAnswersCount;
+        const newIncorrectCount = !currentQuestion.isCorrect ? 
+          state.incorrectAnswersCount + 1 : state.incorrectAnswersCount;
+        
         return { 
           questions: updatedQuestions,
           currentStreak: newStreak,
-          bestStreak: newBestStreak
+          bestStreak: newBestStreak,
+          correctAnswersCount: newCorrectCount,
+          incorrectAnswersCount: newIncorrectCount,
         };
       }
       
@@ -253,10 +326,13 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     set({
       questions: [],
       currentQuestionIndex: 0,
-      timeRemaining: get().settings.timerPerQuestion,
+      timeRemaining: get().settings.timerEnabled ? get().settings.timerPerQuestion : 0,
       isQuizActive: false,
       isQuizCompleted: false,
       currentStreak: 0,
+      correctAnswersCount: 0,
+      incorrectAnswersCount: 0,
+      quizStartTime: null,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -264,10 +340,13 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     set({
       questions,
       currentQuestionIndex: 0,
-      timeRemaining: get().settings.timerPerQuestion,
+      timeRemaining: get().settings.timerEnabled ? get().settings.timerPerQuestion : 0,
       isQuizActive: false,
       isQuizCompleted: false,
       currentStreak: 0,
+      correctAnswersCount: 0,
+      incorrectAnswersCount: 0,
+      quizStartTime: null,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -302,6 +381,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     const totalQuestions = state.questions.length;
     const score = Math.round((correctAnswers / totalQuestions) * 100);
     const totalTimeSpent = state.questions.reduce((total, q) => total + (q.timeSpent || 0), 0);
+    
+    // Calculate total quiz duration
+    const quizDuration = state.quizStartTime ? 
+      Math.round((Date.now() - state.quizStartTime) / 1000) : totalTimeSpent;
 
     const gameResult = gameHistoryStorage.save({
       username: state.settings.username,
@@ -315,8 +398,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       })),
       totalQuestions,
       correctAnswers,
+      incorrectAnswers: state.incorrectAnswersCount,
       score,
-      timeSpent: totalTimeSpent
+      timeSpent: totalTimeSpent,
+      quizDuration, // Total duration of the quiz
+      averageTimePerQuestion: totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 0,
     });
 
     return gameResult;
@@ -329,11 +415,14 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       settings: defaultSettings,
       questions: [],
       currentQuestionIndex: 0,
-      timeRemaining: defaultSettings.timerPerQuestion,
+      timeRemaining: defaultSettings.timerEnabled ? defaultSettings.timerPerQuestion : 0,
       isQuizActive: false,
       isQuizCompleted: false,
       currentStreak: 0,
       bestStreak: 0,
+      correctAnswersCount: 0,
+      incorrectAnswersCount: 0,
+      quizStartTime: null,
     });
   },
 }));
