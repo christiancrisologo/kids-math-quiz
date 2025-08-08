@@ -380,72 +380,72 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Number of Questions and Timer per Question - Combined Row */}
-              <div className="bg-gradient-to-r from-green-50 to-yellow-50 dark:from-green-900/20 dark:to-yellow-900/20 rounded-xl p-3">
-                <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center text-sm">
-                        📊 Number of Questions
-                      </h3>
-                      <ToggleSwitch
-                        label=""
-                        icon=""
-                        enabled={formData.questionsEnabled}
-                        onToggle={(enabled) => handleInputChange('questionsEnabled', enabled)}
-                      />
-                    </div>
-                    {formData.questionsEnabled && (
-                      <MobileInput
-                        type="number"
-                        label=""
-                        placeholder="Minimum 5"
-                        value={formData.numberOfQuestions}
-                        onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
-                        error={errors.numberOfQuestions}
-                        inputMode="numeric"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center text-sm">
-                        ⏰ Timer per Question
-                      </h3>
-                      <ToggleSwitch
-                        label=""
-                        icon=""
-                        enabled={formData.timerEnabled}
-                        onToggle={(enabled) => handleInputChange('timerEnabled', enabled)}
-                      />
-                    </div>
-                    {formData.timerEnabled && (
-                      <MobileInput
-                        type="number"
-                        label=""
-                        placeholder="Minimum 5 seconds"
-                        value={formData.timerPerQuestion}
-                        onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
-                        error={errors.timerPerQuestion}
-                        inputMode="numeric"
-                      />
-                    )}
-                  </div>
-                </div>
-                {selectedYearLevel && (
-                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-                    💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
-                  </div>
-                )}
-              </div>
-
               {/* Enhanced Game Mechanics Settings */}
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
                   🎮 Game Mechanics
                 </h3>
-
+                
                 <div className="space-y-4">
+                  {/* Number of Questions and Timer per Question - Combined Row */}
+                  <div className="bg-gradient-to-r from-green-50 to-yellow-50 dark:from-green-900/20 dark:to-yellow-900/20 rounded-xl p-3">
+                    <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
+                            📊 Number of Questions
+                          </h4>
+                          <ToggleSwitch
+                            label=""
+                            icon=""
+                            enabled={formData.questionsEnabled}
+                            onToggle={(enabled) => handleInputChange('questionsEnabled', enabled)}
+                          />
+                        </div>
+                        {formData.questionsEnabled && (
+                          <MobileInput
+                            type="number"
+                            label=""
+                            placeholder="Minimum 5"
+                            value={formData.numberOfQuestions}
+                            onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
+                            error={errors.numberOfQuestions}
+                            inputMode="numeric"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200 flex items-center text-sm">
+                            ⏰ Timer per Question
+                          </h4>
+                          <ToggleSwitch
+                            label=""
+                            icon=""
+                            enabled={formData.timerEnabled}
+                            onToggle={(enabled) => handleInputChange('timerEnabled', enabled)}
+                          />
+                        </div>
+                        {formData.timerEnabled && (
+                          <MobileInput
+                            type="number"
+                            label=""
+                            placeholder="Minimum 5 seconds"
+                            value={formData.timerPerQuestion}
+                            onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
+                            error={errors.timerPerQuestion}
+                            inputMode="numeric"
+                          />
+                        )}
+                      </div>
+                    </div>
+                    {selectedYearLevel && (
+                      <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                        💡 {yearLevelPresets[selectedYearLevel].label} settings: {yearLevelPresets[selectedYearLevel].numberOfQuestions} questions, {yearLevelPresets[selectedYearLevel].timerPerQuestion}s per question
+                      </div>
+                    )}
+                  </div>
+
                   {/* Correct Answers Setting */}
                   <SliderWithToggle
                     label="Correct Answers Goal"
@@ -460,7 +460,7 @@ export default function Home() {
                     onValuesChange={handleCorrectAnswersChange}
                     disabled={!formData.questionsEnabled}
                   />
-
+                  
                   {/* Incorrect Answers Setting */}
                   <SliderWithToggle
                     label="Incorrect Answers Limit"
@@ -476,9 +476,7 @@ export default function Home() {
                     disabled={!formData.questionsEnabled}
                   />
                 </div>
-              </div>
-
-              {/* Question Type */}
+              </div>              {/* Question Type */}
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center text-sm">
                   🎯 Question Type

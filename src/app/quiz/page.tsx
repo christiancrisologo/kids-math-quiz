@@ -363,15 +363,32 @@ export default function QuizPage() {
                     {/* Mobile Header - Fixed Top */}
                     <div className="bg-white dark:bg-slate-800 shadow-lg p-4 sticky top-0 z-10">
                         <div className="flex justify-between items-center mb-3">
-                            {settings.questionsEnabled ? (
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    {currentQuestionIndex + 1}/{questions.length}
-                                </span>
-                            ) : (
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    Question {currentQuestionIndex + 1}
-                                </span>
-                            )}
+                            {/* Left side - Question number or score display */}
+                            <div className="flex items-center space-x-4">
+                                {settings.questionsEnabled ? (
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                        {currentQuestionIndex + 1}/{questions.length}
+                                    </span>
+                                ) : (
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                        Question {currentQuestionIndex + 1}
+                                    </span>
+                                )}
+                                
+                                {/* Minimalist Score Display */}
+                                <div className="flex items-center space-x-3 text-sm">
+                                    <div className="flex items-center space-x-1">
+                                        <span className="text-green-600 dark:text-green-400">✓</span>
+                                        <span className="font-medium text-green-600 dark:text-green-400">{correctAnswersCount}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                        <span className="text-red-500 dark:text-red-400">✗</span>
+                                        <span className="font-medium text-red-500 dark:text-red-400">{incorrectAnswersCount}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Right side - Timer */}
                             {settings.timerEnabled && (
                                 <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
                                     ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
@@ -394,15 +411,12 @@ export default function QuizPage() {
                                 className="mb-4"
                             />
                         ) : (
-                            <EnhancedProgressBar
-                                progress={0}
-                                currentStreak={currentStreak}
-                                correctCount={correctAnswersCount}
-                                incorrectCount={incorrectAnswersCount}
-                                totalQuestions={0}
-                                showQuestionProgress={false}
-                                className="mb-4"
-                            />
+                            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
+                                    style={{ width: `${Math.min(100, (correctAnswersCount / Math.max(1, correctAnswersCount + incorrectAnswersCount)) * 100)}%` }}
+                                />
+                            </div>
                         )}
                     </div>
 
@@ -470,6 +484,20 @@ export default function QuizPage() {
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
                                     </MobileButton>
+                                    
+                                    {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
+                                    {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
+                                        <MobileButton
+                                            variant="secondary"
+                                            size="lg"
+                                            fullWidth
+                                            onClick={() => completeQuiz()}
+                                            icon="🏁"
+                                            className="mt-3"
+                                        >
+                                            Finish Quiz
+                                        </MobileButton>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -535,6 +563,20 @@ export default function QuizPage() {
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
                                     </MobileButton>
+                                    
+                                    {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
+                                    {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
+                                        <MobileButton
+                                            variant="secondary"
+                                            size="lg"
+                                            fullWidth
+                                            onClick={() => completeQuiz()}
+                                            icon="🏁"
+                                            className="mt-3"
+                                        >
+                                            Finish Quiz
+                                        </MobileButton>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -550,15 +592,32 @@ export default function QuizPage() {
                                 Hi {settings.username}! 👋
                             </h1>
                             <div className="flex justify-between items-center mb-4">
-                                {settings.questionsEnabled ? (
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                                        Question {currentQuestionIndex + 1} of {questions.length}
-                                    </span>
-                                ) : (
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                                        Question {currentQuestionIndex + 1}
-                                    </span>
-                                )}
+                                {/* Left side - Question number and score */}
+                                <div className="flex items-center space-x-6">
+                                    {settings.questionsEnabled ? (
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            Question {currentQuestionIndex + 1} of {questions.length}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            Question {currentQuestionIndex + 1}
+                                        </span>
+                                    )}
+                                    
+                                    {/* Minimalist Score Display */}
+                                    <div className="flex items-center space-x-4 text-sm">
+                                        <div className="flex items-center space-x-1">
+                                            <span className="text-green-600 dark:text-green-400">✓</span>
+                                            <span className="font-medium text-green-600 dark:text-green-400">{correctAnswersCount}</span>
+                                        </div>
+                                        <div className="flex items-center space-x-1">
+                                            <span className="text-red-500 dark:text-red-400">✗</span>
+                                            <span className="font-medium text-red-500 dark:text-red-400">{incorrectAnswersCount}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Right side - Timer */}
                                 {settings.timerEnabled && (
                                     <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
                                         ⏰ {timeRemaining}s
@@ -578,15 +637,12 @@ export default function QuizPage() {
                                     className="mb-6"
                                 />
                             ) : (
-                                <EnhancedProgressBar
-                                    progress={0}
-                                    currentStreak={currentStreak}
-                                    correctCount={correctAnswersCount}
-                                    incorrectCount={incorrectAnswersCount}
-                                    totalQuestions={0}
-                                    showQuestionProgress={false}
-                                    className="mb-6"
-                                />
+                                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
+                                    <div 
+                                        className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
+                                        style={{ width: `${Math.min(100, (correctAnswersCount / Math.max(1, correctAnswersCount + incorrectAnswersCount)) * 100)}%` }}
+                                    />
+                                </div>
                             )}
                         </div>
 
@@ -682,29 +738,41 @@ export default function QuizPage() {
                         </div>
 
                         {/* Submit Button */}
-                        <button
-                            onClick={handleSubmitAnswer}
-                            disabled={
-                                isFractionQuestion
-                                    ? (settings.questionType === 'expression'
-                                        ? !userFractionInput.trim()
-                                        : selectedFractionOption === null)
-                                    : isCurrencyQuestion
+                        <div className="space-y-4">
+                            <button
+                                onClick={handleSubmitAnswer}
+                                disabled={
+                                    isFractionQuestion
                                         ? (settings.questionType === 'expression'
-                                            ? !userInput.trim()
-                                            : selectedCurrencyOption === null)
-                                        : isTimeQuestion
+                                            ? !userFractionInput.trim()
+                                            : selectedFractionOption === null)
+                                        : isCurrencyQuestion
                                             ? (settings.questionType === 'expression'
                                                 ? !userInput.trim()
-                                                : selectedTimeOption === null)
-                                            : (settings.questionType === 'expression'
-                                                ? !userInput.trim()
-                                                : selectedOption === null)
-                            }
-                            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        >
-                            {currentQuestionIndex >= questions.length - 1 ? '🏁 Finish Quiz' : '➡️ Next Question'}
-                        </button>
+                                                : selectedCurrencyOption === null)
+                                            : isTimeQuestion
+                                                ? (settings.questionType === 'expression'
+                                                    ? !userInput.trim()
+                                                    : selectedTimeOption === null)
+                                                : (settings.questionType === 'expression'
+                                                    ? !userInput.trim()
+                                                    : selectedOption === null)
+                                }
+                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            >
+                                {currentQuestionIndex >= questions.length - 1 ? '🏁 Finish Quiz' : '➡️ Next Question'}
+                            </button>
+                            
+                            {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
+                            {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
+                                <button
+                                    onClick={() => completeQuiz()}
+                                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-red-600 dark:hover:from-orange-700 dark:hover:to-red-700 transition-all transform hover:scale-105 shadow-lg"
+                                >
+                                    🏁 Finish Quiz
+                                </button>
+                            )}
+                        </div>
 
                         {/* Quiz Info */}
                         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
