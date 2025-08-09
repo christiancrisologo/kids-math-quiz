@@ -16,7 +16,7 @@ export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
-    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, correctAnswersCount, incorrectAnswersCount, quizStartTime } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, quizStartTime } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 

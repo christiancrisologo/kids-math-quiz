@@ -8,7 +8,6 @@ import { MobileButton } from '../../components/ui/MobileButton';
 import { MobileTile } from '../../components/ui/MobileTile';
 import { MobileInput } from '../../components/ui/MobileInput';
 import { FractionInput } from '../../components/ui/FractionInput';
-import { FunProgressBar } from '../../components/ui/FunProgressBar';
 import { playSound, vibrate } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
@@ -25,7 +24,6 @@ export default function QuizPage() {
         timeRemaining,
         isQuizActive,
         isQuizCompleted,
-        currentStreak,
         correctAnswersCount,
         incorrectAnswersCount,
         overallTimeRemaining,
@@ -459,7 +457,7 @@ export default function QuizPage() {
                         {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
                             <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-2 text-center ${animationClasses.pulse(systemSettings)}`}>
                                 <p className="text-red-700 dark:text-red-300 font-bold text-sm">
-                                    ⚠️ Time's Almost Up! {overallTimeRemaining} seconds remaining!
+                                    ⚠️ Time&apos;s Almost Up! {overallTimeRemaining} seconds remaining!
                                 </p>
                             </div>
                         )}
@@ -706,7 +704,7 @@ export default function QuizPage() {
                             {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
                                 <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-3 text-center mb-4 ${animationClasses.pulse(systemSettings)}`}>
                                     <p className="text-red-700 dark:text-red-300 font-bold">
-                                        ⚠️ Time's Almost Up! {overallTimeRemaining} seconds remaining!
+                                        ⚠️ Time&apos;s Almost Up! {overallTimeRemaining} seconds remaining!
                                     </p>
                                 </div>
                             )}
