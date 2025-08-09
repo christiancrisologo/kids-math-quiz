@@ -23,7 +23,6 @@ export interface YearLevelPreset {
   // Overall timer settings
   overallTimerEnabled: boolean;
   overallTimerDuration: number;
-  countdownModeEnabled: boolean;
 }
 
 export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
@@ -48,7 +47,6 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     // Overall timer settings - disabled for primary
     overallTimerEnabled: false,
     overallTimerDuration: 180, // 3 minutes
-    countdownModeEnabled: false,
   },
   'junior-high': {
     label: '📚 Junior High School',
@@ -71,7 +69,6 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     // Overall timer settings - optional for junior high
     overallTimerEnabled: false,
     overallTimerDuration: 600, // 10 minutes
-    countdownModeEnabled: false,
   },
   'senior-high': {
     label: '🎓 Senior High School',
@@ -91,10 +88,9 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 8,
     incorrectAnswersEnabled: false,
-    // Overall timer settings - enabled for senior high with countdown mode
+    // Overall timer settings - enabled for senior high
     overallTimerEnabled: true,
     overallTimerDuration: 900, // 15 minutes
-    countdownModeEnabled: true,
   }
 };
 
@@ -123,6 +119,5 @@ export const applyYearLevelPreset = (yearLevel: YearLevel) => {
     // Overall timer settings
     overallTimerEnabled: preset.overallTimerEnabled,
     overallTimerDuration: preset.overallTimerDuration,
-    countdownModeEnabled: preset.countdownModeEnabled,
   };
 };

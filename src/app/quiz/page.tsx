@@ -12,6 +12,7 @@ import { playSound, vibrate } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
 import { useQuestionTransition, getBlockingOverlayClasses } from '../../utils/question-transitions';
+import { getChallengeMode } from '../../utils/challengeModes';
 
 export default function QuizPage() {
     const router = useRouter();
@@ -111,16 +112,16 @@ export default function QuizPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timeRemaining, isQuizActive, settings.timerEnabled]);
 
-    // Handle overall timer timeout (countdown mode)
+    // Handle overall timer timeout
     useEffect(() => {
-        if (settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining === 0 && isQuizActive) {
-            // Force end the quiz when overall timer reaches 0 in countdown mode
+        if (settings.overallTimerEnabled && overallTimeRemaining === 0 && isQuizActive) {
+            // Force end the quiz when overall timer reaches 0
             playSound('incorrect', systemSettings); // Play warning sound
             vibrate(300, systemSettings); // Strong vibration
             completeQuiz();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [overallTimeRemaining, isQuizActive, settings.overallTimerEnabled, settings.countdownModeEnabled]);
+    }, [overallTimeRemaining, isQuizActive, settings.overallTimerEnabled]);
 
     // Redirect if no questions
     useEffect(() => {
@@ -385,7 +386,7 @@ export default function QuizPage() {
                     {/* Mobile Header - Fixed Top */}
                     <div className="bg-white dark:bg-slate-800 shadow-lg p-4 sticky top-0 z-10">
                         <div className="flex justify-between items-center mb-3">
-                            {/* Left side - Question number or score display */}
+                            {/* Left side - Question number and score display */}
                             <div className="flex items-center space-x-4">
                                 {settings.questionsEnabled ? (
                                     <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -410,6 +411,13 @@ export default function QuizPage() {
                                 </div>
                             </div>
 
+                            {/* Center - Username */}
+                            <div className="flex-1 text-center">
+                                <h1 className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                                    {settings.username}
+                                </h1>
+                            </div>
+
                             {/* Right side - Timer */}
                             <div className="flex items-center space-x-3">
                                 {/* Question Timer - shown if enabled */}
@@ -424,7 +432,7 @@ export default function QuizPage() {
 
                                 {/* Overall Timer - shown if enabled */}
                                 {settings.overallTimerEnabled && overallTimerActive && (
-                                    <div className={`text-lg font-bold px-3 py-1 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                    <div className={`text-lg font-bold px-3 py-1 rounded-lg ${overallTimeRemaining <= 30
                                         ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
                                         : overallTimeRemaining <= 60
                                             ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
@@ -453,8 +461,8 @@ export default function QuizPage() {
                             </div>
                         )}
 
-                        {/* Countdown Warning - Show when countdown mode is enabled and time is low */}
-                        {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
+                        {/* Countdown Warning - Show when time is low */}
+                        {settings.overallTimerEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
                             <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-2 text-center ${animationClasses.pulse(systemSettings)}`}>
                                 <p className="text-red-700 dark:text-red-300 font-bold text-sm">
                                     ⚠️ Time&apos;s Almost Up! {overallTimeRemaining} seconds remaining!
@@ -465,13 +473,6 @@ export default function QuizPage() {
 
                     {/* Mobile Content Area */}
                     <div className="flex-1 flex flex-col p-4">
-                        {/* Greeting */}
-                        <div className="text-center mb-6">
-                            <h1 className="text-lg font-bold text-white">
-                                Hi {settings.username}! 👋🌟 Let&apos;s solve some fun problems! 🎲✨
-                            </h1>
-                        </div>
-
                         {/* Question Card */}
                         <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg p-4 mb-4 flex-1 flex items-center justify-center max-h-fit ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
                             <div className="text-center">
@@ -623,6 +624,21 @@ export default function QuizPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Challenge Mode Container - Bottom */}
+                        {settings.challengeMode && (
+                            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 border-t border-purple-200 dark:border-purple-700">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center space-x-2 mb-2">
+                                        <span className="text-purple-600 dark:text-purple-400 font-semibold text-sm">🏆 Challenge:</span>
+                                        <span className="font-bold text-purple-800 dark:text-purple-300 text-sm">{settings.challengeMode}</span>
+                                    </div>
+                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                                        📋 {getChallengeMode(settings.challengeMode)?.description}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : (
@@ -631,9 +647,6 @@ export default function QuizPage() {
                     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl relative">
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                                Hi {settings.username}! 👋
-                            </h1>
                             <div className="flex justify-between items-center mb-4">
                                 {/* Left side - Question number and score */}
                                 <div className="flex items-center space-x-6">
@@ -660,6 +673,13 @@ export default function QuizPage() {
                                     </div>
                                 </div>
 
+                                {/* Center - Username */}
+                                <div className="flex-1 text-center">
+                                    <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                        {settings.username}
+                                    </h1>
+                                </div>
+
                                 {/* Right side - Timer */}
                                 <div className="flex items-center space-x-6">
                                     {/* Question Timer - shown if enabled */}
@@ -671,7 +691,7 @@ export default function QuizPage() {
 
                                     {/* Overall Timer - shown if enabled */}
                                     {settings.overallTimerEnabled && overallTimerActive && (
-                                        <div className={`text-xl font-bold px-4 py-2 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                        <div className={`text-xl font-bold px-4 py-2 rounded-lg ${overallTimeRemaining <= 30
                                             ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
                                             : overallTimeRemaining <= 60
                                                 ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
@@ -700,8 +720,8 @@ export default function QuizPage() {
                                 </div>
                             )}
 
-                            {/* Countdown Warning for Desktop - Show when countdown mode is enabled and time is low */}
-                            {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
+                            {/* Countdown Warning for Desktop - Show when time is low */}
+                            {settings.overallTimerEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
                                 <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-3 text-center mb-4 ${animationClasses.pulse(systemSettings)}`}>
                                     <p className="text-red-700 dark:text-red-300 font-bold">
                                         ⚠️ Time&apos;s Almost Up! {overallTimeRemaining} seconds remaining!
@@ -844,6 +864,21 @@ export default function QuizPage() {
                                 op.charAt(0).toUpperCase() + op.slice(1)
                             ).join(', ')}</p>
                         </div>
+
+                        {/* Challenge Mode Container - Bottom */}
+                        {settings.challengeMode && (
+                            <div className="mt-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center space-x-2 mb-2">
+                                        <span className="text-purple-600 dark:text-purple-400 font-semibold">🏆 Challenge:</span>
+                                        <span className="font-bold text-purple-800 dark:text-purple-300">{settings.challengeMode}</span>
+                                    </div>
+                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">
+                                        📋 {getChallengeMode(settings.challengeMode)?.description}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

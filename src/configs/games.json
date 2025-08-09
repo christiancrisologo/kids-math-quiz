@@ -1,0 +1,337 @@
+{
+    "challenges": [
+        {
+            "name": "No Challenge",
+            "description": "Standard quiz with no special restrictions",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 10,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 10,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0
+            }
+        },
+        {
+            "name": "Perfect Score",
+            "description": "Get all questions right - no mistakes allowed!",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 10,
+                "maxCorrectAnswers": 10,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 0,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 10,
+                "timerPerQuestion": 15
+            }
+        },
+        {
+            "name": "Speed Challenge",
+            "description": "Beat the clock! Complete 15 questions in 3 minutes",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 15,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 15,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": true,
+                "overallTimerDuration": 180,
+                "numberOfQuestions": 15,
+                "timerPerQuestion": 8
+            }
+        },
+        {
+            "name": "Endurance Test",
+            "description": "Complete 20 questions with maximum 3 incorrect answers",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 20,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 3,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 20,
+                "timerPerQuestion": 12
+            }
+        },
+        {
+            "name": "Lightning Round",
+            "description": "Answer 8 questions correctly in just 2 minutes!",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": false,
+                "minCorrectAnswers": 8,
+                "maxCorrectAnswers": 8,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 20,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": true,
+                "overallTimerDuration": 120,
+                "numberOfQuestions": 20,
+                "timerPerQuestion": 5
+            }
+        },
+        {
+            "name": "Quick Fire",
+            "description": "Super fast! 5 seconds per question, 12 questions total",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 12,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 12,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 12,
+                "timerPerQuestion": 5
+            }
+        },
+        {
+            "name": "Streak Master",
+            "description": "Get 5 questions right in a row with only 1 mistake allowed",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": false,
+                "minCorrectAnswers": 5,
+                "maxCorrectAnswers": 5,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 1,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 10,
+                "timerPerQuestion": 12
+            }
+        },
+        {
+            "name": "Marathon Mode",
+            "description": "Epic challenge! 30 questions with 5 minutes total time",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 30,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 30,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": true,
+                "overallTimerDuration": 300,
+                "numberOfQuestions": 30,
+                "timerPerQuestion": 10
+            }
+        },
+        {
+            "name": "Precision Test",
+            "description": "Get 15 out of 16 questions correct - almost perfect!",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 15,
+                "maxCorrectAnswers": 15,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 1,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 16,
+                "timerPerQuestion": 15
+            }
+        },
+        {
+            "name": "Time Pressure",
+            "description": "Limited time! 7 seconds per question for 10 questions",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 10,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 10,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 10,
+                "timerPerQuestion": 7
+            }
+        },
+        {
+            "name": "One Shot Wonder",
+            "description": "Ultimate challenge! Get 3 questions right with zero mistakes",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 3,
+                "maxCorrectAnswers": 3,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 0,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 3,
+                "timerPerQuestion": 20
+            }
+        },
+        {
+            "name": "Survivor Mode",
+            "description": "Keep going until you get 3 wrong - how many can you get right?",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": false,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 50,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 3,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 50,
+                "timerPerQuestion": 15
+            }
+        },
+        {
+            "name": "Rush Hour",
+            "description": "Crazy fast! Complete 20 questions in 90 seconds",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 20,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 20,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": true,
+                "overallTimerDuration": 90,
+                "numberOfQuestions": 20,
+                "timerPerQuestion": 4
+            }
+        },
+        {
+            "name": "Steady Pace",
+            "description": "Relaxed mode! 25 seconds per question, take your time",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": true,
+                "minCorrectAnswers": 0,
+                "maxCorrectAnswers": 8,
+                "correctAnswersEnabled": false,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 8,
+                "incorrectAnswersEnabled": false,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 8,
+                "timerPerQuestion": 25
+            }
+        },
+        {
+            "name": "Double or Nothing",
+            "description": "High stakes! Get 6 right with maximum 2 wrong answers",
+            "settings": {
+                "timerEnabled": true,
+                "questionsEnabled": false,
+                "minCorrectAnswers": 6,
+                "maxCorrectAnswers": 6,
+                "correctAnswersEnabled": true,
+                "minIncorrectAnswers": 0,
+                "maxIncorrectAnswers": 2,
+                "incorrectAnswersEnabled": true,
+                "overallTimerEnabled": false,
+                "overallTimerDuration": 0,
+                "numberOfQuestions": 15,
+                "timerPerQuestion": 18
+            }
+        }
+    ],
+    "yearLevel": [
+        {
+            "name": "primary",
+            "label": "🎒 Primary School",
+            "difficulty": "easy",
+            "numberOfQuestions": 5,
+            "timerPerQuestion": 12,
+            "questionType": ["multiple-choice"],
+            "mathOperations": ["addition", "subtraction", "multiplication", "division"],
+            "numberTypes": ["integers"],
+            "description": "Basic math for young learners",
+            "timerEnabled": true,
+            "questionsEnabled": true,
+            "minCorrectAnswers": 0,
+            "maxCorrectAnswers": 5,
+            "correctAnswersEnabled": false,
+            "minIncorrectAnswers": 0,
+            "maxIncorrectAnswers": 3,
+            "incorrectAnswersEnabled": false,
+            "overallTimerEnabled": false,
+            "overallTimerDuration": 180
+        },
+        {
+            "name": "junior-high",
+            "label": "📚 Junior High School",
+            "difficulty": "easy",
+            "numberOfQuestions": 10,
+            "timerPerQuestion": 10,
+            "questionType": ["expression", "multiple-choice"],
+            "mathOperations": ["addition", "subtraction", "multiplication", "division", "algebraic"],
+            "numberTypes": ["integers", "decimals", "fractions", "currency", "time"],
+            "description": "Intermediate math concepts",
+            "timerEnabled": true,
+            "questionsEnabled": true,
+            "minCorrectAnswers": 0,
+            "maxCorrectAnswers": 10,
+            "correctAnswersEnabled": false,
+            "minIncorrectAnswers": 0,
+            "maxIncorrectAnswers": 5,
+            "incorrectAnswersEnabled": false,
+            "overallTimerEnabled": false,
+            "overallTimerDuration": 600
+        },
+        {
+            "name": "senior-high",
+            "label": "🎓 Senior High School",
+            "difficulty": "hard",
+            "numberOfQuestions": 15,
+            "timerPerQuestion": 8,
+            "questionType": ["expression", "multiple-choice"],
+            "mathOperations": ["addition", "subtraction", "multiplication", "division", "algebraic"],
+            "numberTypes": ["integers", "decimals", "fractions", "currency", "time"],
+            "description": "Advanced math challenges",
+            "timerEnabled": true,
+            "questionsEnabled": true,
+            "minCorrectAnswers": 0,
+            "maxCorrectAnswers": 15,
+            "correctAnswersEnabled": false,
+            "minIncorrectAnswers": 0,
+            "maxIncorrectAnswers": 8,
+            "incorrectAnswersEnabled": false,
+            "overallTimerEnabled": true,
+            "overallTimerDuration": 900
+        }
+    ]
+}
