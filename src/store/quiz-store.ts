@@ -4,14 +4,15 @@ import { userPreferencesStorage, gameHistoryStorage, GameResult } from '../utils
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
-export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic';
+export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division' | 'algebraic' | 'binomial';
 export type NumberType = 'integers' | 'decimals' | 'fractions' | 'currency' | 'time';
 
 export interface Question {
   id: string;
   question: string;
   answer: number;
-  variable?: string; // e.g., "x", "y" for algebraic questions
+  variable?: string; // e.g., "x", "y" for algebraic questions, or "x,y" for binomial
+  variables?: string[]; // Array of variables for multi-variable equations like binomials
   equation?: string; // Original equation for display
   userAnswer?: number;
   isCorrect?: boolean;
