@@ -482,6 +482,11 @@ export default function QuizPage() {
                                             <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
                                             <div>{currentQuestion.question}</div>
                                         </div>
+                                    ) : currentQuestion.variables && currentQuestion.variables.length > 0 ? (
+                                        <div>
+                                            <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variables.join(' and ')}:</div>
+                                            <div>{currentQuestion.question}</div>
+                                        </div>
                                     ) : (
                                         `${currentQuestion.question} = ?`
                                     )}
@@ -505,7 +510,11 @@ export default function QuizPage() {
                                         <MobileInput
                                             ref={inputRef}
                                             type="number"
-                                            placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Your answer"}
+                                            placeholder={
+                                                currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
+                                                currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
+                                                "Your answer"
+                                            }
                                             value={userInput}
                                             onChange={setUserInput}
                                             inputMode="numeric"
@@ -738,6 +747,11 @@ export default function QuizPage() {
                                         <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
                                         <div>{currentQuestion.question}</div>
                                     </div>
+                                ) : currentQuestion.variables && currentQuestion.variables.length > 0 ? (
+                                    <div>
+                                        <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variables.join(' and ')}:</div>
+                                        <div>{currentQuestion.question}</div>
+                                    </div>
                                 ) : (
                                     `${currentQuestion.question} = ?`
                                 )}
@@ -764,7 +778,11 @@ export default function QuizPage() {
                                             onChange={(e) => setUserInput(e.target.value)}
                                             onKeyDown={handleKeyPress}
                                             className="w-full px-6 py-4 text-3xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
-                                            placeholder={currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` : "Enter your answer"}
+                                            placeholder={
+                                                currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
+                                                currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
+                                                "Enter your answer"
+                                            }
                                             autoFocus
                                             inputMode="numeric"
                                         />

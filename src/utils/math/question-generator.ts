@@ -118,6 +118,184 @@ const generateAlgebraicQuestion = (difficulty: Difficulty): { question: string; 
   }
 };
 
+const generateBinomialQuestion = (difficulty: Difficulty): { 
+  question: string; 
+  answer: number; 
+  variables?: string[];
+  equation?: string;
+} => {
+  if (difficulty === 'easy') {
+    // Simple binomial expressions: (x + a)(x + b) = c or (x + a)² = c
+    const questionTypes = ['expand', 'solve_expanded', 'square'];
+    const questionType = questionTypes[getRandomNumber(0, questionTypes.length - 1)];
+    
+    switch (questionType) {
+      case 'expand': {
+        // Expand (x + a)(x + b) and find coefficient or value
+        const a = getRandomNumber(1, 5);
+        const b = getRandomNumber(1, 5);
+        // (x + a)(x + b) = x² + (a+b)x + ab
+        const linearCoeff = a + b;
+        const constant = a * b;
+        
+        // Ask for one of the coefficients
+        const askFor = Math.random() > 0.5 ? 'linear' : 'constant';
+        if (askFor === 'linear') {
+          return {
+            question: `(x + ${a})(x + ${b}) = x² + ?x + ${constant}`,
+            answer: linearCoeff,
+            variables: ['x'],
+            equation: `(x + ${a})(x + ${b})`
+          };
+        } else {
+          return {
+            question: `(x + ${a})(x + ${b}) = x² + ${linearCoeff}x + ?`,
+            answer: constant,
+            variables: ['x'],
+            equation: `(x + ${a})(x + ${b})`
+          };
+        }
+      }
+      
+      case 'solve_expanded': {
+        // Given expanded form, solve for x: x² + bx + c = 0
+        // Use simple factorable quadratics: (x + p)(x + q) = 0
+        const p = getRandomNumber(1, 6);
+        const q = getRandomNumber(1, 6);
+        const b = p + q;
+        const c = p * q;
+        
+        // Solutions are x = -p or x = -q, we'll ask for the positive solution if one exists
+        const solutions = [-p, -q].sort((a, b) => b - a); // Sort descending
+        const answer = solutions.find(x => x >= 0) ?? solutions[0]; // Prefer positive, fallback to largest
+        
+        return {
+          question: `x² + ${b}x + ${c} = 0`,
+          answer: Math.abs(answer), // Take absolute value for easier input
+          variables: ['x'],
+          equation: `x² + ${b}x + ${c} = 0`
+        };
+      }
+      
+      case 'square': {
+        // Perfect square: (x + a)² = x² + 2ax + a²
+        const a = getRandomNumber(2, 6);
+        const linearCoeff = 2 * a;
+        const constant = a * a;
+        
+        return {
+          question: `(x + ${a})² = x² + ${linearCoeff}x + ?`,
+          answer: constant,
+          variables: ['x'],
+          equation: `(x + ${a})²`
+        };
+      }
+      
+      default: {
+        const a = getRandomNumber(1, 5);
+        const b = getRandomNumber(1, 5);
+        const constant = a * b;
+        return {
+          question: `(x + ${a})(x + ${b}) = x² + ${a + b}x + ?`,
+          answer: constant,
+          variables: ['x'],
+          equation: `(x + ${a})(x + ${b})`
+        };
+      }
+    }
+  } else {
+    // Hard: More complex binomial expressions and two-variable problems
+    const questionTypes = ['two_variable', 'complex_binomial', 'difference_of_squares'];
+    const questionType = questionTypes[getRandomNumber(0, questionTypes.length - 1)];
+    
+    switch (questionType) {
+      case 'two_variable': {
+        // Two variables: (x + a)(y + b) = xy + bx + ay + ab
+        const a = getRandomNumber(1, 4);
+        const b = getRandomNumber(1, 4);
+        const coeff_xy = 1;
+        const coeff_x = b;
+        const coeff_y = a;
+        const constant = a * b;
+        
+        // Ask for one coefficient
+        const askFor = ['x_coeff', 'y_coeff', 'constant'][getRandomNumber(0, 2)];
+        if (askFor === 'x_coeff') {
+          return {
+            question: `(x + ${a})(y + ${b}) = xy + ?x + ${coeff_y}y + ${constant}`,
+            answer: coeff_x,
+            variables: ['x', 'y'],
+            equation: `(x + ${a})(y + ${b})`
+          };
+        } else if (askFor === 'y_coeff') {
+          return {
+            question: `(x + ${a})(y + ${b}) = xy + ${coeff_x}x + ?y + ${constant}`,
+            answer: coeff_y,
+            variables: ['x', 'y'],
+            equation: `(x + ${a})(y + ${b})`
+          };
+        } else {
+          return {
+            question: `(x + ${a})(y + ${b}) = xy + ${coeff_x}x + ${coeff_y}y + ?`,
+            answer: constant,
+            variables: ['x', 'y'],
+            equation: `(x + ${a})(y + ${b})`
+          };
+        }
+      }
+      
+      case 'complex_binomial': {
+        // More complex single variable: (ax + b)(cx + d)
+        const a = getRandomNumber(2, 4);
+        const b = getRandomNumber(1, 5);
+        const c = getRandomNumber(2, 4);
+        const d = getRandomNumber(1, 5);
+        
+        // (ax + b)(cx + d) = acx² + (ad + bc)x + bd
+        const x2_coeff = a * c;
+        const x_coeff = a * d + b * c;
+        const constant = b * d;
+        
+        return {
+          question: `(${a}x + ${b})(${c}x + ${d}) = ${x2_coeff}x² + ?x + ${constant}`,
+          answer: x_coeff,
+          variables: ['x'],
+          equation: `(${a}x + ${b})(${c}x + ${d})`
+        };
+      }
+      
+      case 'difference_of_squares': {
+        // Difference of squares: (x + a)(x - a) = x² - a²
+        const a = getRandomNumber(2, 8);
+        const constant = a * a;
+        
+        return {
+          question: `(x + ${a})(x - ${a}) = x² - ?`,
+          answer: constant,
+          variables: ['x'],
+          equation: `(x + ${a})(x - ${a})`
+        };
+      }
+      
+      default: {
+        const a = getRandomNumber(2, 4);
+        const b = getRandomNumber(1, 5);
+        const c = getRandomNumber(2, 4);
+        const d = getRandomNumber(1, 5);
+        const x_coeff = a * d + b * c;
+        const constant = b * d;
+        
+        return {
+          question: `(${a}x + ${b})(${c}x + ${d}) = ${a * c}x² + ?x + ${constant}`,
+          answer: x_coeff,
+          variables: ['x'],
+          equation: `(${a}x + ${b})(${c}x + ${d})`
+        };
+      }
+    }
+  }
+};
+
 const generateFractionQuestion = (difficulty: Difficulty): { question: string; answer: number; fractionAnswer: string } => {
   const operations = ['addition', 'subtraction', 'multiplication', 'division'];
   const operation = operations[getRandomNumber(0, operations.length - 1)];
@@ -196,8 +374,43 @@ const generateQuestionByOperation = (operation: MathOperation, difficulty: Diffi
       return generateDivisionQuestion(difficulty);
     case 'algebraic':
       return generateAlgebraicQuestion(difficulty);
+    case 'binomial':
+      return generateBinomialQuestion(difficulty);
     default:
       return generateAdditionQuestion(difficulty);
+  }
+};
+
+const generateDecimalBinomialQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
+  if (difficulty === 'easy') {
+    // Simple binomial with decimal coefficients: (x + a.b)(x + c.d)
+    const a = (getRandomNumber(10, 30) / 10); // 1.0 to 3.0
+    const b = (getRandomNumber(10, 30) / 10); // 1.0 to 3.0
+    
+    // (x + a)(x + b) = x² + (a+b)x + ab
+    const linearCoeff = +(a + b).toFixed(1);
+    const constant = +(a * b).toFixed(2);
+    
+    return {
+      question: `(x + ${a})(x + ${b}) = x² + ${linearCoeff}x + ?`,
+      answer: constant
+    };
+  } else {
+    // More complex with decimal coefficients
+    const a = (getRandomNumber(15, 45) / 10); // 1.5 to 4.5
+    const b = (getRandomNumber(20, 60) / 10); // 2.0 to 6.0
+    const c = (getRandomNumber(10, 25) / 10); // 1.0 to 2.5
+    const d = (getRandomNumber(15, 35) / 10); // 1.5 to 3.5
+    
+    // (ax + b)(cx + d) = acx² + (ad + bc)x + bd
+    const x2_coeff = +(a * c).toFixed(2);
+    const x_coeff = +(a * d + b * c).toFixed(2);
+    const constant = +(b * d).toFixed(2);
+    
+    return {
+      question: `(${a}x + ${b})(${c}x + ${d}) = ${x2_coeff}x² + ?x + ${constant}`,
+      answer: x_coeff
+    };
   }
 };
 
@@ -319,6 +532,8 @@ const generateDecimalQuestionByOperation = (operation: MathOperation, difficulty
       return generateDecimalDivisionQuestion(difficulty);
     case 'algebraic':
       return generateDecimalAlgebraicQuestion(difficulty);
+    case 'binomial':
+      return generateDecimalBinomialQuestion(difficulty);
     default:
       return generateDecimalAdditionQuestion(difficulty);
   }
@@ -330,8 +545,8 @@ const generateCurrencyQuestionByOperation = (operation: MathOperation, difficult
   answer: number;
   displayAnswer?: string;
 } => {
-  // Currency doesn't support algebraic expressions as per requirements
-  if (operation === 'algebraic') {
+  // Currency doesn't support algebraic or binomial expressions as per requirements
+  if (operation === 'algebraic' || operation === 'binomial') {
     operation = 'addition'; // Fallback to addition
   }
 
@@ -380,8 +595,8 @@ const generateTimeQuestionByOperation = (operation: MathOperation, difficulty: D
   answer: number;
   displayAnswer?: string;
 } => {
-  // Time doesn't support algebraic expressions as per requirements
-  if (operation === 'algebraic') {
+  // Time doesn't support algebraic or binomial expressions as per requirements
+  if (operation === 'algebraic' || operation === 'binomial') {
     operation = 'addition'; // Fallback to addition
   }
 
@@ -455,6 +670,8 @@ const generateQuestionByOperationAndNumberType = (
   answer: number; 
   fractionAnswer?: string;
   displayAnswer?: string; // For currency and time formatting
+  variables?: string[];
+  equation?: string;
 } => {
   // For fraction number type, use fraction-specific questions
   if (numberType === 'fractions') {
@@ -549,9 +766,15 @@ export const generateQuestions = (
       }
     }
     
-    // For algebraic questions, add variable and equation info
+    // For algebraic and binomial questions, add variable and equation info
     if (randomOperation === 'algebraic' || result.question.includes('x')) {
       questionObj.variable = 'x';
+      questionObj.equation = result.question;
+    }
+    
+    // For binomial questions, add variables array
+    if (randomOperation === 'binomial' && result.variables) {
+      questionObj.variables = result.variables;
       questionObj.equation = result.question;
     }
     
