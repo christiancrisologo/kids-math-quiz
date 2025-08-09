@@ -413,7 +413,7 @@ export default function QuizPage() {
 
                             {/* Center - Username */}
                             <div className="flex-1 text-center">
-                                <h1 className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                                <h1 className="text-lg font-bold text-gray-800 dark:text-gray-200">
                                     {settings.username}
                                 </h1>
                             </div>
@@ -422,7 +422,7 @@ export default function QuizPage() {
                             <div className="flex items-center space-x-3">
                                 {/* Question Timer - shown if enabled */}
                                 {settings.timerEnabled && (
-                                    <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
+                                    <div className={`text-sm font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
                                         ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
                                         : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
                                         }`}>
@@ -432,7 +432,7 @@ export default function QuizPage() {
 
                                 {/* Overall Timer - shown if enabled */}
                                 {settings.overallTimerEnabled && overallTimerActive && (
-                                    <div className={`text-lg font-bold px-3 py-1 rounded-lg ${overallTimeRemaining <= 30
+                                    <div className={`text-sm font-bold px-3 py-1 rounded-lg ${overallTimeRemaining <= 30
                                         ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
                                         : overallTimeRemaining <= 60
                                             ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
@@ -476,10 +476,10 @@ export default function QuizPage() {
                         {/* Question Card */}
                         <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg p-4 mb-4 flex-1 flex items-center justify-center max-h-fit ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
                             <div className="text-center">
-                                <div className="text-5xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                                <div className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                                     {currentQuestion.variable ? (
                                         <div>
-                                            <div className="text-base text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
+                                            <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
                                             <div>{currentQuestion.question}</div>
                                         </div>
                                     ) : (
