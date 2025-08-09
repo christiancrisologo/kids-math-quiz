@@ -20,6 +20,10 @@ export interface YearLevelPreset {
   minIncorrectAnswers: number;
   maxIncorrectAnswers: number;
   incorrectAnswersEnabled: boolean;
+  // Overall timer settings
+  overallTimerEnabled: boolean;
+  overallTimerDuration: number;
+  countdownModeEnabled: boolean;
 }
 
 export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
@@ -41,6 +45,10 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 3,
     incorrectAnswersEnabled: false,
+    // Overall timer settings - disabled for primary
+    overallTimerEnabled: false,
+    overallTimerDuration: 180, // 3 minutes
+    countdownModeEnabled: false,
   },
   'junior-high': {
     label: '📚 Junior High School',
@@ -60,6 +68,10 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 5,
     incorrectAnswersEnabled: false,
+    // Overall timer settings - optional for junior high
+    overallTimerEnabled: false,
+    overallTimerDuration: 600, // 10 minutes
+    countdownModeEnabled: false,
   },
   'senior-high': {
     label: '🎓 Senior High School',
@@ -79,6 +91,10 @@ export const yearLevelPresets: Record<YearLevel, YearLevelPreset> = {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 8,
     incorrectAnswersEnabled: false,
+    // Overall timer settings - enabled for senior high with countdown mode
+    overallTimerEnabled: true,
+    overallTimerDuration: 900, // 15 minutes
+    countdownModeEnabled: true,
   }
 };
 
@@ -104,5 +120,9 @@ export const applyYearLevelPreset = (yearLevel: YearLevel) => {
     minIncorrectAnswers: preset.minIncorrectAnswers,
     maxIncorrectAnswers: preset.maxIncorrectAnswers,
     incorrectAnswersEnabled: preset.incorrectAnswersEnabled,
+    // Overall timer settings
+    overallTimerEnabled: preset.overallTimerEnabled,
+    overallTimerDuration: preset.overallTimerDuration,
+    countdownModeEnabled: preset.countdownModeEnabled,
   };
 };

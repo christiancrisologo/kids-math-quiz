@@ -28,6 +28,8 @@ export default function QuizPage() {
         currentStreak,
         correctAnswersCount,
         incorrectAnswersCount,
+        overallTimeRemaining,
+        overallTimerActive,
         startQuiz,
         nextQuestion,
         submitAnswer,
@@ -35,6 +37,7 @@ export default function QuizPage() {
         submitCurrencyAnswer,
         submitTimeAnswer,
         setTimeRemaining,
+        setOverallTimeRemaining,
         completeQuiz,
     } = useQuizStore();
 
@@ -91,6 +94,17 @@ export default function QuizPage() {
         return () => clearInterval(timer);
     }, [isQuizActive, timeRemaining, setTimeRemaining, isUserInteractionBlocked, settings.timerEnabled]);
 
+    // Overall timer logic - separate from question timer
+    useEffect(() => {
+        if (!isQuizActive || !settings.overallTimerEnabled || !overallTimerActive || overallTimeRemaining <= 0) return;
+
+        const overallTimer = setInterval(() => {
+            setOverallTimeRemaining(overallTimeRemaining - 1);
+        }, 1000);
+
+        return () => clearInterval(overallTimer);
+    }, [isQuizActive, overallTimeRemaining, setOverallTimeRemaining, settings.overallTimerEnabled, overallTimerActive]);
+
     // Auto-advance when timer reaches 0 (only if timer is enabled)
     useEffect(() => {
         if (settings.timerEnabled && timeRemaining === 0 && isQuizActive) {
@@ -98,6 +112,17 @@ export default function QuizPage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timeRemaining, isQuizActive, settings.timerEnabled]);
+
+    // Handle overall timer timeout (countdown mode)
+    useEffect(() => {
+        if (settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining === 0 && isQuizActive) {
+            // Force end the quiz when overall timer reaches 0 in countdown mode
+            playSound('incorrect', systemSettings); // Play warning sound
+            vibrate(300, systemSettings); // Strong vibration
+            completeQuiz();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [overallTimeRemaining, isQuizActive, settings.overallTimerEnabled, settings.countdownModeEnabled]);
 
     // Redirect if no questions
     useEffect(() => {
@@ -373,7 +398,7 @@ export default function QuizPage() {
                                         Question {currentQuestionIndex + 1}
                                     </span>
                                 )}
-                                
+
                                 {/* Minimalist Score Display */}
                                 <div className="flex items-center space-x-3 text-sm">
                                     <div className="flex items-center space-x-1">
@@ -386,32 +411,62 @@ export default function QuizPage() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Right side - Timer */}
-                            {settings.timerEnabled && (
-                                <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
-                                    ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                    : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
-                                    }`}>
-                                    ⏰ {timeRemaining}s
-                                </div>
-                            )}
+                            <div className="flex flex-col items-end space-y-1">
+                                {/* Overall Timer - shown if enabled */}
+                                {settings.overallTimerEnabled && overallTimerActive && (
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">Game Timer</span>
+                                        <div className={`text-lg font-bold px-3 py-1 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                            : overallTimeRemaining <= 60
+                                                ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
+                                                : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                            }`}>
+                                            🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Question Timer - shown if enabled */}
+                                {settings.timerEnabled && (
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">Quiz Timer</span>
+                                        <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
+                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                            : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
+                                            }`}>
+                                            ⏰ {timeRemaining}s
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Enhanced Progress Bar - Only for questions enabled mode */}
                         {settings.questionsEnabled ? (
                             <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-4">
-                                <div 
+                                <div
                                     className="h-full bg-gradient-to-r from-purple-400 to-blue-500 rounded-full transition-all duration-300"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
                         ) : (
                             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                                <div 
+                                <div
                                     className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
                                     style={{ width: `${Math.min(100, (correctAnswersCount / Math.max(1, correctAnswersCount + incorrectAnswersCount)) * 100)}%` }}
                                 />
+                            </div>
+                        )}
+
+                        {/* Countdown Warning - Show when countdown mode is enabled and time is low */}
+                        {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
+                            <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-2 text-center ${animationClasses.pulse(systemSettings)}`}>
+                                <p className="text-red-700 dark:text-red-300 font-bold text-sm">
+                                    ⚠️ Time's Almost Up! {overallTimeRemaining} seconds remaining!
+                                </p>
                             </div>
                         )}
                     </div>
@@ -480,7 +535,7 @@ export default function QuizPage() {
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
                                     </MobileButton>
-                                    
+
                                     {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
                                     {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
                                         <MobileButton
@@ -559,7 +614,7 @@ export default function QuizPage() {
                                     >
                                         {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
                                     </MobileButton>
-                                    
+
                                     {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
                                     {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
                                         <MobileButton
@@ -599,7 +654,7 @@ export default function QuizPage() {
                                             Question {currentQuestionIndex + 1}
                                         </span>
                                     )}
-                                    
+
                                     {/* Minimalist Score Display */}
                                     <div className="flex items-center space-x-4 text-sm">
                                         <div className="flex items-center space-x-1">
@@ -612,29 +667,59 @@ export default function QuizPage() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Right side - Timer */}
-                                {settings.timerEnabled && (
-                                    <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
-                                        ⏰ {timeRemaining}s
-                                    </div>
-                                )}
+                                <div className="flex items-center space-x-6">
+                                    {/* Overall Timer - shown if enabled */}
+                                    {settings.overallTimerEnabled && overallTimerActive && (
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Game Timer</span>
+                                            <div className={`text-xl font-bold px-4 py-2 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                                ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                                : overallTimeRemaining <= 60
+                                                    ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
+                                                    : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                                }`}>
+                                                🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Question Timer - shown if enabled */}
+                                    {settings.timerEnabled && (
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Quiz Timer</span>
+                                            <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
+                                                ⏰ {timeRemaining}s
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Enhanced Progress Bar - Only for questions enabled mode */}
                             {settings.questionsEnabled ? (
                                 <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
-                                    <div 
+                                    <div
                                         className="h-full bg-gradient-to-r from-purple-400 to-blue-500 rounded-full transition-all duration-300"
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
                             ) : (
                                 <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6">
-                                    <div 
+                                    <div
                                         className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-300"
                                         style={{ width: `${Math.min(100, (correctAnswersCount / Math.max(1, correctAnswersCount + incorrectAnswersCount)) * 100)}%` }}
                                     />
+                                </div>
+                            )}
+
+                            {/* Countdown Warning for Desktop - Show when countdown mode is enabled and time is low */}
+                            {settings.overallTimerEnabled && settings.countdownModeEnabled && overallTimeRemaining <= 5 && overallTimeRemaining > 0 && (
+                                <div className={`bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-lg p-3 text-center mb-4 ${animationClasses.pulse(systemSettings)}`}>
+                                    <p className="text-red-700 dark:text-red-300 font-bold">
+                                        ⚠️ Time's Almost Up! {overallTimeRemaining} seconds remaining!
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -755,7 +840,7 @@ export default function QuizPage() {
                             >
                                 {currentQuestionIndex >= questions.length - 1 ? '🏁 Finish Quiz' : '➡️ Next Question'}
                             </button>
-                            
+
                             {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
                             {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
                                 <button

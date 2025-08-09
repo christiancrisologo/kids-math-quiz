@@ -181,17 +181,25 @@ export default function ResultsPage() {
                             <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3 text-center">
                                 <div className="text-2xl mb-1">⏱️</div>
                                 <div className="font-bold text-purple-800 dark:text-purple-300 text-lg">
-                                    {quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : 0}s
+                                    {quizStartTime ? (() => {
+                                        const totalSeconds = Math.round((Date.now() - quizStartTime) / 1000);
+                                        const minutes = Math.floor(totalSeconds / 60);
+                                        const seconds = totalSeconds % 60;
+                                        return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+                                    })() : '0m'}
                                 </div>
                                 <div className="text-xs text-purple-600 dark:text-purple-400">Total Duration</div>
                             </div>
                         </div>
 
-                        {/* Average Score */}
+                        {/* Average Time per Question */}
                         <div className="mt-4 text-center">
                             <div className="bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 inline-block">
                                 <div className="font-bold text-gray-800 dark:text-gray-200">
-                                    📈 Average Score: {questions.length > 0 ? Math.round(questions.reduce((total, q) => total + (q.timeSpent || 0), 0) / questions.length) : 0}s per question
+                                    📈 Average Time per Question
+                                </div>
+                                <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                                    {questions.length > 0 ? Math.round(questions.reduce((total, q) => total + (q.timeSpent || 0), 0) / questions.length) : 0}s
                                 </div>
                             </div>
                         </div>

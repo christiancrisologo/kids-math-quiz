@@ -44,6 +44,10 @@ export interface QuizSettings {
   minIncorrectAnswers: number;
   maxIncorrectAnswers: number;
   incorrectAnswersEnabled: boolean;
+  // Overall timer settings
+  overallTimerEnabled: boolean;
+  overallTimerDuration: number; // in seconds
+  countdownModeEnabled: boolean; // when true, counts down from max to 0
 }
 
 export interface QuizState {
@@ -64,6 +68,10 @@ export interface QuizState {
   incorrectAnswersCount: number;
   quizStartTime: number | null;
   
+  // Overall timer state
+  overallTimeRemaining: number;
+  overallTimerActive: boolean;
+  
   // Actions
   updateSettings: (settings: Partial<QuizSettings>) => void;
   setQuestions: (questions: Question[]) => void;
@@ -74,6 +82,7 @@ export interface QuizState {
   submitCurrencyAnswer: (currencyAnswer: string) => void;
   submitTimeAnswer: (timeAnswer: string) => void;
   setTimeRemaining: (time: number) => void;
+  setOverallTimeRemaining: (time: number) => void;
   completeQuiz: () => void;
   resetQuiz: () => void;
   retryQuiz: (questions: Question[]) => void;
@@ -102,6 +111,10 @@ const defaultSettings: QuizSettings = {
   minIncorrectAnswers: 0,
   maxIncorrectAnswers: 5,
   incorrectAnswersEnabled: false,
+  // Overall timer settings with defaults
+  overallTimerEnabled: false,
+  overallTimerDuration: 180, // 3 minutes default
+  countdownModeEnabled: false,
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
@@ -117,6 +130,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   correctAnswersCount: 0,
   incorrectAnswersCount: 0,
   quizStartTime: null,
+  
+  // Overall timer initial state
+  overallTimeRemaining: defaultSettings.overallTimerDuration,
+  overallTimerActive: false,
   
   // Actions
   updateSettings: (newSettings) =>
@@ -136,6 +153,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: Date.now(),
+      // Initialize overall timer
+      overallTimeRemaining: state.settings.overallTimerEnabled ? state.settings.overallTimerDuration : 0,
+      overallTimerActive: state.settings.overallTimerEnabled,
     })),
   
   nextQuestion: () =>
@@ -318,9 +338,12 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   
   setTimeRemaining: (time) =>
     set({ timeRemaining: time }),
+
+  setOverallTimeRemaining: (time) =>
+    set({ overallTimeRemaining: time }),
   
   completeQuiz: () =>
-    set({ isQuizActive: false, isQuizCompleted: true }),
+    set({ isQuizActive: false, isQuizCompleted: true, overallTimerActive: false }),
   
   resetQuiz: () =>
     set({
@@ -333,6 +356,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: null,
+      overallTimeRemaining: get().settings.overallTimerDuration,
+      overallTimerActive: false,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -347,6 +372,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: null,
+      overallTimeRemaining: get().settings.overallTimerDuration,
+      overallTimerActive: false,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -423,6 +450,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: null,
+      overallTimeRemaining: defaultSettings.overallTimerDuration,
+      overallTimerActive: false,
     });
   },
 }));
