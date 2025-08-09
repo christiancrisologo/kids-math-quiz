@@ -47,7 +47,8 @@ export interface QuizSettings {
   // Overall timer settings
   overallTimerEnabled: boolean;
   overallTimerDuration: number; // in seconds
-  countdownModeEnabled: boolean; // when true, counts down from max to 0
+  // Challenge mode
+  challengeMode?: string; // Selected challenge mode name
 }
 
 export interface QuizState {
@@ -114,7 +115,8 @@ const defaultSettings: QuizSettings = {
   // Overall timer settings with defaults
   overallTimerEnabled: false,
   overallTimerDuration: 180, // 3 minutes default
-  countdownModeEnabled: false,
+  // Challenge mode default
+  challengeMode: undefined,
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({

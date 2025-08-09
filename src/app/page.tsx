@@ -14,6 +14,7 @@ import { SystemSettingsPanel } from '../components/ui/SystemSettings';
 import { useSystemSettings } from '../contexts/system-settings-context';
 import { animationClasses } from '../utils/enhanced-animations';
 import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
+import { getChallengeModes, applyChallengeMode, type ChallengeMode } from '../utils/challengeModes';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
 
 export default function Home() {
@@ -42,10 +43,13 @@ export default function Home() {
     // Overall timer settings
     overallTimerEnabled: false,
     overallTimerDuration: 180, // 3 minutes default
-    countdownModeEnabled: false,
+    // Challenge mode
+    challengeMode: undefined as string | undefined,
   });
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
+  const [selectedChallengeMode, setSelectedChallengeMode] = useState<string>('');
+  const [availableChallengeModes] = useState<ChallengeMode[]>(getChallengeModes());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
 
@@ -94,8 +98,14 @@ export default function Home() {
         // Overall timer settings
         overallTimerEnabled: settings.overallTimerEnabled !== undefined ? settings.overallTimerEnabled : prev.overallTimerEnabled,
         overallTimerDuration: settings.overallTimerDuration !== undefined ? settings.overallTimerDuration : prev.overallTimerDuration,
-        countdownModeEnabled: settings.countdownModeEnabled !== undefined ? settings.countdownModeEnabled : prev.countdownModeEnabled,
+        // Challenge mode
+        challengeMode: settings.challengeMode || prev.challengeMode,
       }));
+
+      // Set challenge mode if it exists in settings
+      if (settings.challengeMode) {
+        setSelectedChallengeMode(settings.challengeMode);
+      }
     } else {
       console.log('No saved settings found, applying primary school preset'); // Debug log
       // No saved settings, apply primary school preset as default
@@ -115,7 +125,6 @@ export default function Home() {
         // Keep overall timer defaults
         overallTimerEnabled: prev.overallTimerEnabled,
         overallTimerDuration: prev.overallTimerDuration,
-        countdownModeEnabled: prev.countdownModeEnabled,
       }));
     }
   }, [settings]); // Run when settings change
@@ -247,6 +256,31 @@ export default function Home() {
     setShowSettings(true);
   };
 
+  const handleChallengeModeChange = (challengeName: string) => {
+    setSelectedChallengeMode(challengeName);
+
+    if (challengeName === '') {
+      // No challenge selected, keep current settings
+      setFormData(prev => ({
+        ...prev,
+        challengeMode: undefined,
+      }));
+    } else {
+      // Apply challenge mode settings
+      const updatedSettings = applyChallengeMode(formData, challengeName);
+      setFormData(prev => ({
+        ...prev,
+        ...updatedSettings,
+      }));
+
+      // Show settings so user can see what was applied
+      setShowSettings(true);
+    }
+
+    // Clear any validation errors
+    setErrors({});
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -352,6 +386,47 @@ export default function Home() {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Challenge Mode Selection */}
+          <div className="mb-4">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-4">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center text-sm">
+                🏆 Challenge Mode
+              </h3>
+              <div className="space-y-3">
+                <div className="relative">
+                  <select
+                    value={selectedChallengeMode}
+                    onChange={(e) => handleChallengeModeChange(e.target.value)}
+                    className="w-full p-3 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-200 appearance-none cursor-pointer"
+                  >
+                    <option value="">Select a challenge (optional)</option>
+                    {availableChallengeModes.map((challenge) => (
+                      <option key={challenge.name} value={challenge.name}>
+                        {challenge.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {selectedChallengeMode && (
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg p-3">
+                    <h4 className="font-medium text-blue-800 dark:text-blue-300 text-sm mb-1">
+                      {selectedChallengeMode}
+                    </h4>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">
+                      {availableChallengeModes.find(c => c.name === selectedChallengeMode)?.description}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -494,24 +569,6 @@ export default function Home() {
                                 value={Math.round(formData.overallTimerDuration / 60)}
                                 onChange={(value) => handleInputChange('overallTimerDuration', (parseInt(value) || 5) * 60)}
                                 inputMode="numeric"
-                              />
-                            </div>
-
-                            {/* Countdown Mode */}
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                  Countdown Mode
-                                </label>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  Count down from max time to 0 (forces quiz end at 0)
-                                </p>
-                              </div>
-                              <ToggleSwitch
-                                label=""
-                                icon=""
-                                enabled={formData.countdownModeEnabled}
-                                onToggle={(enabled) => handleInputChange('countdownModeEnabled', enabled)}
                               />
                             </div>
                           </div>

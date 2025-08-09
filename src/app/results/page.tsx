@@ -11,6 +11,7 @@ import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
 import { checkAchievements } from '../../utils/achievements';
 import { generateQuestions } from '../../utils/math/question-generator';
+import { isChallengeCompleted, getChallengeCompletionMessage } from '../../utils/challengeModes';
 
 export default function ResultsPage() {
     const router = useRouter();
@@ -49,8 +50,18 @@ export default function ResultsPage() {
 
     const correctAnswers = questions.filter(q => q.isCorrect).length;
     const totalQuestions = questions.length;
+    const incorrectAnswers = totalQuestions - correctAnswers;
     const percentage = Math.round((correctAnswers / totalQuestions) * 100);
     const achievements = checkAchievements(correctAnswers, totalQuestions, bestStreak, settings);
+
+    // Check if challenge was completed
+    const challengeCompleted = settings.challengeMode ? isChallengeCompleted(
+        settings.challengeMode,
+        correctAnswers,
+        incorrectAnswers,
+        totalQuestions,
+        quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : undefined
+    ) : false;
 
     // Determine confetti intensity based on performance
     const getConfettiIntensity = (percentage: number): 'low' | 'medium' | 'high' => {
@@ -123,9 +134,19 @@ export default function ResultsPage() {
 
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <h1 className={`font-bold text-gray-800 dark:text-gray-200 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
-                            🎯 Matherific Results!
-                        </h1>
+                        <div className={`font-bold text-gray-600 dark:text-gray-400 mb-3 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                            Here is your result
+                        </div>
+                        <div className={`font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3 ${isMobile ? 'text-3xl' : 'text-5xl'}`}>
+                            {settings.username}
+                        </div>
+                        {settings.challengeMode && (
+                            <div className="mb-2">
+                                <div className="inline-block bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                    🏆 Challenge: {settings.challengeMode}
+                                </div>
+                            </div>
+                        )}
                         <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
                             {gradeInfo.message}
                         </p>
@@ -155,6 +176,31 @@ export default function ResultsPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* Challenge Completion Message */}
+                    {settings.challengeMode && challengeCompleted && (
+                        <div className={`bg-gradient-to-r from-green-100 via-yellow-100 to-orange-100 dark:from-green-900/30 dark:via-yellow-900/30 dark:to-orange-900/30 rounded-xl p-4 mb-8 text-center border-4 border-yellow-400 dark:border-yellow-500 ${animationClasses.bounceGentle(systemSettings)}`}>
+                            <div className="text-4xl mb-2">🎉</div>
+                            <h2 className={`font-bold text-green-800 dark:text-green-300 mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                                Challenge Complete!
+                            </h2>
+                            <p className={`text-green-700 dark:text-green-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                                {getChallengeCompletionMessage(settings.challengeMode)}
+                            </p>
+                        </div>
+                    )}
+
+                    {settings.challengeMode && !challengeCompleted && (
+                        <div className={`bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-4 mb-8 text-center border-2 border-blue-300 dark:border-blue-600`}>
+                            <div className="text-2xl mb-2">💪</div>
+                            <h2 className={`font-bold text-blue-800 dark:text-blue-300 mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                                Challenge Attempted
+                            </h2>
+                            <p className={`text-blue-700 dark:text-blue-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                                You tried the {settings.challengeMode} challenge! Keep practicing to complete it!
+                            </p>
+                        </div>
+                    )}
 
                     {/* Enhanced Statistics */}
                     <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl mt-6 ${isMobile ? 'p-4' : 'p-6'}`}>
@@ -331,9 +377,14 @@ export default function ResultsPage() {
                             <div className="mb-2">
                                 <span className="font-medium">Number Types:</span> {settings.numberTypes?.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') || 'Integers'}
                             </div>
-                            <div>
+                            <div className="mb-2">
                                 <span className="font-medium">Question Type:</span> {settings.questionType.charAt(0).toUpperCase() + settings.questionType.slice(1)}
                             </div>
+                            {settings.challengeMode && (
+                                <div>
+                                    <span className="font-medium">Challenge Mode:</span> {settings.challengeMode}
+                                </div>
+                            )}
                         </div>
                     </div>
 
