@@ -107,7 +107,7 @@ export default function ResultsPage() {
     if (questions.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 dark:from-emerald-900 dark:via-blue-800 dark:to-violet-900 flex items-center justify-center p-4">
-                <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
+                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
                     <div className={`${animationClasses.spin(systemSettings)} rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto`}></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">Loading results...</p>
                 </div>
@@ -118,7 +118,7 @@ export default function ResultsPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-green-400 to-blue-500 dark:from-amber-900 dark:via-emerald-800 dark:to-blue-900">
             <div className={`${isMobile ? 'p-4' : 'flex items-center justify-center p-4 min-h-screen'}`}>
-                <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
+                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
                     } ${isMobile ? 'p-6' : 'p-8'} relative`}>
 
                     {/* Header */}
@@ -132,7 +132,7 @@ export default function ResultsPage() {
                     </div>
 
                     {/* Score Summary */}
-                    <div className={`bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 dark:from-yellow-900/30 dark:via-pink-900/30 dark:to-purple-900/30 rounded-2xl text-center mb-8 ${animationClasses.float(systemSettings)} border-4 border-gradient-to-r from-rainbow-200 to-rainbow-400 ${isMobile ? 'p-6' : 'p-8'
+                    <div className={`bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 dark:from-yellow-900/30 dark:via-pink-900/30 dark:to-purple-900/30 rounded-xl text-center mb-8 ${animationClasses.float(systemSettings)} border-4 border-gradient-to-r from-rainbow-200 to-rainbow-400 ${isMobile ? 'p-6' : 'p-8'
                         }`}>
                         <div className={`mb-4 ${isMobile ? 'text-4xl' : 'text-6xl'} ${animationClasses.bounceGentle(systemSettings)}`}>{gradeInfo.emoji}</div>
                         <div className={`font-bold text-gray-800 dark:text-gray-200 mb-2 ${isMobile ? 'text-2xl' : 'text-4xl'} ${animationClasses.shimmer(systemSettings)}`}>

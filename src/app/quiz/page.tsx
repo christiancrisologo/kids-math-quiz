@@ -369,7 +369,7 @@ export default function QuizPage() {
     if (!currentQuestion) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-red-500 to-purple-600 dark:from-indigo-900 dark:via-purple-800 dark:to-pink-900 flex items-center justify-center p-4">
-                <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
+                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl text-center ${isMobile ? 'p-6 max-w-sm' : 'p-8 max-w-md'}`}>
                     <div className={`${animationClasses.spin(systemSettings)} rounded-full h-16 w-16 border-b-2 border-purple-500 dark:border-purple-400 mx-auto`}></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-400">Loading quiz...</p>
                 </div>
@@ -413,32 +413,26 @@ export default function QuizPage() {
                             </div>
 
                             {/* Right side - Timer */}
-                            <div className="flex flex-col items-end space-y-1">
-                                {/* Overall Timer - shown if enabled */}
-                                {settings.overallTimerEnabled && overallTimerActive && (
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">Game Timer</span>
-                                        <div className={`text-lg font-bold px-3 py-1 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
-                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                            : overallTimeRemaining <= 60
-                                                ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
-                                                : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                            }`}>
-                                            🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
-                                        </div>
+                            <div className="flex items-center space-x-3">
+                                {/* Question Timer - shown if enabled */}
+                                {settings.timerEnabled && (
+                                    <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
+                                        ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                        : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
+                                        }`}>
+                                        ⏰ {timeRemaining}s
                                     </div>
                                 )}
 
-                                {/* Question Timer - shown if enabled */}
-                                {settings.timerEnabled && (
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">Quiz Timer</span>
-                                        <div className={`text-xl font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
-                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                            : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
-                                            }`}>
-                                            ⏰ {timeRemaining}s
-                                        </div>
+                                {/* Overall Timer - shown if enabled */}
+                                {settings.overallTimerEnabled && overallTimerActive && (
+                                    <div className={`text-lg font-bold px-3 py-1 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                        ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                        : overallTimeRemaining <= 60
+                                            ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
+                                            : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                        }`}>
+                                        🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
                                     </div>
                                 )}
                             </div>
@@ -481,12 +475,12 @@ export default function QuizPage() {
                         </div>
 
                         {/* Question Card */}
-                        <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-6 flex-1 flex items-center justify-center ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
+                        <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg p-4 mb-4 flex-1 flex items-center justify-center max-h-fit ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
                             <div className="text-center">
-                                <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+                                <div className="text-5xl font-bold text-gray-800 dark:text-gray-200 mb-2">
                                     {currentQuestion.variable ? (
                                         <div>
-                                            <div className="text-sm text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
+                                            <div className="text-base text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
                                             <div>{currentQuestion.question}</div>
                                         </div>
                                     ) : (
@@ -497,9 +491,9 @@ export default function QuizPage() {
                         </div>
 
                         {/* Mobile Answer Area - Bottom Sheet Style */}
-                        <div className={`bg-white dark:bg-slate-800 rounded-t-3xl shadow-lg p-6 pb-8 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`} onKeyDown={handleKeyPress}>
+                        <div className={`bg-white dark:bg-slate-800 rounded-t-xl shadow-lg p-4 pb-6 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`} onKeyDown={handleKeyPress}>
                             {settings.questionType === 'expression' ? (
-                                <div className="space-y-4">
+                                <div className="space-y-2">
                                     {isFractionQuestion ? (
                                         <FractionInput
                                             ref={fractionInputRef}
@@ -636,7 +630,7 @@ export default function QuizPage() {
             ) : (
                 /* Desktop Layout */
                 <div className="flex items-center justify-center p-4 min-h-screen">
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl relative">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl relative">
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
@@ -670,28 +664,22 @@ export default function QuizPage() {
 
                                 {/* Right side - Timer */}
                                 <div className="flex items-center space-x-6">
-                                    {/* Overall Timer - shown if enabled */}
-                                    {settings.overallTimerEnabled && overallTimerActive && (
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Game Timer</span>
-                                            <div className={`text-xl font-bold px-4 py-2 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
-                                                ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                                : overallTimeRemaining <= 60
-                                                    ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
-                                                    : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                                }`}>
-                                                🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
-                                            </div>
+                                    {/* Question Timer - shown if enabled */}
+                                    {settings.timerEnabled && (
+                                        <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
+                                            ⏰ {timeRemaining}s
                                         </div>
                                     )}
 
-                                    {/* Question Timer - shown if enabled */}
-                                    {settings.timerEnabled && (
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Quiz Timer</span>
-                                            <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
-                                                ⏰ {timeRemaining}s
-                                            </div>
+                                    {/* Overall Timer - shown if enabled */}
+                                    {settings.overallTimerEnabled && overallTimerActive && (
+                                        <div className={`text-xl font-bold px-4 py-2 rounded-lg ${settings.countdownModeEnabled && overallTimeRemaining <= 30
+                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
+                                            : overallTimeRemaining <= 60
+                                                ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
+                                                : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                                            }`}>
+                                            🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
                                         </div>
                                     )}
                                 </div>
