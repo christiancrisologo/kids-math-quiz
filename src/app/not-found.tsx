@@ -36,20 +36,20 @@ export default function NotFoundPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 dark:from-red-900 dark:via-pink-800 dark:to-purple-900">
-            <div className={`flex items-center justify-center ${isMobile ? 'p-4 pt-8' : 'p-4'} min-h-screen`}>
-                <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
-                    } ${isMobile ? 'p-6' : 'p-8'} text-center animate-float`}>
+            <div className={`flex items-center justify-center ${isMobile ? 'p-2 pt-4' : 'p-3'} min-h-screen`}>
+                <div className={`bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
+                    } ${isMobile ? 'p-4' : 'p-6'} text-center animate-float`}>
 
                     {/* 404 Animation */}
-                    <div className="mb-8">
+                    <div className="mb-6">
                         <div className={`${isMobile ? 'text-6xl' : 'text-8xl'} font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 animate-bounce-gentle`}>
                             404
                         </div>
                     </div>
 
                     {/* Header */}
-                    <div className="mb-8">
-                        <h1 className={`font-bold text-gray-800 dark:text-gray-200 mb-4 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
+                    <div className="mb-6">
+                        <h1 className={`font-bold text-gray-800 dark:text-gray-200 mb-3 ${isMobile ? 'text-2xl' : 'text-4xl'}`}>
                             Oops! Page Not Found 🔍
                         </h1>
                         <p className={`text-gray-600 dark:text-gray-400 ${isMobile ? 'text-sm' : 'text-lg'}`}>
@@ -59,7 +59,7 @@ export default function NotFoundPage() {
                     </div>
 
                     {/* Fun Math Error Message */}
-                    <div className={`bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-xl p-4 mb-8 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                    <div className={`bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-3 mb-6 ${isMobile ? 'text-sm' : 'text-base'}`}>
                         <p className="text-gray-700 dark:text-gray-300 font-medium">
                             🤖 <strong>Math Bot says:</strong> This page equals zero! But don&apos;t worry,
                             we have plenty of other exciting math problems waiting for you!
@@ -102,7 +102,7 @@ export default function NotFoundPage() {
                     </div>
 
                     {/* Fun Math Facts */}
-                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-slate-600">
+                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-600">
                         <p className={`text-gray-500 dark:text-gray-400 ${isMobile ? 'text-xs' : 'text-sm'}`}>
                             💡 <strong>Fun Fact:</strong> Did you know that 404 = 4 × 101?
                             That&apos;s a pretty cool math pattern! 🎲

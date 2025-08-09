@@ -18,7 +18,7 @@ import type { Difficulty, QuestionType, MathOperation, NumberType } from '../sto
 
 export default function Home() {
   const router = useRouter();
-  const { updateSettings, setQuestions, settings, loadUserPreferences, saveUserPreferences } = useQuizStore();
+  const { updateSettings, setQuestions, settings, loadUserPreferences, saveUserPreferences, resetQuiz } = useQuizStore();
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
 
@@ -281,6 +281,9 @@ export default function Home() {
 
     console.log('Saving user preferences:', formData); // Debug log
 
+    // Reset quiz state first to clear any completed status
+    resetQuiz();
+
     // Update store with settings
     updateSettings(formData);
 
@@ -304,7 +307,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-cyan-400 dark:from-purple-900 dark:via-blue-900 dark:to-pink-900">
       <div className={`flex items-center justify-center ${isMobile ? 'p-4 pt-8' : 'p-4'} min-h-screen`}>
-        <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
+        <div className={`bg-white dark:bg-slate-800 rounded-  rounded-xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
           } ${isMobile ? 'p-4' : 'p-6'} relative ${animationClasses.float(systemSettings)}`}>
 
           {/* Header */}
