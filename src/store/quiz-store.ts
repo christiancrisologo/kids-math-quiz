@@ -429,9 +429,15 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         if (!user) {
           try {
             user = await createUser(state.settings.username);
-          } catch (err: any) {
+          } catch (err: unknown) {
             // If duplicate key error, fetch user again
-            if (err.message && err.message.includes('duplicate key value')) {
+            if (
+              typeof err === 'object' &&
+              err !== null &&
+              'message' in err &&
+              typeof (err as { message?: string }).message === 'string' &&
+              (err as { message: string }).message.includes('duplicate key value')
+            ) {
               user = await getUserByUsername(state.settings.username);
             } else {
               throw err;
@@ -446,7 +452,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           challenge_mode: state.settings.challengeMode || 'none',
           game_duration: quizDuration,
           player_level: state.settings.difficulty,
-          game_settings: state.settings,
+          game_settings: (state.settings as unknown) as Record<string, unknown>,
         });
       } catch (error) {
         console.error('Supabase save error:', error);
