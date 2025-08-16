@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
+const repoName = "kids-math-quiz";
+const isProduction = ['production', 'github-pages'].includes(process.env.NODE_ENV);
+
+
 const nextConfig: NextConfig = {
   // Enable static export for GitHub Pages
-  output: 'export',
+  ...(isProduction ? { output: 'export' } : {}),
   
   // Add trailing slash for GitHub Pages compatibility
   trailingSlash: true,
@@ -13,8 +17,8 @@ const nextConfig: NextConfig = {
   },
   
   // Configure base path and asset prefix for GitHub Pages
-  basePath: process.env.NODE_ENV === 'production' ? '/kids-math-quiz' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/kids-math-quiz/' : '',
+  basePath: isProduction ? `/${repoName}` : '',
+  assetPrefix: isProduction ? `/${repoName}/` : '',
 };
 
 export default nextConfig;
