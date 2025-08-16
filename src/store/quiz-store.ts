@@ -55,6 +55,7 @@ export interface QuizSettings {
 }
 
 export interface QuizState {
+  _gameRecordSaved?: boolean;
   // Settings
   settings: QuizSettings;
   
@@ -123,6 +124,7 @@ const defaultSettings: QuizSettings = {
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
+  _gameRecordSaved: false,
   // Initial state
   settings: defaultSettings,
   questions: [],
@@ -158,9 +160,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: Date.now(),
-      // Initialize overall timer
       overallTimeRemaining: state.settings.overallTimerEnabled ? state.settings.overallTimerDuration : 0,
       overallTimerActive: state.settings.overallTimerEnabled,
+      _gameRecordSaved: false,
     })),
   
   nextQuestion: () =>
@@ -379,6 +381,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       quizStartTime: null,
       overallTimeRemaining: get().settings.overallTimerDuration,
       overallTimerActive: false,
+      _gameRecordSaved: false,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -407,6 +410,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     if (!state.isQuizCompleted || state.questions.length === 0) {
       return null;
     }
+    // Prevent duplicate record
+    if (get()._gameRecordSaved) {
+      return null;
+    }
+    set({ _gameRecordSaved: true });
 
     const correctAnswers = state.questions.filter(q => q.isCorrect).length;
     const totalQuestions = state.questions.length;
