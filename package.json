@@ -13,6 +13,7 @@
     "test:build": "npm run lint && npm run test:type-check && npm run build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
     "fraction.js": "^5.2.2",
     "mathjax": "^3.2.2",
     "next": "15.4.5",

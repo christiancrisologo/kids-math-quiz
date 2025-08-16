@@ -21,24 +21,27 @@ export default function ResultsPage() {
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
-    // Redirect if no questions (shouldn't happen, but safety check)
+    // Prevent duplicate game saves
+    const [gameSaved, setGameSaved] = useState(false);
     useEffect(() => {
         if (questions.length === 0) {
             router.push('/');
         } else {
             // Play completion sound when results load
             setTimeout(() => playSound('completion', systemSettings), 500);
-            // Save the game result
-            try {
-                saveGameResult();
-            } catch (error) {
-                console.error('Failed to save game result:', error);
+            // Save the game result only once
+            if (!gameSaved) {
+                try {
+                    saveGameResult();
+                    setGameSaved(true);
+                } catch (error) {
+                    console.error('Failed to save game result:', error);
+                }
             }
-
             // Show confetti with a slight delay for better effect
             setTimeout(() => setShowConfetti(true), 800);
         }
-    }, [questions.length, router, saveGameResult, systemSettings]);
+    }, [questions.length, router, saveGameResult, systemSettings, gameSaved]);
 
     // Show bonus confetti for exceptional performance
     useEffect(() => {

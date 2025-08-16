@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
 import { userPreferencesStorage, gameHistoryStorage, GameResult } from '../utils/storage';
+import { createUser, getUserByUsername, createGameRecord } from '../utils/supabaseGame';
+import { APP } from '../utils/supabaseTables';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
@@ -53,6 +55,7 @@ export interface QuizSettings {
 }
 
 export interface QuizState {
+  _gameRecordSaved?: boolean;
   // Settings
   settings: QuizSettings;
   
@@ -121,6 +124,7 @@ const defaultSettings: QuizSettings = {
 };
 
 export const useQuizStore = create<QuizState>((set, get) => ({
+  _gameRecordSaved: false,
   // Initial state
   settings: defaultSettings,
   questions: [],
@@ -156,9 +160,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       correctAnswersCount: 0,
       incorrectAnswersCount: 0,
       quizStartTime: Date.now(),
-      // Initialize overall timer
       overallTimeRemaining: state.settings.overallTimerEnabled ? state.settings.overallTimerDuration : 0,
       overallTimerActive: state.settings.overallTimerEnabled,
+      _gameRecordSaved: false,
     })),
   
   nextQuestion: () =>
@@ -377,6 +381,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       quizStartTime: null,
       overallTimeRemaining: get().settings.overallTimerDuration,
       overallTimerActive: false,
+      _gameRecordSaved: false,
       // Note: we keep bestStreak to maintain the user's record
     }),
 
@@ -401,21 +406,54 @@ export const useQuizStore = create<QuizState>((set, get) => ({
 
   saveGameResult: () => {
     const state = get();
-    
     // Only save if quiz is completed and has questions
     if (!state.isQuizCompleted || state.questions.length === 0) {
       return null;
     }
+    // Prevent duplicate record
+    if (get()._gameRecordSaved) {
+      return null;
+    }
+    set({ _gameRecordSaved: true });
 
     const correctAnswers = state.questions.filter(q => q.isCorrect).length;
     const totalQuestions = state.questions.length;
     const score = Math.round((correctAnswers / totalQuestions) * 100);
     const totalTimeSpent = state.questions.reduce((total, q) => total + (q.timeSpent || 0), 0);
-    
-    // Calculate total quiz duration
-    const quizDuration = state.quizStartTime ? 
-      Math.round((Date.now() - state.quizStartTime) / 1000) : totalTimeSpent;
+    const quizDuration = state.quizStartTime ? Math.round((Date.now() - state.quizStartTime) / 1000) : totalTimeSpent;
 
+    // Supabase integration
+    (async () => {
+      try {
+        let user = await getUserByUsername(state.settings.username);
+        if (!user) {
+          try {
+            user = await createUser(state.settings.username);
+          } catch (err: any) {
+            // If duplicate key error, fetch user again
+            if (err.message && err.message.includes('duplicate key value')) {
+              user = await getUserByUsername(state.settings.username);
+            } else {
+              throw err;
+            }
+          }
+        }
+        await createGameRecord({
+          player_id: user.id,
+          game_id: APP.ID,
+          score,
+          achievement: '', // Add achievement logic if needed
+          challenge_mode: state.settings.challengeMode || 'none',
+          game_duration: quizDuration,
+          player_level: state.settings.difficulty,
+          game_settings: state.settings,
+        });
+      } catch (error) {
+        console.error('Supabase save error:', error);
+      }
+    })();
+
+    // Optionally, still save locally for offline/history
     const gameResult = gameHistoryStorage.save({
       username: state.settings.username,
       settings: state.settings,
@@ -431,10 +469,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       incorrectAnswers: state.incorrectAnswersCount,
       score,
       timeSpent: totalTimeSpent,
-      quizDuration, // Total duration of the quiz
+      quizDuration,
       averageTimePerQuestion: totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 0,
     });
-
     return gameResult;
   },
 

@@ -16,6 +16,7 @@ import { animationClasses } from '../utils/enhanced-animations';
 import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
 import { getChallengeModes, applyChallengeMode, type ChallengeMode } from '../utils/challengeModes';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
+import { getUserByUsername } from '../utils/supabaseGame';
 
 export default function Home() {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function Home() {
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
 
+  const [welcomeBack, setWelcomeBack] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     difficulty: 'easy' as Difficulty,
@@ -58,6 +61,30 @@ export default function Home() {
     // First load any saved preferences
     loadUserPreferences();
 
+    // Check Supabase for user existence if username is set
+    const checkUser = async () => {
+      if (formData.username && formData.username.trim() !== '') {
+        try {
+          const user = await getUserByUsername(formData.username.trim());
+          if (user) {
+            setWelcomeBack(true);
+            setShowWelcome(true);
+            setTimeout(() => setShowWelcome(false), 3000);
+          } else {
+            setWelcomeBack(false);
+            setShowWelcome(false);
+          }
+        } catch (e) {
+          setWelcomeBack(false);
+          setShowWelcome(false);
+        }
+      } else {
+        setWelcomeBack(false);
+        setShowWelcome(false);
+      }
+    };
+    checkUser();
+
     // Also log what's currently in localStorage for debugging (browser only)
     if (typeof window !== 'undefined') {
       console.log('localStorage check:', {
@@ -65,7 +92,7 @@ export default function Home() {
         gameHistory: localStorage.getItem('gameHistory')
       });
     }
-  }, [loadUserPreferences]); // Include loadUserPreferences in dependency array
+  }, [loadUserPreferences, formData.username]);
 
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
@@ -340,6 +367,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-cyan-400 dark:from-purple-900 dark:via-blue-900 dark:to-pink-900">
+      {showWelcome && (
+        <div className="fixed top-0 left-0 w-full z-50 flex justify-center">
+          <div className="bg-green-100 text-green-800 px-6 py-2 rounded-b-xl shadow-lg font-semibold text-lg">
+            Welcome back, {formData.username}!
+          </div>
+        </div>
+      )}
       <div className={`flex items-center justify-center ${isMobile ? 'p-4 pt-8' : 'p-4'} min-h-screen`}>
         <div className={`bg-white dark:bg-slate-800 rounded-  rounded-xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-2xl'
           } ${isMobile ? 'p-4' : 'p-6'} relative ${animationClasses.float(systemSettings)}`}>
