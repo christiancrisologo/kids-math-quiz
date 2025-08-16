@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { areFractionsEqual, parseFraction } from '../utils/math/fraction-utils';
 import { userPreferencesStorage, gameHistoryStorage, GameResult } from '../utils/storage';
 import { createUser, getUserByUsername, createGameRecord } from '../utils/supabaseGame';
+import { APP } from '../utils/supabaseTables';
 
 export type Difficulty = 'easy' | 'hard';
 export type QuestionType = 'expression' | 'multiple-choice';
@@ -418,13 +419,23 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       try {
         let user = await getUserByUsername(state.settings.username);
         if (!user) {
-          user = await createUser(state.settings.username);
+          try {
+            user = await createUser(state.settings.username);
+          } catch (err: any) {
+            // If duplicate key error, fetch user again
+            if (err.message && err.message.includes('duplicate key value')) {
+              user = await getUserByUsername(state.settings.username);
+            } else {
+              throw err;
+            }
+          }
         }
         await createGameRecord({
-          user_id: user.id,
+          player_id: user.id,
+          game_id: APP.ID,
           score,
           achievement: '', // Add achievement logic if needed
-          date_played: new Date().toISOString(),
+          challenge_mode: state.settings.challengeMode || 'none',
           game_duration: quizDuration,
           player_level: state.settings.difficulty,
           game_settings: state.settings,

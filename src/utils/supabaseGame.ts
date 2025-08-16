@@ -1,8 +1,9 @@
 import { supabase } from './supabaseClient';
+import { TABLES, COLUMNS, APP } from './supabaseTables';
 
 export async function createUser(username: string) {
   const { data, error } = await supabase
-    .from('game_user')
+    .from(TABLES.USERS)
     .insert([{ username }])
     .select();
   if (error) throw error;
@@ -11,40 +12,42 @@ export async function createUser(username: string) {
 
 export async function getUserByUsername(username: string) {
   const { data, error } = await supabase
-    .from('game_user')
+    .from(TABLES.USERS)
     .select('*')
-    .eq('username', username)
-    .single();
+    .eq(COLUMNS.USERS.USERNAME, username);
   if (error) throw error;
-  return data;
+  return data && data.length > 0 ? data[0] : null;
 }
 
 export async function createGameRecord({
-  user_id,
+  player_id,
+  game_id,
   score,
   achievement,
-  date_played,
   game_duration,
+  challenge_mode,
   player_level,
   game_settings,
 }: {
-  user_id: string;
+  player_id: string;
+  game_id: string;
   score: number;
   achievement: string;
-  date_played: string;
+  challenge_mode: string;
   game_duration: number;
   player_level: string;
   game_settings: any;
 }) {
   const { data, error } = await supabase
-    .from('game_records')
+    .from(TABLES.RECORDS)
     .insert([
       {
-        user_id,
+        player_id,
+        game_id,
         score,
         achievement,
-        date_played,
         game_duration,
+        challenge_mode,
         player_level,
         game_settings,
       },
