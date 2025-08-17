@@ -58,29 +58,8 @@ export default function Home() {
 
   // Apply primary school preset on component mount and load saved preferences
   useEffect(() => {
-    // First load any saved preferences
+    // Only load preferences once on mount
     loadUserPreferences();
-
-    // Check Supabase for user existence if username is set
-    const checkUser = async () => {
-      if (formData.username && formData.username.trim() !== '') {
-        try {
-          const user = await getUserByUsername(formData.username.trim());
-          if (user) {
-            setShowWelcome(true);
-            setTimeout(() => setShowWelcome(false), 3000);
-          } else {
-            setShowWelcome(false);
-          }
-        } catch {
-          setShowWelcome(false);
-        }
-      } else {
-        setShowWelcome(false);
-      }
-    };
-    checkUser();
-
     // Also log what's currently in localStorage for debugging (browser only)
     if (typeof window !== 'undefined') {
       console.log('localStorage check:', {
@@ -88,7 +67,7 @@ export default function Home() {
         gameHistory: localStorage.getItem('gameHistory')
       });
     }
-  }, [loadUserPreferences, formData.username]);
+  }, [loadUserPreferences]);
   // Removed unused welcomeBack state
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
