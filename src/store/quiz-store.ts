@@ -397,11 +397,22 @@ export const useQuizStore = create<QuizState>((set, get) => ({
 
   saveUserPreferences: () => {
     const state = get();
-    userPreferencesStorage.save({
-      username: state.settings.username,
-      settings: state.settings,
-      lastUpdated: new Date()
-    });
+    // Fetch userId from Supabase and save to preferences
+    (async () => {
+      let userId = '';
+      try {
+        const user = await getUserByUsername(state.settings.username);
+        if (user && user.id) {
+          userId = user.id;
+        }
+      } catch {}
+      userPreferencesStorage.save({
+        username: state.settings.username,
+        userId,
+        settings: state.settings,
+        lastUpdated: new Date()
+      });
+    })();
   },
 
   saveGameResult: () => {
@@ -477,7 +488,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       timeSpent: totalTimeSpent,
       quizDuration,
       averageTimePerQuestion: totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 0,
-    });
+    }, navigator.onLine);
     return gameResult;
   },
 

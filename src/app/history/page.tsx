@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabaseClient';
+import { TABLES } from '../../utils/supabaseTables';
 import { useRouter } from 'next/navigation';
 import { gameHistoryStorage, GameResult } from '../../utils/storage';
 import { useQuizStore } from '../../store/quiz-store';
@@ -14,16 +16,79 @@ export default function HistoryPage() {
     const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
     const [loading, setLoading] = useState(true);
 
-    // Load game history on component mount
+    // Load game history from Supabase and localStorage, merge, deduplicate, and update localStorage
     useEffect(() => {
-        try {
-            const history = gameHistoryStorage.loadAll();
-            setGameHistory(history);
-            setLoading(false);
-        } catch (error) {
-            console.error('Failed to load game history:', error);
-            setLoading(false);
+        async function fetchAndMergeHistory() {
+            setLoading(true);
+            try {
+                // Get current username from store
+                const username = settings.username;
+                if (!username) {
+                    setGameHistory([]);
+                    setLoading(false);
+                    return;
+                }
+                // Get user from Supabase
+                const { data: userData, error: userError } = await supabase
+                    .from('game_players')
+                    .select('id')
+                    .eq('username', username)
+                    .single();
+                if (userError || !userData) {
+                    setGameHistory([]);
+                    setLoading(false);
+                    return;
+                }
+                const userId = userData.id;
+                // Fetch only this user's game records
+                const { data: remoteRecords, error } = await supabase
+                    .from(TABLES.RECORDS)
+                    .select('*')
+                    .eq('player_id', userId);
+                if (error) {
+                    throw error;
+                }
+                // Parse remote records to GameResult format, parsing game_settings JSON
+                const parsedRemote = (remoteRecords || []).map((rec: Record<string, any>) => {
+                    let settings = rec.settings;
+                    if (!settings && rec.game_settings) {
+                        try {
+                            settings = typeof rec.game_settings === 'string'
+                                ? JSON.parse(rec.game_settings)
+                                : rec.game_settings;
+                        } catch {
+                            settings = {};
+                        }
+                    }
+                    return {
+                        id: rec.id,
+                        username: rec.username,
+                        settings,
+                        questions: rec.questions ?? [],
+                        totalQuestions: rec.totalQuestions ?? 0,
+                        correctAnswers: rec.correctAnswers ?? 0,
+                        incorrectAnswers: rec.incorrectAnswers ?? 0,
+                        score: rec.score ?? 0,
+                        completedAt: rec.completedAt ? new Date(rec.completedAt) : (rec.created_at ? new Date(rec.created_at) : new Date()),
+                        created_at: rec.created_at ? new Date(rec.created_at) : undefined,
+                        timeSpent: rec.timeSpent ?? 0,
+                        quizDuration: rec.quizDuration ?? 0,
+                        averageTimePerQuestion: rec.averageTimePerQuestion ?? 0,
+                        pendingSync: false
+                    };
+                });
+                // Merge and deduplicate
+                const merged = gameHistoryStorage.mergeWithRemote(parsedRemote);
+                // Update localStorage with merged records
+                localStorage.setItem('mathquiz_game_history', JSON.stringify(merged));
+                setGameHistory(merged);
+            } catch (error) {
+                console.error('Failed to fetch/merge game history:', error);
+            } finally {
+                setLoading(false);
+            }
         }
+        fetchAndMergeHistory();
     }, []);
 
     // Get unique usernames for filter dropdown - removed since we're showing single user history
@@ -31,7 +96,7 @@ export default function HistoryPage() {
     // Sort history based on selected sort option
     const sortedHistory = [...gameHistory].sort((a, b) => {
         if (sortBy === 'date') {
-            return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+            return new Date(b.created_at ?? b.completedAt).getTime() - new Date(a.created_at ?? a.completedAt).getTime();
         } else {
             return b.score - a.score;
         }
@@ -179,7 +244,7 @@ export default function HistoryPage() {
                                     {sortedHistory.map((game: GameResult) => (
                                         <tr key={game.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {formatDate(game.completedAt)}
+                                                {formatDate(game.created_at ? new Date(game.created_at) : game.completedAt)}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <span className={`text-lg font-bold ${getScoreColor(game.score)}`}>

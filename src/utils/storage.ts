@@ -17,6 +17,7 @@ export interface GameResult {
   incorrectAnswers: number;
   score: number;
   completedAt: Date;
+  created_at?: string | Date;
   timeSpent: number;
   quizDuration: number;
   averageTimePerQuestion: number;
@@ -25,6 +26,7 @@ export interface GameResult {
 
 export interface UserPreferences {
   username: string;
+  userId?: string;
   settings: QuizSettings;
   lastUpdated: Date;
 }
@@ -37,6 +39,9 @@ export const userPreferencesStorage = {
         ...preferences,
         lastUpdated: new Date().toISOString()
       }));
+      if (preferences.userId) {
+        localStorage.setItem('mathquiz_user_id', preferences.userId);
+      }
     } catch (error) {
       console.error('Failed to save user preferences:', error);
     }
@@ -46,10 +51,11 @@ export const userPreferencesStorage = {
     try {
       const stored = localStorage.getItem('mathquiz_user_preferences');
       if (!stored) return null;
-      
       const parsed = JSON.parse(stored);
+      const userId = localStorage.getItem('mathquiz_user_id') || parsed.userId;
       return {
         ...parsed,
+        userId,
         lastUpdated: new Date(parsed.lastUpdated)
       };
     } catch (error) {
