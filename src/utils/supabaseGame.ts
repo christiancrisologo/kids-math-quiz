@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { TABLES, COLUMNS, APP } from './supabaseTables';
+import { TABLES, COLUMNS } from './supabaseTables';
 
 export async function createUser(username: string) {
   const { data, error } = await supabase
@@ -36,7 +36,7 @@ export async function createGameRecord({
   challenge_mode: string;
   game_duration: number;
   player_level: string;
-  game_settings: any;
+  game_settings: Record<string, unknown>;
 }) {
   const { data, error } = await supabase
     .from(TABLES.RECORDS)

@@ -93,7 +93,7 @@ export default function Home() {
       });
     }
   }, [loadUserPreferences, formData.username]);
-
+          // Removed unused welcomeBack state
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
     // Check if we have any meaningful saved settings (not just default values)
