@@ -19,6 +19,7 @@ export interface GameResult {
   timeSpent: number;
   quizDuration: number;
   averageTimePerQuestion: number;
+  pendingSync?: boolean;
 }
 
 export interface UserPreferences {
@@ -67,20 +68,17 @@ export const userPreferencesStorage = {
 
 // Game history storage
 export const gameHistoryStorage = {
-  save: (result: Omit<GameResult, 'id' | 'completedAt'>): GameResult => {
+  save: (result: Omit<GameResult, 'id' | 'completedAt'>, online: boolean): GameResult => {
     try {
       const gameResult: GameResult = {
         ...result,
         id: generateGameId(),
-        completedAt: new Date()
+        completedAt: new Date(),
+        pendingSync: !online
       };
-
       const existingHistory = gameHistoryStorage.loadAll();
       const updatedHistory = [gameResult, ...existingHistory];
-      
-      // Keep only the last 100 games to prevent localStorage bloat
       const trimmedHistory = updatedHistory.slice(0, 100);
-      
       localStorage.setItem('mathquiz_game_history', JSON.stringify(trimmedHistory));
       return gameResult;
     } catch (error) {
@@ -88,12 +86,39 @@ export const gameHistoryStorage = {
       throw error;
     }
   },
+  syncPendingRecords: async (supabaseClient: any, tableName: string) => {
+    // Only run if online
+    if (!navigator.onLine) return;
+    const allResults = gameHistoryStorage.loadAll();
+    const pending = allResults.filter(r => r.pendingSync);
+    for (const record of pending) {
+      // Check if record exists in Supabase by ID
+      const { data, error } = await supabaseClient
+        .from(tableName)
+        .select('id')
+        .eq('id', record.id);
+      if (!error && (!data || data.length === 0)) {
+        // Save to Supabase
+        const { error: saveError } = await supabaseClient
+          .from(tableName)
+          .insert([{ ...record, pendingSync: undefined }]);
+        if (!saveError) {
+          // Mark as synced
+          record.pendingSync = false;
+        }
+      }
+    }
+    // Update localStorage
+    const merged = allResults.map(r =>
+      pending.find(p => p.id === r.id) ? { ...r, pendingSync: false } : r
+    );
+    localStorage.setItem('mathquiz_game_history', JSON.stringify(merged));
+  },
 
   loadAll: (): GameResult[] => {
     try {
       const stored = localStorage.getItem('mathquiz_game_history');
       if (!stored) return [];
-      
       const parsed = JSON.parse(stored);
       return parsed.map((result: GameResult) => ({
         ...result,
@@ -103,6 +128,17 @@ export const gameHistoryStorage = {
       console.error('Failed to load game history:', error);
       return [];
     }
+  },
+  mergeWithRemote: (remoteRecords: GameResult[]): GameResult[] => {
+    // Merge local and remote, deduplicate by ID
+    const local = gameHistoryStorage.loadAll();
+    const all = [...remoteRecords];
+    for (const rec of local) {
+      if (!all.find(r => r.id === rec.id)) {
+        all.push(rec);
+      }
+    }
+    return all;
   },
 
   loadByUser: (username: string): GameResult[] => {
