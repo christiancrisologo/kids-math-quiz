@@ -24,7 +24,7 @@ export default function Home() {
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
 
-  const [welcomeBack, setWelcomeBack] = useState(false);
+  // Removed unused welcomeBack state
   const [showWelcome, setShowWelcome] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -67,19 +67,15 @@ export default function Home() {
         try {
           const user = await getUserByUsername(formData.username.trim());
           if (user) {
-            setWelcomeBack(true);
             setShowWelcome(true);
             setTimeout(() => setShowWelcome(false), 3000);
           } else {
-            setWelcomeBack(false);
             setShowWelcome(false);
           }
-        } catch (e) {
-          setWelcomeBack(false);
+        } catch {
           setShowWelcome(false);
         }
       } else {
-        setWelcomeBack(false);
         setShowWelcome(false);
       }
     };

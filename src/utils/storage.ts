@@ -1,4 +1,5 @@
 import { QuizSettings } from '../store/quiz-store';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GameResult {
   id: string;
@@ -86,7 +87,7 @@ export const gameHistoryStorage = {
       throw error;
     }
   },
-  syncPendingRecords: async (supabaseClient: any, tableName: string) => {
+  syncPendingRecords: async (supabaseClient: SupabaseClient, tableName: string) => {
     // Only run if online
     if (!navigator.onLine) return;
     const allResults = gameHistoryStorage.loadAll();
