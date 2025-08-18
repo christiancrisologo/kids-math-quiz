@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabaseClient';
+import { TABLES } from '../../utils/supabaseTables';
 import { useRouter } from 'next/navigation';
 import { gameHistoryStorage, GameResult } from '../../utils/storage';
 import { useQuizStore } from '../../store/quiz-store';
@@ -14,16 +16,117 @@ export default function HistoryPage() {
     const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
     const [loading, setLoading] = useState(true);
 
-    // Load game history on component mount
+    // Load game history using userId from localStorage, merge DB/local if online, filter by userId
     useEffect(() => {
-        try {
-            const history = gameHistoryStorage.loadAll();
-            setGameHistory(history);
-            setLoading(false);
-        } catch (error) {
-            console.error('Failed to load game history:', error);
-            setLoading(false);
+        async function fetchAndMergeHistory() {
+            setLoading(true);
+            try {
+                // Get userId from localStorage
+                let userId = '';
+                if (typeof window !== 'undefined') {
+                    const userRaw = localStorage.getItem('math_quiz_user');
+                    if (userRaw) {
+                        try {
+                            const userObj = JSON.parse(userRaw);
+                            userId = userObj.userId || '';
+                        } catch {}
+                    }
+                }
+                if (!userId) {
+                    setGameHistory([]);
+                    setLoading(false);
+                    return;
+                }
+                // If offline, just load local records filtered by userId
+                if (!navigator.onLine) {
+                    const localRecords = gameHistoryStorage.loadAll().filter(r => r.userId === userId);
+                    setGameHistory(localRecords);
+                    setLoading(false);
+                    return;
+                }
+                // If online, fetch DB records for userId
+                const { data: remoteRecords, error } = await supabase
+                    .from(TABLES.RECORDS)
+                    .select('*')
+                    .eq('player_id', userId);
+                if (error) {
+                    throw error;
+                }
+                // Parse remote records to GameResult format
+                const parsedRemote = (remoteRecords || []).map((rec: unknown) => {
+                    const recObj = rec as {
+                        id?: string;
+                        player_id?: string;
+                        settings?: unknown;
+                        game_settings?: unknown;
+                        questions?: unknown;
+                        totalQuestions?: number;
+                        correctAnswers?: number;
+                        incorrectAnswers?: number;
+                        score?: number;
+                        completedAt?: string;
+                        created_at?: string;
+                        timeSpent?: number;
+                        quizDuration?: number;
+                        averageTimePerQuestion?: number;
+                    };
+                    let settings: import('../../store/quiz-store').QuizSettings = recObj.settings as import('../../store/quiz-store').QuizSettings;
+                    if (!settings && recObj.game_settings) {
+                        try {
+                            settings = typeof recObj.game_settings === 'string'
+                                ? JSON.parse(recObj.game_settings as string)
+                                : recObj.game_settings as import('../../store/quiz-store').QuizSettings;
+                        } catch {
+                            settings = {} as import('../../store/quiz-store').QuizSettings;
+                        }
+                    }
+                    const questions = Array.isArray(recObj.questions)
+                        ? recObj.questions.map((q: unknown) => {
+                            const questionObj = q as {
+                                question?: string;
+                                correctAnswer?: string;
+                                userAnswer?: string;
+                                isCorrect?: boolean;
+                                timeSpent?: number;
+                            };
+                            return {
+                                question: questionObj.question ?? '',
+                                correctAnswer: questionObj.correctAnswer ?? '',
+                                userAnswer: questionObj.userAnswer ?? '',
+                                isCorrect: questionObj.isCorrect ?? false,
+                                timeSpent: questionObj.timeSpent ?? 0
+                            };
+                        })
+                        : [];
+                    return {
+                        id: recObj.id ?? '',
+                        userId: recObj.player_id ?? '',
+                        settings,
+                        questions,
+                        totalQuestions: typeof recObj.totalQuestions === 'number' ? recObj.totalQuestions : 0,
+                        correctAnswers: typeof recObj.correctAnswers === 'number' ? recObj.correctAnswers : 0,
+                        incorrectAnswers: typeof recObj.incorrectAnswers === 'number' ? recObj.incorrectAnswers : 0,
+                        score: typeof recObj.score === 'number' ? recObj.score : 0,
+                        completedAt: recObj.completedAt ? new Date(recObj.completedAt) : (recObj.created_at ? new Date(recObj.created_at) : new Date()),
+                        created_at: recObj.created_at ? new Date(recObj.created_at) : undefined,
+                        timeSpent: typeof recObj.timeSpent === 'number' ? recObj.timeSpent : 0,
+                        quizDuration: typeof recObj.quizDuration === 'number' ? recObj.quizDuration : 0,
+                        averageTimePerQuestion: typeof recObj.averageTimePerQuestion === 'number' ? recObj.averageTimePerQuestion : 0,
+                        pendingSync: false
+                    };
+                });
+                // Merge and deduplicate, then filter by userId
+                const merged = gameHistoryStorage.mergeWithRemote(parsedRemote).filter(r => r.userId === userId);
+                // Update localStorage with merged records
+                localStorage.setItem('mathquiz_game_history', JSON.stringify(merged));
+                setGameHistory(merged);
+            } catch (error) {
+                console.error('Failed to fetch/merge game history:', error);
+            } finally {
+                setLoading(false);
+            }
         }
+        fetchAndMergeHistory();
     }, []);
 
     // Get unique usernames for filter dropdown - removed since we're showing single user history
@@ -31,7 +134,7 @@ export default function HistoryPage() {
     // Sort history based on selected sort option
     const sortedHistory = [...gameHistory].sort((a, b) => {
         if (sortBy === 'date') {
-            return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+            return new Date(b.created_at ?? b.completedAt).getTime() - new Date(a.created_at ?? a.completedAt).getTime();
         } else {
             return b.score - a.score;
         }
@@ -179,7 +282,7 @@ export default function HistoryPage() {
                                     {sortedHistory.map((game: GameResult) => (
                                         <tr key={game.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                {formatDate(game.completedAt)}
+                                                {formatDate(game.created_at ? new Date(game.created_at) : game.completedAt)}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <span className={`text-lg font-bold ${getScoreColor(game.score)}`}>
