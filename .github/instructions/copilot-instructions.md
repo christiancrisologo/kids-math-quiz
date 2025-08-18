@@ -58,7 +58,8 @@ MathQuiz is a mathematics learning application designed to help users practice a
 - Create a branch for feature `<feature-number>/<feature-name>` 
 - Implement in phases with regular commits
 - Test on multiple devices before merge
-- Run the lint and fix if there's any lint errors
+- Before committing, Run the lint and fix if there's any lint errors
+- Create a new commit to fix the linting errors
 - Fetch the latest changes from the main branch before starting work
 - Rebase the branch with the main branch and fix the conflicts
 - Create a pull request using the pull-request-template.md. Fill in the descriptions to create the PR

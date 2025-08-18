@@ -95,7 +95,7 @@ export interface QuizState {
   // Persistence actions
   loadUserPreferences: () => void;
   saveUserPreferences: () => void;
-  saveGameResult: () => GameResult | null;
+  saveGameResult: () => Promise<GameResult | null>;
   clearUserData: () => void;
 }
 
@@ -397,25 +397,26 @@ export const useQuizStore = create<QuizState>((set, get) => ({
 
   saveUserPreferences: () => {
     const state = get();
-    // Fetch userId from Supabase and save to preferences
-    (async () => {
-      let userId = '';
-      try {
-        const user = await getUserByUsername(state.settings.username);
-        if (user && user.id) {
-          userId = user.id;
-        }
-      } catch {}
-      userPreferencesStorage.save({
-        username: state.settings.username,
-        userId,
-        settings: state.settings,
-        lastUpdated: new Date()
-      });
-    })();
+    // Get userId from localStorage (math_quiz_user)
+    let userId = '';
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          userId = userObj.userId || '';
+        } catch {}
+      }
+    }
+    userPreferencesStorage.save({
+      userId,
+      userName: state.settings.username,
+      settings: state.settings,
+      lastUpdated: new Date()
+    });
   },
 
-  saveGameResult: () => {
+  saveGameResult: async () => {
     const state = get();
     // Only save if quiz is completed and has questions
     if (!state.isQuizCompleted || state.questions.length === 0) {
@@ -425,7 +426,6 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     if (get()._gameRecordSaved) {
       return null;
     }
-    set({ _gameRecordSaved: true });
 
     const correctAnswers = state.questions.filter(q => q.isCorrect).length;
     const totalQuestions = state.questions.length;
@@ -433,33 +433,39 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     const totalTimeSpent = state.questions.reduce((total, q) => total + (q.timeSpent || 0), 0);
     const quizDuration = state.quizStartTime ? Math.round((Date.now() - state.quizStartTime) / 1000) : totalTimeSpent;
 
-    // Supabase integration
-    (async () => {
+    // Get userId from localStorage
+    let userId = '';
+    let userName = state.settings.username;
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          userId = userObj.userId || '';
+          userName = userObj.userName || userName;
+        } catch {}
+      }
+    }
+
+    // If online, check user in DB by userName, create if not found, then save game record
+    if (navigator.onLine && userName) {
       try {
-        let user = await getUserByUsername(state.settings.username);
+        let user = await getUserByUsername(userName);
         if (!user) {
-          try {
-            user = await createUser(state.settings.username);
-          } catch (err: unknown) {
-            // If duplicate key error, fetch user again
-            if (
-              typeof err === 'object' &&
-              err !== null &&
-              'message' in err &&
-              typeof (err as { message?: string }).message === 'string' &&
-              (err as { message: string }).message.includes('duplicate key value')
-            ) {
-              user = await getUserByUsername(state.settings.username);
-            } else {
-              throw err;
-            }
+          user = await createUser(userName);
+        }
+        if (user && user.id) {
+          userId = user.id;
+          // Update user reference in localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('math_quiz_user', JSON.stringify({ userId, userName }));
           }
         }
         await createGameRecord({
-          player_id: user.id,
+          player_id: userId,
           game_id: APP.ID,
           score,
-          achievement: '', // Add achievement logic if needed
+          achievement: '',
           challenge_mode: state.settings.challengeMode || 'none',
           game_duration: quizDuration,
           player_level: state.settings.difficulty,
@@ -468,11 +474,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       } catch (error) {
         console.error('Supabase save error:', error);
       }
-    })();
+    }
 
-    // Optionally, still save locally for offline/history
+    // Save to localStorage (always, for offline support)
     const gameResult = gameHistoryStorage.save({
-      username: state.settings.username,
       settings: state.settings,
       questions: state.questions.map(q => ({
         question: q.question,
@@ -488,7 +493,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       timeSpent: totalTimeSpent,
       quizDuration,
       averageTimePerQuestion: totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 0,
-    }, navigator.onLine);
+    }, !navigator.onLine);
+    set({ _gameRecordSaved: true });
     return gameResult;
   },
 

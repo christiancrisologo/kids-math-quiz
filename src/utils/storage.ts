@@ -3,7 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GameResult {
   id: string;
-  username: string;
+  userId?: string;
   settings: QuizSettings;
   questions: Array<{
     question: string;
@@ -25,8 +25,8 @@ export interface GameResult {
 }
 
 export interface UserPreferences {
-  username: string;
-  userId?: string;
+  userId: string;
+  userName: string;
   settings: QuizSettings;
   lastUpdated: Date;
 }
@@ -39,9 +39,11 @@ export const userPreferencesStorage = {
         ...preferences,
         lastUpdated: new Date().toISOString()
       }));
-      if (preferences.userId) {
-        localStorage.setItem('mathquiz_user_id', preferences.userId);
-      }
+      // Store user info in a dedicated key
+      localStorage.setItem('mathquiz_user_info', JSON.stringify({
+        userId: preferences.userId,
+        userName: preferences.userName
+      }));
     } catch (error) {
       console.error('Failed to save user preferences:', error);
     }
@@ -52,10 +54,18 @@ export const userPreferencesStorage = {
       const stored = localStorage.getItem('mathquiz_user_preferences');
       if (!stored) return null;
       const parsed = JSON.parse(stored);
-      const userId = localStorage.getItem('mathquiz_user_id') || parsed.userId;
+      const userInfo = localStorage.getItem('mathquiz_user_info');
+      let userId = '';
+      let userName = '';
+      if (userInfo) {
+        const info = JSON.parse(userInfo);
+        userId = info.userId;
+        userName = info.userName;
+      }
       return {
         ...parsed,
         userId,
+        userName,
         lastUpdated: new Date(parsed.lastUpdated)
       };
     } catch (error) {
@@ -75,10 +85,20 @@ export const userPreferencesStorage = {
 
 // Game history storage
 export const gameHistoryStorage = {
-  save: (result: Omit<GameResult, 'id' | 'completedAt'>, online: boolean): GameResult => {
+  save: (result: Omit<GameResult, 'id' | 'completedAt' | 'username'>, online: boolean): GameResult => {
     try {
+      // Get user info from localStorage
+      const userInfo = localStorage.getItem('mathquiz_user_info');
+      let userId = '';
+      let userName = '';
+      if (userInfo) {
+        const info = JSON.parse(userInfo);
+        userId = info.userId;
+        userName = info.userName;
+      }
       const gameResult: GameResult = {
         ...result,
+        userId,
         id: generateGameId(),
         completedAt: new Date(),
         pendingSync: !online
@@ -148,17 +168,6 @@ export const gameHistoryStorage = {
     return all;
   },
 
-  loadByUser: (username: string): GameResult[] => {
-    try {
-      const allResults = gameHistoryStorage.loadAll();
-      return allResults.filter(result => 
-        result.username.toLowerCase() === username.toLowerCase()
-      );
-    } catch (error) {
-      console.error('Failed to load user game history:', error);
-      return [];
-    }
-  },
 
   clear: (): void => {
     try {
@@ -168,17 +177,6 @@ export const gameHistoryStorage = {
     }
   },
 
-  clearByUser: (username: string): void => {
-    try {
-      const allResults = gameHistoryStorage.loadAll();
-      const filteredResults = allResults.filter(result => 
-        result.username.toLowerCase() !== username.toLowerCase()
-      );
-      localStorage.setItem('mathquiz_game_history', JSON.stringify(filteredResults));
-    } catch (error) {
-      console.error('Failed to clear user game history:', error);
-    }
-  }
 };
 
 // Utility function to generate unique game IDs

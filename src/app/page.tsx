@@ -16,7 +16,7 @@ import { animationClasses } from '../utils/enhanced-animations';
 import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
 import { getChallengeModes, applyChallengeMode, type ChallengeMode } from '../utils/challengeModes';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
-import { getUserByUsername } from '../utils/supabaseGame';
+import { createUser, getUserByUsername } from '../utils/supabaseGame';
 
 export default function Home() {
   const router = useRouter();
@@ -26,15 +26,29 @@ export default function Home() {
 
   // Removed unused welcomeBack state
   const [showWelcome, setShowWelcome] = useState(false);
+  // Load user info from localStorage (math_quiz_user)
+  const getInitialUsername = () => {
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          return userObj.userName || '';
+        } catch {
+          return '';
+        }
+      }
+    }
+    return '';
+  };
   const [formData, setFormData] = useState({
-    username: '',
+    username: getInitialUsername(),
     difficulty: 'easy' as Difficulty,
     numberOfQuestions: 5,
     timerPerQuestion: 10,
     questionType: 'expression' as QuestionType,
-    mathOperations: ['addition'] as MathOperation[], // Changed to array with default selection
-    numberTypes: ['integers'] as NumberType[], // New field for number types
-    // Enhanced settings
+    mathOperations: ['addition'] as MathOperation[],
+    numberTypes: ['integers'] as NumberType[],
     timerEnabled: true,
     questionsEnabled: true,
     minCorrectAnswers: 0,
@@ -43,10 +57,8 @@ export default function Home() {
     minIncorrectAnswers: 0,
     maxIncorrectAnswers: 5,
     incorrectAnswersEnabled: false,
-    // Overall timer settings
     overallTimerEnabled: false,
-    overallTimerDuration: 180, // 3 minutes default
-    // Challenge mode
+    overallTimerDuration: 180,
     challengeMode: undefined as string | undefined,
   });
 
@@ -56,80 +68,43 @@ export default function Home() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
 
-  // Apply primary school preset on component mount and load saved preferences
+  // Only log what's currently in localStorage for debugging (browser only)
   useEffect(() => {
-    // Only load preferences once on mount
-    loadUserPreferences();
-    // Also log what's currently in localStorage for debugging (browser only)
     if (typeof window !== 'undefined') {
       console.log('localStorage check:', {
-        userPreferences: localStorage.getItem('userPreferences'),
+        math_quiz_user: localStorage.getItem('math_quiz_user'),
         gameHistory: localStorage.getItem('gameHistory')
       });
     }
-  }, [loadUserPreferences]);
+  }, []);
+
+  // Supabase test button handler
+  const handleSupabaseTest = async () => {
+    try {
+      const user = await createUser('test_supabase_user_' + Math.floor(Math.random() * 10000));
+      alert('Supabase response: ' + JSON.stringify(user));
+      console.log('Supabase test user:', user);
+    } catch (err) {
+      alert('Supabase error: ' + err);
+      console.error('Supabase error:', err);
+    }
+  };
   // Removed unused welcomeBack state
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
-    // Check if we have any meaningful saved settings (not just default values)
-    const hasSavedSettings = settings.username && settings.username.trim() !== '';
-
-    console.log('Loading preferences:', { settings, hasSavedSettings }); // Debug log
-
-    if (hasSavedSettings) {
-      console.log('Using saved settings from localStorage'); // Debug log
-      // Use saved settings
-      setFormData(prev => ({
-        ...prev,
-        username: settings.username || prev.username,
-        difficulty: settings.difficulty || prev.difficulty,
-        numberOfQuestions: settings.numberOfQuestions || prev.numberOfQuestions,
-        timerPerQuestion: settings.timerPerQuestion || prev.timerPerQuestion,
-        questionType: settings.questionType || prev.questionType,
-        mathOperations: settings.mathOperations?.length ? settings.mathOperations : prev.mathOperations,
-        numberTypes: settings.numberTypes?.length ? settings.numberTypes : prev.numberTypes,
-        // Enhanced settings
-        timerEnabled: settings.timerEnabled !== undefined ? settings.timerEnabled : prev.timerEnabled,
-        questionsEnabled: settings.questionsEnabled !== undefined ? settings.questionsEnabled : prev.questionsEnabled,
-        minCorrectAnswers: settings.minCorrectAnswers !== undefined ? settings.minCorrectAnswers : prev.minCorrectAnswers,
-        maxCorrectAnswers: settings.maxCorrectAnswers !== undefined ? settings.maxCorrectAnswers : prev.maxCorrectAnswers,
-        correctAnswersEnabled: settings.correctAnswersEnabled !== undefined ? settings.correctAnswersEnabled : prev.correctAnswersEnabled,
-        minIncorrectAnswers: settings.minIncorrectAnswers !== undefined ? settings.minIncorrectAnswers : prev.minIncorrectAnswers,
-        maxIncorrectAnswers: settings.maxIncorrectAnswers !== undefined ? settings.maxIncorrectAnswers : prev.maxIncorrectAnswers,
-        incorrectAnswersEnabled: settings.incorrectAnswersEnabled !== undefined ? settings.incorrectAnswersEnabled : prev.incorrectAnswersEnabled,
-        // Overall timer settings
-        overallTimerEnabled: settings.overallTimerEnabled !== undefined ? settings.overallTimerEnabled : prev.overallTimerEnabled,
-        overallTimerDuration: settings.overallTimerDuration !== undefined ? settings.overallTimerDuration : prev.overallTimerDuration,
-        // Challenge mode
-        challengeMode: settings.challengeMode || prev.challengeMode,
-      }));
-
-      // Set challenge mode if it exists in settings
-      if (settings.challengeMode) {
-        setSelectedChallengeMode(settings.challengeMode);
+    // If username is blank, check localStorage for math_quiz_user
+    if (!formData.username) {
+      const userRaw = typeof window !== 'undefined' ? localStorage.getItem('math_quiz_user') : null;
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          if (userObj.userName) {
+            setFormData(prev => ({ ...prev, username: userObj.userName }));
+          }
+        } catch { }
       }
-    } else {
-      console.log('No saved settings found, applying primary school preset'); // Debug log
-      // No saved settings, apply primary school preset as default
-      const presetSettings = applyYearLevelPreset('primary');
-      setFormData(prev => ({
-        ...prev,
-        ...presetSettings,
-        // Keep enhanced settings defaults
-        timerEnabled: prev.timerEnabled,
-        questionsEnabled: prev.questionsEnabled,
-        minCorrectAnswers: prev.minCorrectAnswers,
-        maxCorrectAnswers: presetSettings.numberOfQuestions || prev.maxCorrectAnswers,
-        correctAnswersEnabled: prev.correctAnswersEnabled,
-        minIncorrectAnswers: prev.minIncorrectAnswers,
-        maxIncorrectAnswers: presetSettings.numberOfQuestions || prev.maxIncorrectAnswers,
-        incorrectAnswersEnabled: prev.incorrectAnswersEnabled,
-        // Keep overall timer defaults
-        overallTimerEnabled: prev.overallTimerEnabled,
-        overallTimerDuration: prev.overallTimerDuration,
-      }));
     }
-  }, [settings]); // Run when settings change
+  }, [formData.username]);
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => {
@@ -315,7 +290,20 @@ export default function Home() {
       return;
     }
 
-    console.log('Saving user preferences:', formData); // Debug log
+    // Save user info to localStorage (math_quiz_user)
+    if (typeof window !== 'undefined') {
+      // If no userId, generate a random one
+      let userId = '';
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          userId = userObj.userId || '';
+        } catch { }
+      }
+
+      localStorage.setItem('math_quiz_user', JSON.stringify({ userId, userName: formData.username }));
+    }
 
     // Reset quiz state first to clear any completed status
     resetQuiz();
@@ -332,13 +320,38 @@ export default function Home() {
       formData.difficulty,
       formData.mathOperations,
       formData.questionType,
-      formData.numberTypes // Add number types parameter
+      formData.numberTypes
     );
     setQuestions(questions);
 
     // Navigate to quiz page
     router.push('/quiz');
   };
+
+  // Fix hydration mismatch: use state and check localStorage only after mount
+  // Hide history button by default, only show if localStorage has game records for current user
+  const [showHistoryButton, setShowHistoryButton] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      let userId = '';
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          userId = userObj.userId || '';
+        } catch { }
+      }
+      const gameHistoryRaw = localStorage.getItem('mathquiz_game_history');
+      let hasHistoryForUser = false;
+      if (gameHistoryRaw && userId) {
+        try {
+          const historyArr = JSON.parse(gameHistoryRaw);
+          hasHistoryForUser = Array.isArray(historyArr) && historyArr.some(r => r.userId === userId);
+        } catch { }
+      }
+      setShowHistoryButton(hasHistoryForUser);
+    }
+  }, [formData.username]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-cyan-400 dark:from-purple-900 dark:via-blue-900 dark:to-pink-900">
@@ -759,17 +772,19 @@ export default function Home() {
           </div>
 
           {/* View History Button */}
-          <div className="mt-3">
-            <MobileButton
-              variant="secondary"
-              size="lg"
-              fullWidth
-              onClick={() => router.push('/history')}
-              icon="📊"
-            >
-              View History
-            </MobileButton>
-          </div>
+          {showHistoryButton && (
+            <div className="mt-3">
+              <MobileButton
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={() => router.push('/history')}
+                icon="📊"
+              >
+                View History
+              </MobileButton>
+            </div>
+          )}
         </div>
       </div>
     </div>

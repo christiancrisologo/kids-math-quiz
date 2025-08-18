@@ -16,31 +16,35 @@ export default function HistoryPage() {
     const [sortBy, setSortBy] = useState<'date' | 'score'>('date');
     const [loading, setLoading] = useState(true);
 
-    // Load game history from Supabase and localStorage, merge, deduplicate, and update localStorage
+    // Load game history using userId from localStorage, merge DB/local if online, filter by userId
     useEffect(() => {
         async function fetchAndMergeHistory() {
             setLoading(true);
             try {
-                // Get current username from store
-                const username = settings.username;
-                if (!username) {
+                // Get userId from localStorage
+                let userId = '';
+                if (typeof window !== 'undefined') {
+                    const userRaw = localStorage.getItem('math_quiz_user');
+                    if (userRaw) {
+                        try {
+                            const userObj = JSON.parse(userRaw);
+                            userId = userObj.userId || '';
+                        } catch {}
+                    }
+                }
+                if (!userId) {
                     setGameHistory([]);
                     setLoading(false);
                     return;
                 }
-                // Get user from Supabase
-                const { data: userData, error: userError } = await supabase
-                    .from('game_players')
-                    .select('id')
-                    .eq('username', username)
-                    .single();
-                if (userError || !userData) {
-                    setGameHistory([]);
+                // If offline, just load local records filtered by userId
+                if (!navigator.onLine) {
+                    const localRecords = gameHistoryStorage.loadAll().filter(r => r.userId === userId);
+                    setGameHistory(localRecords);
                     setLoading(false);
                     return;
                 }
-                const userId = userData.id;
-                // Fetch only this user's game records
+                // If online, fetch DB records for userId
                 const { data: remoteRecords, error } = await supabase
                     .from(TABLES.RECORDS)
                     .select('*')
@@ -48,37 +52,53 @@ export default function HistoryPage() {
                 if (error) {
                     throw error;
                 }
-                // Parse remote records to GameResult format, parsing game_settings JSON
-                const parsedRemote = (remoteRecords || []).map((rec: Record<string, any>) => {
-                    let settings = rec.settings;
-                    if (!settings && rec.game_settings) {
+                // Parse remote records to GameResult format
+                const parsedRemote = (remoteRecords || []).map((rec: unknown) => {
+                    const recObj = rec as {
+                        id?: string;
+                        player_id?: string;
+                        settings?: any;
+                        game_settings?: any;
+                        questions?: any[];
+                        totalQuestions?: number;
+                        correctAnswers?: number;
+                        incorrectAnswers?: number;
+                        score?: number;
+                        completedAt?: string;
+                        created_at?: string;
+                        timeSpent?: number;
+                        quizDuration?: number;
+                        averageTimePerQuestion?: number;
+                    };
+                    let settings = recObj.settings;
+                    if (!settings && recObj.game_settings) {
                         try {
-                            settings = typeof rec.game_settings === 'string'
-                                ? JSON.parse(rec.game_settings)
-                                : rec.game_settings;
+                            settings = typeof recObj.game_settings === 'string'
+                                ? JSON.parse(recObj.game_settings)
+                                : recObj.game_settings;
                         } catch {
                             settings = {};
                         }
                     }
                     return {
-                        id: rec.id,
-                        username: rec.username,
+                        id: recObj.id ?? '',
+                        userId: recObj.player_id ?? '',
                         settings,
-                        questions: rec.questions ?? [],
-                        totalQuestions: rec.totalQuestions ?? 0,
-                        correctAnswers: rec.correctAnswers ?? 0,
-                        incorrectAnswers: rec.incorrectAnswers ?? 0,
-                        score: rec.score ?? 0,
-                        completedAt: rec.completedAt ? new Date(rec.completedAt) : (rec.created_at ? new Date(rec.created_at) : new Date()),
-                        created_at: rec.created_at ? new Date(rec.created_at) : undefined,
-                        timeSpent: rec.timeSpent ?? 0,
-                        quizDuration: rec.quizDuration ?? 0,
-                        averageTimePerQuestion: rec.averageTimePerQuestion ?? 0,
+                        questions: Array.isArray(recObj.questions) ? recObj.questions : [],
+                        totalQuestions: typeof recObj.totalQuestions === 'number' ? recObj.totalQuestions : 0,
+                        correctAnswers: typeof recObj.correctAnswers === 'number' ? recObj.correctAnswers : 0,
+                        incorrectAnswers: typeof recObj.incorrectAnswers === 'number' ? recObj.incorrectAnswers : 0,
+                        score: typeof recObj.score === 'number' ? recObj.score : 0,
+                        completedAt: recObj.completedAt ? new Date(recObj.completedAt) : (recObj.created_at ? new Date(recObj.created_at) : new Date()),
+                        created_at: recObj.created_at ? new Date(recObj.created_at) : undefined,
+                        timeSpent: typeof recObj.timeSpent === 'number' ? recObj.timeSpent : 0,
+                        quizDuration: typeof recObj.quizDuration === 'number' ? recObj.quizDuration : 0,
+                        averageTimePerQuestion: typeof recObj.averageTimePerQuestion === 'number' ? recObj.averageTimePerQuestion : 0,
                         pendingSync: false
                     };
                 });
-                // Merge and deduplicate
-                const merged = gameHistoryStorage.mergeWithRemote(parsedRemote);
+                // Merge and deduplicate, then filter by userId
+                const merged = gameHistoryStorage.mergeWithRemote(parsedRemote).filter(r => r.userId === userId);
                 // Update localStorage with merged records
                 localStorage.setItem('mathquiz_game_history', JSON.stringify(merged));
                 setGameHistory(merged);
