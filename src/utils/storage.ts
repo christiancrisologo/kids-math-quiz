@@ -90,11 +90,9 @@ export const gameHistoryStorage = {
       // Get user info from localStorage
       const userInfo = localStorage.getItem('mathquiz_user_info');
       let userId = '';
-      let userName = '';
       if (userInfo) {
         const info = JSON.parse(userInfo);
         userId = info.userId;
-        userName = info.userName;
       }
       const gameResult: GameResult = {
         ...result,

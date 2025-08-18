@@ -57,9 +57,9 @@ export default function HistoryPage() {
                     const recObj = rec as {
                         id?: string;
                         player_id?: string;
-                        settings?: any;
-                        game_settings?: any;
-                        questions?: any[];
+                        settings?: unknown;
+                        game_settings?: unknown;
+                        questions?: unknown;
                         totalQuestions?: number;
                         correctAnswers?: number;
                         incorrectAnswers?: number;
@@ -70,21 +70,39 @@ export default function HistoryPage() {
                         quizDuration?: number;
                         averageTimePerQuestion?: number;
                     };
-                    let settings = recObj.settings;
+                    let settings: import('../../store/quiz-store').QuizSettings = recObj.settings as import('../../store/quiz-store').QuizSettings;
                     if (!settings && recObj.game_settings) {
                         try {
                             settings = typeof recObj.game_settings === 'string'
-                                ? JSON.parse(recObj.game_settings)
-                                : recObj.game_settings;
+                                ? JSON.parse(recObj.game_settings as string)
+                                : recObj.game_settings as import('../../store/quiz-store').QuizSettings;
                         } catch {
-                            settings = {};
+                            settings = {} as import('../../store/quiz-store').QuizSettings;
                         }
                     }
+                    const questions = Array.isArray(recObj.questions)
+                        ? recObj.questions.map((q: unknown) => {
+                            const questionObj = q as {
+                                question?: string;
+                                correctAnswer?: string;
+                                userAnswer?: string;
+                                isCorrect?: boolean;
+                                timeSpent?: number;
+                            };
+                            return {
+                                question: questionObj.question ?? '',
+                                correctAnswer: questionObj.correctAnswer ?? '',
+                                userAnswer: questionObj.userAnswer ?? '',
+                                isCorrect: questionObj.isCorrect ?? false,
+                                timeSpent: questionObj.timeSpent ?? 0
+                            };
+                        })
+                        : [];
                     return {
                         id: recObj.id ?? '',
                         userId: recObj.player_id ?? '',
                         settings,
-                        questions: Array.isArray(recObj.questions) ? recObj.questions : [],
+                        questions,
                         totalQuestions: typeof recObj.totalQuestions === 'number' ? recObj.totalQuestions : 0,
                         correctAnswers: typeof recObj.correctAnswers === 'number' ? recObj.correctAnswers : 0,
                         incorrectAnswers: typeof recObj.incorrectAnswers === 'number' ? recObj.incorrectAnswers : 0,

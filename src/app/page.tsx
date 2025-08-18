@@ -16,16 +16,15 @@ import { animationClasses } from '../utils/enhanced-animations';
 import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
 import { getChallengeModes, applyChallengeMode, type ChallengeMode } from '../utils/challengeModes';
 import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
-import { createUser, getUserByUsername } from '../utils/supabaseGame';
 
 export default function Home() {
   const router = useRouter();
-  const { updateSettings, setQuestions, settings, loadUserPreferences, saveUserPreferences, resetQuiz } = useQuizStore();
+  const { updateSettings, setQuestions, saveUserPreferences, resetQuiz } = useQuizStore();
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
 
   // Removed unused welcomeBack state
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome] = useState(false);
   // Load user info from localStorage (math_quiz_user)
   const getInitialUsername = () => {
     if (typeof window !== 'undefined') {
@@ -78,17 +77,6 @@ export default function Home() {
     }
   }, []);
 
-  // Supabase test button handler
-  const handleSupabaseTest = async () => {
-    try {
-      const user = await createUser('test_supabase_user_' + Math.floor(Math.random() * 10000));
-      alert('Supabase response: ' + JSON.stringify(user));
-      console.log('Supabase test user:', user);
-    } catch (err) {
-      alert('Supabase error: ' + err);
-      console.error('Supabase error:', err);
-    }
-  };
   // Removed unused welcomeBack state
   // Sync form data with loaded settings from store, or apply defaults if no saved data
   useEffect(() => {
