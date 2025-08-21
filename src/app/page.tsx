@@ -714,6 +714,13 @@ export default function Home() {
               fullWidth
               onClick={handleStartQuiz}
               icon="🚀"
+              disabled={
+                !formData.username.trim() ||
+                Object.keys(errors).length > 0 ||
+                formData.mathOperations.length === 0 ||
+                formData.numberTypes.length === 0
+                // Challenge mode is optional, do not include in validation
+              }
             >
               Start Quiz!
             </MobileButton>
