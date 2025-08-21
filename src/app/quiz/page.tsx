@@ -4,15 +4,18 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
-import { MobileButton } from '../../components/ui/MobileButton';
-import { MobileTile } from '../../components/ui/MobileTile';
-import { MobileInput } from '../../components/ui/MobileInput';
-import { FractionInput } from '../../components/ui/FractionInput';
 import { playSound, vibrate } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
 import { useQuestionTransition, getBlockingOverlayClasses } from '../../utils/question-transitions';
 import { getChallengeMode } from '../../utils/challengeModes';
+import QuestionDisplay from '../../components/quiz/QuestionDisplay';
+import AnswerInput from '../../components/quiz/AnswerInput';
+import OptionSelector from '../../components/quiz/OptionSelector';
+import Timer from '../../components/quiz/Timer';
+import QuizActions from '../../components/quiz/QuizActions';
+import { FractionInput } from '../../components/ui/FractionInput';
+import { MobileTile } from '../../components/ui/MobileTile';
 
 export default function QuizPage() {
     const router = useRouter();
@@ -420,27 +423,12 @@ export default function QuizPage() {
 
                             {/* Right side - Timer */}
                             <div className="flex items-center space-x-3">
-                                {/* Question Timer - shown if enabled */}
-                                {settings.timerEnabled && (
-                                    <div className={`text-sm font-bold px-3 py-1 rounded-lg ${timeRemaining <= 5
-                                        ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                        : 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30'
-                                        }`}>
-                                        ⏰ {timeRemaining}s
-                                    </div>
-                                )}
-
-                                {/* Overall Timer - shown if enabled */}
-                                {settings.overallTimerEnabled && overallTimerActive && (
-                                    <div className={`text-sm font-bold px-3 py-1 rounded-lg ${overallTimeRemaining <= 30
-                                        ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                        : overallTimeRemaining <= 60
-                                            ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
-                                            : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                        }`}>
-                                        🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
-                                    </div>
-                                )}
+                                <Timer
+                                    timeRemaining={timeRemaining}
+                                    overallTimeRemaining={overallTimeRemaining}
+                                    timerEnabled={settings.timerEnabled}
+                                    overallTimerEnabled={settings.overallTimerEnabled}
+                                />
                             </div>
                         </div>
 
@@ -473,167 +461,52 @@ export default function QuizPage() {
 
                     {/* Mobile Content Area */}
                     <div className="flex-1 flex flex-col p-4">
-                        {/* Question Card */}
-                        <div key={animationKey} className={`bg-white dark:bg-slate-800 rounded-xl shadow-lg p-4 mb-4 flex-1 flex items-center justify-center max-h-fit ${animationClasses.bounceGentle(systemSettings)} ${transitionClasses}`}>
-                            <div className="text-center">
-                                <div className="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                                    {currentQuestion.variable ? (
-                                        <div>
-                                            <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variable}:</div>
-                                            <div>{currentQuestion.question}</div>
-                                        </div>
-                                    ) : currentQuestion.variables && currentQuestion.variables.length > 0 ? (
-                                        <div>
-                                            <div className="text-xl text-purple-600 dark:text-purple-400 mb-2">Solve for {currentQuestion.variables.join(' and ')}:</div>
-                                            <div>{currentQuestion.question}</div>
-                                        </div>
-                                    ) : (
-                                        `${currentQuestion.question} = ?`
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Mobile Answer Area - Bottom Sheet Style */}
-                        <div className={`bg-white dark:bg-slate-800 rounded-t-xl shadow-lg p-4 pb-6 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`} onKeyDown={handleKeyPress}>
-                            {settings.questionType === 'expression' ? (
-                                <div className="space-y-2">
-                                    {isFractionQuestion ? (
-                                        <FractionInput
-                                            ref={fractionInputRef}
-                                            value={userFractionInput}
-                                            onChange={setUserFractionInput}
-                                            placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
-                                            fullWidth
-                                        />
-                                    ) : (
-                                        <MobileInput
-                                            ref={inputRef}
-                                            type="number"
-                                            placeholder={
-                                                currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
-                                                currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
-                                                "Your answer"
-                                            }
-                                            value={userInput}
-                                            onChange={setUserInput}
-                                            inputMode="numeric"
-                                            fullWidth
-                                            onKeyDown={handleKeyPress}
-                                        />
-                                    )}
-                                    <MobileButton
-                                        variant="primary"
-                                        size="lg"
-                                        fullWidth
-                                        onClick={handleSubmitAnswer}
-                                        disabled={
-                                            isFractionQuestion ? !userFractionInput.trim() :
-                                                isCurrencyQuestion ? !userInput.trim() :
-                                                    isTimeQuestion ? !userInput.trim() :
-                                                        !userInput.trim()
-                                        }
-                                        icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
-                                    >
-                                        {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                                    </MobileButton>
-
-                                    {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
-                                    {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
-                                        <MobileButton
-                                            variant="secondary"
-                                            size="lg"
-                                            fullWidth
-                                            onClick={() => completeQuiz()}
-                                            icon="🏁"
-                                            className="mt-3"
-                                        >
-                                            Finish Quiz
-                                        </MobileButton>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {isFractionQuestion && currentQuestion.fractionOptions ? (
-                                            // Fraction multiple choice options
-                                            currentQuestion.fractionOptions.map((option, index) => (
-                                                <MobileTile
-                                                    key={index}
-                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
-                                                    isSelected={selectedFractionOption === option}
-                                                    onClick={() => setSelectedFractionOption(option)}
-                                                    compact={true}
-                                                />
-                                            ))
-                                        ) : isCurrencyQuestion && currentQuestion.currencyOptions ? (
-                                            // Currency multiple choice options
-                                            currentQuestion.currencyOptions.map((option, index) => (
-                                                <MobileTile
-                                                    key={index}
-                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
-                                                    isSelected={selectedCurrencyOption === option}
-                                                    onClick={() => setSelectedCurrencyOption(option)}
-                                                    compact={true}
-                                                />
-                                            ))
-                                        ) : isTimeQuestion && currentQuestion.timeOptions ? (
-                                            // Time multiple choice options
-                                            currentQuestion.timeOptions.map((option, index) => (
-                                                <MobileTile
-                                                    key={index}
-                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
-                                                    isSelected={selectedTimeOption === option}
-                                                    onClick={() => setSelectedTimeOption(option)}
-                                                    compact={true}
-                                                />
-                                            ))
-                                        ) : (
-                                            // Regular multiple choice options (integers and decimals)
-                                            currentQuestion.options?.map((option, index) => (
-                                                <MobileTile
-                                                    key={index}
-                                                    title={`${String.fromCharCode(65 + index)}. ${option}`}
-                                                    isSelected={selectedOption === option}
-                                                    onClick={() => setSelectedOption(option)}
-                                                    compact={true}
-                                                />
-                                            ))
-                                        )}
-                                    </div>
-                                    <MobileButton
-                                        variant="primary"
-                                        size="lg"
-                                        fullWidth
-                                        onClick={handleSubmitAnswer}
-                                        disabled={
-                                            isFractionQuestion ? selectedFractionOption === null :
-                                                isCurrencyQuestion ? selectedCurrencyOption === null :
-                                                    isTimeQuestion ? selectedTimeOption === null :
-                                                        selectedOption === null
-                                        }
-                                        icon={currentQuestionIndex >= questions.length - 1 ? '🏁' : '➡️'}
-                                    >
-                                        {currentQuestionIndex >= questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                                    </MobileButton>
-
-                                    {/* Finish Quiz Button - Show when timer and questions are disabled or set to 0 */}
-                                    {(!settings.timerEnabled && (!settings.questionsEnabled || settings.numberOfQuestions === 0)) && (
-                                        <MobileButton
-                                            variant="secondary"
-                                            size="lg"
-                                            fullWidth
-                                            onClick={() => completeQuiz()}
-                                            icon="🏁"
-                                            className="mt-3"
-                                        >
-                                            Finish Quiz
-                                        </MobileButton>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
+                        <QuestionDisplay currentQuestion={currentQuestion} />
+                        {settings.questionType === 'expression' ? (
+                            <AnswerInput
+                                value={isFractionQuestion ? userFractionInput : userInput}
+                                onChange={isFractionQuestion ? setUserFractionInput : setUserInput}
+                                placeholder={
+                                    currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
+                                    currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
+                                    "Your answer"
+                                }
+                            />
+                        ) : (
+                            <OptionSelector
+                                options={
+                                    isFractionQuestion && currentQuestion.fractionOptions ? currentQuestion.fractionOptions :
+                                    isCurrencyQuestion && currentQuestion.currencyOptions ? currentQuestion.currencyOptions :
+                                    isTimeQuestion && currentQuestion.timeOptions ? currentQuestion.timeOptions :
+                                    currentQuestion.options || []
+                                }
+                                selectedOption={
+                                    isFractionQuestion ? selectedFractionOption :
+                                    isCurrencyQuestion ? selectedCurrencyOption :
+                                    isTimeQuestion ? selectedTimeOption :
+                                    selectedOption
+                                }
+                                onSelect={(option) => {
+                                    if (isFractionQuestion) setSelectedFractionOption(option as string);
+                                    else if (isCurrencyQuestion) setSelectedCurrencyOption(option as string);
+                                    else if (isTimeQuestion) setSelectedTimeOption(option as string);
+                                    else setSelectedOption(option as number);
+                                }}
+                            />
+                        )}
+                        <QuizActions
+                            onSubmit={handleSubmitAnswer}
+                            onNext={currentQuestionIndex >= questions.length - 1 ? completeQuiz : nextQuestion}
+                            isSubmitDisabled={
+                                settings.questionType === 'expression'
+                                    ? (isFractionQuestion ? !userFractionInput.trim() : !userInput.trim())
+                                    : (isFractionQuestion ? selectedFractionOption === null :
+                                        isCurrencyQuestion ? selectedCurrencyOption === null :
+                                        isTimeQuestion ? selectedTimeOption === null :
+                                        selectedOption === null)
+                            }
+                            isNextDisabled={false}
+                        />
                         {/* Challenge Mode Container - Bottom */}
                         {settings.challengeMode && (
                             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 border-t border-purple-200 dark:border-purple-700">
@@ -691,24 +564,12 @@ export default function QuizPage() {
 
                                 {/* Right side - Timer */}
                                 <div className="flex items-center space-x-6">
-                                    {/* Question Timer - shown if enabled */}
-                                    {settings.timerEnabled && (
-                                        <div className={`text-2xl font-bold ${timeRemaining <= 5 ? `text-red-500 dark:text-red-400 ${animationClasses.pulse(systemSettings)}` : 'text-purple-600 dark:text-purple-400'}`}>
-                                            ⏰ {timeRemaining}s
-                                        </div>
-                                    )}
-
-                                    {/* Overall Timer - shown if enabled */}
-                                    {settings.overallTimerEnabled && overallTimerActive && (
-                                        <div className={`text-xl font-bold px-4 py-2 rounded-lg ${overallTimeRemaining <= 30
-                                            ? `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 ${animationClasses.pulse(systemSettings)}`
-                                            : overallTimeRemaining <= 60
-                                                ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30'
-                                                : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
-                                            }`}>
-                                            🕐 {Math.floor(overallTimeRemaining / 60)}:{(overallTimeRemaining % 60).toString().padStart(2, '0')}
-                                        </div>
-                                    )}
+                                    <Timer
+                                        timeRemaining={timeRemaining}
+                                        overallTimeRemaining={overallTimeRemaining}
+                                        timerEnabled={settings.timerEnabled}
+                                        overallTimerEnabled={settings.overallTimerEnabled}
+                                    />
                                 </div>
                             </div>
 
@@ -875,28 +736,6 @@ export default function QuizPage() {
                                 </button>
                             )}
                         </div>
-
-                        {/* Quiz Info */}
-                        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                            <p>Difficulty: {settings.difficulty} | Operations: {settings.mathOperations.map(op =>
-                                op.charAt(0).toUpperCase() + op.slice(1)
-                            ).join(', ')}</p>
-                        </div>
-
-                        {/* Challenge Mode Container - Bottom */}
-                        {settings.challengeMode && (
-                            <div className="mt-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
-                                <div className="text-center">
-                                    <div className="flex items-center justify-center space-x-2 mb-2">
-                                        <span className="text-purple-600 dark:text-purple-400 font-semibold">🏆 Challenge:</span>
-                                        <span className="font-bold text-purple-800 dark:text-purple-300">{settings.challengeMode}</span>
-                                    </div>
-                                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">
-                                        📋 {getChallengeMode(settings.challengeMode)?.description}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             )}
