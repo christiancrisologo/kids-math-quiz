@@ -1,8 +1,6 @@
 // Helper functions extracted from landing page
 
-import type { Difficulty, QuestionType, MathOperation, NumberType, QuizSettings } from '../store/quiz-store';
-import { yearLevelPresets, applyYearLevelPreset, YearLevel } from './yearLevelPresets';
-import { applyChallengeMode, ChallengeMode } from './challengeModes';
+import type { QuizSettings } from '../store/quiz-store';
 import { initialFormData } from '../constants/initialFormData';
 
 export function getInitialFormData(settings: QuizSettings): Partial<QuizSettings> {
@@ -30,18 +28,17 @@ export function handleToggle<T>(current: T[], value: T): T[] {
   }
 }
 
-export function handleSliderChange(min: number, max: number, field: string, setFormData: Function) {
-  setFormData((prev: any) => ({
-    ...prev,
-    [field + 'Min']: min,
-    [field + 'Max']: max,
-  }));
+
+export function handleSliderChange<T extends Record<string, unknown>>(
+    min: number,
+    max: number,
+    field: string,
+    setFormData: React.Dispatch<React.SetStateAction<T>>
+) {
+    setFormData((prev) => ({
+        ...prev,
+        [`min${field.charAt(0).toUpperCase() + field.slice(1)}`]: min,
+        [`max${field.charAt(0).toUpperCase() + field.slice(1)}`]: max,
+    }));
 }
 
-export function getYearLevelInfo(yearLevel: YearLevel) {
-  return yearLevelPresets[yearLevel];
-}
-
-export function getChallengeInfo(challengeModes: ChallengeMode[], selectedChallengeMode: string) {
-  return challengeModes.find((c) => c.name === selectedChallengeMode);
-}

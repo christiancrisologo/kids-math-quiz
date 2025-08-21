@@ -122,26 +122,10 @@ export default function Home() {
   };
 
   const handleMathOperationToggle = (operation: MathOperation) => {
-    setFormData(prev => {
-      const currentOperations = prev.mathOperations;
-      const isSelected = currentOperations.includes(operation);
-
-      if (isSelected) {
-        // Don't allow removing the last operation
-        if (currentOperations.length === 1) {
-          return prev;
-        }
-        return {
-          ...prev,
-          mathOperations: currentOperations.filter(op => op !== operation)
-        };
-      } else {
-        return {
-          ...prev,
-          mathOperations: [...currentOperations, operation]
-        };
-      }
-    });
+    setFormData(prev => ({
+      ...prev,
+      mathOperations: handleToggle(prev.mathOperations, operation)
+    }));
 
     // Clear math operations error when user makes a selection
     if (errors.mathOperations) {
@@ -153,26 +137,10 @@ export default function Home() {
   };
 
   const handleNumberTypeToggle = (numberType: NumberType) => {
-    setFormData(prev => {
-      const currentTypes = prev.numberTypes;
-      const isSelected = currentTypes.includes(numberType);
-
-      if (isSelected) {
-        // Don't allow removing the last number type
-        if (currentTypes.length === 1) {
-          return prev;
-        }
-        return {
-          ...prev,
-          numberTypes: currentTypes.filter(type => type !== numberType)
-        };
-      } else {
-        return {
-          ...prev,
-          numberTypes: [...currentTypes, numberType]
-        };
-      }
-    });
+    setFormData(prev => ({
+      ...prev,
+      numberTypes: handleToggle(prev.numberTypes, numberType)
+    }));
 
     // Clear number types error when user makes a selection
     if (errors.numberTypes) {
@@ -185,20 +153,12 @@ export default function Home() {
 
   // Handler for correct answers slider
   const handleCorrectAnswersChange = (min: number, max: number) => {
-    setFormData(prev => ({
-      ...prev,
-      minCorrectAnswers: min,
-      maxCorrectAnswers: max,
-    }));
+    handleSliderChange(min, max, 'correctAnswers', setFormData);
   };
 
   // Handler for incorrect answers slider
   const handleIncorrectAnswersChange = (min: number, max: number) => {
-    setFormData(prev => ({
-      ...prev,
-      minIncorrectAnswers: min,
-      maxIncorrectAnswers: max,
-    }));
+    handleSliderChange(min, max, 'incorrectAnswers', setFormData);
   };
 
   const handleYearLevelChange = (yearLevel: YearLevel) => {

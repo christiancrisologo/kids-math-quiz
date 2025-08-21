@@ -29,7 +29,9 @@ import {
 
 const getRandomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  // ...existing code...
 
 const generateAdditionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
   const max = difficulty === 'easy' ? 20 : 100;
@@ -38,8 +40,8 @@ const generateAdditionQuestion = (difficulty: Difficulty): { question: string; a
   return {
     question: `${a} + ${b}`,
     answer: a + b,
-  };
 };
+  }
 
 const generateSubtractionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
   const max = difficulty === 'easy' ? 20 : 100;
@@ -48,7 +50,8 @@ const generateSubtractionQuestion = (difficulty: Difficulty): { question: string
   return {
     question: `${a} - ${b}`,
     answer: a - b,
-  };
+
+  }
 };
 
 const generateMultiplicationQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
@@ -58,7 +61,8 @@ const generateMultiplicationQuestion = (difficulty: Difficulty): { question: str
   return {
     question: `${a} × ${b}`,
     answer: a * b,
-  };
+
+  }
 };
 
 const generateDivisionQuestion = (difficulty: Difficulty): { question: string; answer: number } => {
@@ -66,6 +70,7 @@ const generateDivisionQuestion = (difficulty: Difficulty): { question: string; a
   const divisor = getRandomNumber(2, max);
   const quotient = getRandomNumber(1, max);
   const dividend = divisor * quotient;
+
   return {
     question: `${dividend} ÷ ${divisor}`,
     answer: quotient,

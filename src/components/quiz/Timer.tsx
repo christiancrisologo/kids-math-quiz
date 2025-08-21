@@ -18,8 +18,7 @@ const Timer: React.FC<TimerProps> = ({
     warningSeconds = 5, // Default warning threshold
 }) => {
     // Helper for warning style
-    const getWarningStyle = (remaining: number) =>
-        remaining <= warningSeconds ? 'color: #ef4444; animation: blink 1s steps(2, start) infinite;' : '';
+        // Removed unused variable getWarningStyle
 
     return (
         <div>
