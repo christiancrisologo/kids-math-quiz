@@ -468,23 +468,23 @@ export default function QuizPage() {
                                 onChange={isFractionQuestion ? setUserFractionInput : setUserInput}
                                 placeholder={
                                     currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
-                                    currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
-                                    "Your answer"
+                                        currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
+                                            "Your answer"
                                 }
                             />
                         ) : (
                             <OptionSelector
                                 options={
                                     isFractionQuestion && currentQuestion.fractionOptions ? currentQuestion.fractionOptions :
-                                    isCurrencyQuestion && currentQuestion.currencyOptions ? currentQuestion.currencyOptions :
-                                    isTimeQuestion && currentQuestion.timeOptions ? currentQuestion.timeOptions :
-                                    currentQuestion.options || []
+                                        isCurrencyQuestion && currentQuestion.currencyOptions ? currentQuestion.currencyOptions :
+                                            isTimeQuestion && currentQuestion.timeOptions ? currentQuestion.timeOptions :
+                                                currentQuestion.options || []
                                 }
                                 selectedOption={
                                     isFractionQuestion ? selectedFractionOption :
-                                    isCurrencyQuestion ? selectedCurrencyOption :
-                                    isTimeQuestion ? selectedTimeOption :
-                                    selectedOption
+                                        isCurrencyQuestion ? selectedCurrencyOption :
+                                            isTimeQuestion ? selectedTimeOption :
+                                                selectedOption
                                 }
                                 onSelect={(option) => {
                                     if (isFractionQuestion) setSelectedFractionOption(option as string);
@@ -502,8 +502,8 @@ export default function QuizPage() {
                                     ? (isFractionQuestion ? !userFractionInput.trim() : !userInput.trim())
                                     : (isFractionQuestion ? selectedFractionOption === null :
                                         isCurrencyQuestion ? selectedCurrencyOption === null :
-                                        isTimeQuestion ? selectedTimeOption === null :
-                                        selectedOption === null)
+                                            isTimeQuestion ? selectedTimeOption === null :
+                                                selectedOption === null)
                             }
                             isNextDisabled={false}
                         />
@@ -641,8 +641,8 @@ export default function QuizPage() {
                                             className="w-full px-6 py-4 text-3xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
                                             placeholder={
                                                 currentQuestion.variable ? `Enter value for ${currentQuestion.variable}` :
-                                                currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
-                                                "Enter your answer"
+                                                    currentQuestion.variables && currentQuestion.variables.length > 0 ? `Enter value for ${currentQuestion.variables[0]}` :
+                                                        "Enter your answer"
                                             }
                                             autoFocus
                                             inputMode="numeric"
