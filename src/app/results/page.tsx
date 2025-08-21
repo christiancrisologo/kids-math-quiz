@@ -12,9 +12,6 @@ import { animationClasses } from '../../utils/enhanced-animations';
 import { checkAchievements } from '../../utils/achievements';
 import { generateQuestions } from '../../utils/math/question-generator';
 import { isChallengeCompleted, getChallengeCompletionMessage } from '../../utils/challengeModes';
-import HistoryHeader from '../../components/quiz/HistoryHeader';
-import Timer from '../../components/quiz/Timer';
-import QuizActions from '../../components/quiz/QuizActions';
 
 export default function ResultsPage() {
     const router = useRouter();
@@ -135,10 +132,10 @@ export default function ResultsPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-green-400 to-blue-500 dark:from-amber-900 dark:via-emerald-800 dark:to-blue-900">
             <div className={`${isMobile ? 'p-4' : 'flex items-center justify-center p-4 min-h-screen'}`}>
-                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'} ${isMobile ? 'p-6' : 'p-8'} relative`}>
+                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-4xl'
+                    } ${isMobile ? 'p-6' : 'p-8'} relative`}>
+
                     {/* Header */}
-                    <HistoryHeader username={settings.username} />
-                    {/* Content */}
                     <div className="text-center mb-8">
                         <div className={`font-bold text-gray-600 dark:text-gray-400 mb-3 ${isMobile ? 'text-lg' : 'text-xl'}`}>
                             Here is your result
@@ -395,12 +392,35 @@ export default function ResultsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <QuizActions
-                        onSubmit={handleRetryQuiz}
-                        onNext={handleNewQuiz}
-                        isSubmitDisabled={false}
-                        isNextDisabled={false}
-                    />
+                    <div className={`space-y-4 ${!isMobile ? 'md:grid md:grid-cols-3 md:gap-4 md:space-y-0' : ''}`}>
+                        <MobileButton
+                            variant="secondary"
+                            size="lg"
+                            fullWidth
+                            onClick={handleRetryQuiz}
+                            icon="🔄"
+                        >
+                            Try Again
+                        </MobileButton>
+                        <MobileButton
+                            variant="secondary"
+                            size="lg"
+                            fullWidth
+                            onClick={() => router.push('/history')}
+                            icon="📊"
+                        >
+                            View History
+                        </MobileButton>
+                        <MobileButton
+                            variant="primary"
+                            size="lg"
+                            fullWidth
+                            onClick={handleNewQuiz}
+                            icon="🏠"
+                        >
+                            Back to Home
+                        </MobileButton>
+                    </div>
                 </div>
             </div>
 
