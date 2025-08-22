@@ -32,7 +32,7 @@ export default function HistoryPage() {
                         try {
                             const userObj = JSON.parse(userRaw);
                             userId = userObj.userId || '';
-                        } catch {}
+                        } catch { }
                     }
                 }
                 if (!userId) {
@@ -110,7 +110,7 @@ export default function HistoryPage() {
                         incorrectAnswers: typeof recObj.incorrectAnswers === 'number' ? recObj.incorrectAnswers : 0,
                         score: typeof recObj.score === 'number' ? recObj.score : 0,
                         completedAt: recObj.completedAt ? new Date(recObj.completedAt) : (recObj.created_at ? new Date(recObj.created_at) : new Date()),
-                        created_at: recObj.created_at ? new Date(recObj.created_at) : undefined,
+                        created_at: recObj.created_at ? new Date(recObj.created_at).toISOString() : new Date().toISOString(),
                         timeSpent: typeof recObj.timeSpent === 'number' ? recObj.timeSpent : 0,
                         quizDuration: typeof recObj.quizDuration === 'number' ? recObj.quizDuration : 0,
                         averageTimePerQuestion: typeof recObj.averageTimePerQuestion === 'number' ? recObj.averageTimePerQuestion : 0,
