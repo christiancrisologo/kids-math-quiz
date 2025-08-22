@@ -18,7 +18,6 @@ export interface GameResult {
   incorrectAnswers: number;
   score: number;
   completedAt: Date;
-  created_at?: string | Date;
   timeSpent: number;
   quizDuration: number;
   averageTimePerQuestion: number;
@@ -95,11 +94,13 @@ export const gameHistoryStorage = {
         const info = JSON.parse(userInfo);
         userId = info.userId;
       }
+      const now = new Date();
       const gameResult: GameResult = {
         ...result,
         userId,
         id: generateGameId(),
-        completedAt: new Date(),
+        completedAt: now,
+        created_at: now.toISOString(),
         pendingSync: !online
       };
       const existingHistory = gameHistoryStorage.loadAll();
@@ -164,7 +165,17 @@ export const gameHistoryStorage = {
         all.push(rec);
       }
     }
-    return all;
+    // Normalize created_at to string for all records
+    return all.map(r => ({
+      ...r,
+      created_at: typeof r.created_at === 'string'
+        ? r.created_at
+        : r.completedAt instanceof Date
+          ? r.completedAt.toISOString()
+          : typeof r.completedAt === 'string'
+            ? r.completedAt
+            : new Date().toISOString()
+    }));
   },
 
 

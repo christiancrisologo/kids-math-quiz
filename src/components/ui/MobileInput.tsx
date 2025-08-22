@@ -13,6 +13,7 @@ interface MobileInputProps {
     className?: string;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     onBlur?: () => void;
+    readOnly?: boolean;
 }
 
 export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(({
@@ -27,7 +28,8 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(({
     inputMode,
     className = '',
     onKeyDown,
-    onBlur
+    onBlur,
+    readOnly = false
 }, ref) => {
     return (
         <div className={`${fullWidth ? 'w-full' : ''} ${className}`}>
@@ -46,6 +48,7 @@ export const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(({
                 onBlur={onBlur}
                 disabled={disabled}
                 inputMode={inputMode}
+                readOnly={readOnly}
                 className={`
           min-h-[56px] px-4 py-3 text-lg border-2 rounded-xl transition-all duration-200
           ${fullWidth ? 'w-full' : ''}

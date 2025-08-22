@@ -446,6 +446,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       timeSpent: totalTimeSpent,
       quizDuration,
       averageTimePerQuestion: totalQuestions > 0 ? Math.round(totalTimeSpent / totalQuestions) : 0,
+      created_at: new Date().toISOString(),
     }, !navigator.onLine);
     set({ _gameRecordSaved: true });
     return gameResult;
