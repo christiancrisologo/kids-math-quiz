@@ -121,11 +121,7 @@ export async function saveGameToSupabase({ username, score, quizDuration, settin
       try {
         user = await createUser(username);
       } catch (err: unknown) {
-        if (typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message?: string }).message === 'string' && (err as { message?: string }).message?.includes('duplicate key value')) {
-          user = await getUserByUsername(username);
-        } else {
-          throw err;
-        }
+        throw err;
       }
     }
     await createGameRecord({
@@ -310,8 +306,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   setOverallTimeRemaining: (time: number) => {
     set({ overallTimeRemaining: time });
   },
-  completeQuiz: () => {
-    set({ isQuizActive: false, isQuizCompleted: true, overallTimerActive: false });
+  completeQuiz: async () => {
+  set({ isQuizActive: false, isQuizCompleted: true, overallTimerActive: false });
+  // Saving is now handled in the results page, not here
   },
   resetQuiz: () => {
     set({

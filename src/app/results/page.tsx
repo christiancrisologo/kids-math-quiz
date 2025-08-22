@@ -6,7 +6,6 @@ import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
 import { EnhancedConfettiEffect } from '../../components/ui/EnhancedConfettiEffect';
-import { playSound } from '../../utils/enhanced-sounds';
 import { useSystemSettings } from '../../contexts/system-settings-context';
 import { animationClasses } from '../../utils/enhanced-animations';
 import { checkAchievements } from '../../utils/achievements';
@@ -17,31 +16,33 @@ export default function ResultsPage() {
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
-    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, quizStartTime } = useQuizStore();
+    const { settings, questions, resetQuiz, bestStreak, retryQuiz, saveGameResult, quizStartTime, isQuizCompleted } = useQuizStore();
     const [showConfetti, setShowConfetti] = useState(false);
     const [showBonusConfetti, setShowBonusConfetti] = useState(false);
 
     // Prevent duplicate game saves
     const [gameSaved, setGameSaved] = useState(false);
+    // Prevent duplicate game saves
+    //
     useEffect(() => {
-        if (questions.length === 0) {
+        if (questions?.length === 0) {
             router.push('/');
-        } else {
-            // Play completion sound when results load
-            setTimeout(() => playSound('completion', systemSettings), 500);
-            // Save the game result only once
-            if (!gameSaved) {
+        }
+    }, [questions, router]);
+
+    useEffect(() => {
+        if (!gameSaved && isQuizCompleted) {
+            (async () => {
                 try {
-                    saveGameResult();
+                    await saveGameResult();
                     setGameSaved(true);
                 } catch (error) {
                     console.error('Failed to save game result:', error);
                 }
-            }
-            // Show confetti with a slight delay for better effect
-            setTimeout(() => setShowConfetti(true), 800);
+            })();
         }
-    }, [questions.length, router, saveGameResult, systemSettings, gameSaved]);
+    }, [gameSaved, isQuizCompleted, saveGameResult]);
+
 
     // Show bonus confetti for exceptional performance
     useEffect(() => {
