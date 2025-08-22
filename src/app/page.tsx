@@ -1,9 +1,9 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../store/quiz-store';
-import { handleToggle, handleSliderChange } from '../utils/helpers';
 import { generateQuestions } from '../utils/math/question-generator';
 import { useIsMobile } from '../utils/responsive';
 import { MobileButton } from '../components/ui/MobileButton';
@@ -14,20 +14,24 @@ import { SliderWithToggle } from '../components/ui/SliderWithToggle';
 import { SystemSettingsPanel } from '../components/ui/SystemSettings';
 import { useSystemSettings } from '../contexts/system-settings-context';
 import { animationClasses } from '../utils/enhanced-animations';
-import { yearLevelPresets, applyYearLevelPreset, type YearLevel } from '../utils/yearLevelPresets';
-import { getChallengeModes, applyChallengeMode, type ChallengeMode } from '../utils/challengeModes';
-import type { Difficulty, QuestionType, MathOperation, NumberType } from '../store/quiz-store';
+import {
+  Difficulty,
+  QuestionType,
+  MathOperation,
+  NumberType
+} from '../store/quiz-store';
+import { YearLevel, yearLevelPresets, applyYearLevelPreset } from '../utils/yearLevelPresets';
+import { ChallengeMode, getChallengeModes, applyChallengeMode } from '../utils/challengeModes';
+import { handleToggle, handleSliderChange } from '../utils/helpers';
+import { initialFormData } from '../constants/initialFormData';
 
 export default function Home() {
   const router = useRouter();
   const { updateSettings, setQuestions, saveUserPreferences, resetQuiz } = useQuizStore();
   const isMobile = useIsMobile();
   const { settings: systemSettings } = useSystemSettings();
-
-  // Removed unused welcomeBack state
-  const [showWelcome] = useState(false);
-  // Load user info from localStorage (math_quiz_user)
-  // const [isClient, setIsClient] = useState(false);
+  const [hasExistingUser, setHasExistingUser] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     difficulty: 'easy' as Difficulty,
@@ -48,26 +52,47 @@ export default function Home() {
     overallTimerDuration: 180,
     challengeMode: undefined as string | undefined,
   });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const userRaw = localStorage.getItem('math_quiz_user');
-      if (userRaw) {
-        try {
-          const userObj = JSON.parse(userRaw);
-          setFormData((prev) => ({ ...prev, username: userObj.userName || '' }));
-        } catch {
-          // ignore
-        }
-      }
-    }
-  }, []);
-
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
   const [selectedChallengeMode, setSelectedChallengeMode] = useState<string>('');
   const [availableChallengeModes] = useState<ChallengeMode[]>(getChallengeModes());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showSettings, setShowSettings] = useState(false);
+
+  useEffect(() => {
+    if (showWelcome) {
+      const timer = setTimeout(() => setShowWelcome(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcome]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      setHasExistingUser(!!userRaw);
+      let show = false;
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          if (userObj.userName && userObj.userName.trim() !== '') {
+            show = true;
+          }
+        } catch { }
+      }
+      setShowWelcome(show);
+    }
+  }, [formData.username]);
+
+  // Handler for new user button
+  const handleNewUser = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.clear();
+    }
+    setFormData({ ...initialFormData, challengeMode: undefined });
+    setSelectedYearLevel('primary');
+    setSelectedChallengeMode('');
+    setErrors({});
+    resetQuiz();
+  };
 
   // Only log what's currently in localStorage for debugging (browser only)
   useEffect(() => {
@@ -324,14 +349,36 @@ export default function Home() {
           </div>
 
           {/* Username Input */}
+          {/* Username Input + New User Button */}
           <div className="mb-4">
-            <MobileInput
-              label="Your Name"
-              placeholder="Enter your name"
-              value={formData.username}
-              onChange={(value) => handleInputChange('username', value)}
-              error={errors.username}
-            />
+            <div className="flex gap-2 w-full items-center">
+              <div className="flex-1 h-full flex items-center">
+                <MobileInput
+                  label="Your Name"
+                  placeholder="Enter your name"
+                  value={formData.username}
+                  onChange={(value) => handleInputChange('username', value)}
+                  error={errors.username}
+                  readOnly={hasExistingUser && !!formData.username}
+                />
+              </div>
+              {hasExistingUser && formData.username && (
+                <MobileButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleNewUser}
+                  className="mt-6 ml-2 whitespace-nowrap bg-ye hover:bg-amber-400 text-gray-900 border border-yellow-400 flex items-center justify-center h-[56px]"
+                  icon={<span role="img" aria-label="reset">🔄</span>}
+                >
+                  Reset
+                </MobileButton>
+              )}
+            </div>
+            {hasExistingUser && formData.username && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                Reset the game to change user
+              </div>
+            )}
           </div>
 
           {/* Year Level Selection */}
