@@ -8,7 +8,7 @@ import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
 import HistoryHeader from '../../components/quiz/HistoryHeader';
-import GameHistoryTable from '../../components/quiz/GameHistoryTable';
+// import GameHistoryTable from '../../components/quiz/GameHistoryTable';
 import NoHistory from '../../components/quiz/NoHistory';
 
 export default function HistoryPage() {
@@ -36,7 +36,6 @@ export default function HistoryPage() {
                     }
                 }
                 if (!userId) {
-                    setGameHistory([]);
                     setLoading(false);
                     return;
                 }

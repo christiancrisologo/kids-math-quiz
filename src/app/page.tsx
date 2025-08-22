@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../store/quiz-store';
+import { handleToggle, handleSliderChange } from '../utils/helpers';
 import { generateQuestions } from '../utils/math/question-generator';
 import { useIsMobile } from '../utils/responsive';
 import { MobileButton } from '../components/ui/MobileButton';
@@ -26,22 +27,9 @@ export default function Home() {
   // Removed unused welcomeBack state
   const [showWelcome] = useState(false);
   // Load user info from localStorage (math_quiz_user)
-  const getInitialUsername = () => {
-    if (typeof window !== 'undefined') {
-      const userRaw = localStorage.getItem('math_quiz_user');
-      if (userRaw) {
-        try {
-          const userObj = JSON.parse(userRaw);
-          return userObj.userName || '';
-        } catch {
-          return '';
-        }
-      }
-    }
-    return '';
-  };
+  // const [isClient, setIsClient] = useState(false);
   const [formData, setFormData] = useState({
-    username: getInitialUsername(),
+    username: '',
     difficulty: 'easy' as Difficulty,
     numberOfQuestions: 5,
     timerPerQuestion: 10,
@@ -60,6 +48,20 @@ export default function Home() {
     overallTimerDuration: 180,
     challengeMode: undefined as string | undefined,
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          setFormData((prev) => ({ ...prev, username: userObj.userName || '' }));
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, []);
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
   const [selectedChallengeMode, setSelectedChallengeMode] = useState<string>('');
