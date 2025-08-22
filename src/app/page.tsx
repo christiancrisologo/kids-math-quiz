@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuizStore } from '../store/quiz-store';
+import { handleToggle, handleSliderChange } from '../utils/helpers';
 import { generateQuestions } from '../utils/math/question-generator';
 import { useIsMobile } from '../utils/responsive';
 import { MobileButton } from '../components/ui/MobileButton';
@@ -26,22 +27,9 @@ export default function Home() {
   // Removed unused welcomeBack state
   const [showWelcome] = useState(false);
   // Load user info from localStorage (math_quiz_user)
-  const getInitialUsername = () => {
-    if (typeof window !== 'undefined') {
-      const userRaw = localStorage.getItem('math_quiz_user');
-      if (userRaw) {
-        try {
-          const userObj = JSON.parse(userRaw);
-          return userObj.userName || '';
-        } catch {
-          return '';
-        }
-      }
-    }
-    return '';
-  };
+  // const [isClient, setIsClient] = useState(false);
   const [formData, setFormData] = useState({
-    username: getInitialUsername(),
+    username: '',
     difficulty: 'easy' as Difficulty,
     numberOfQuestions: 5,
     timerPerQuestion: 10,
@@ -60,6 +48,20 @@ export default function Home() {
     overallTimerDuration: 180,
     challengeMode: undefined as string | undefined,
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userRaw = localStorage.getItem('math_quiz_user');
+      if (userRaw) {
+        try {
+          const userObj = JSON.parse(userRaw);
+          setFormData((prev) => ({ ...prev, username: userObj.userName || '' }));
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, []);
 
   const [selectedYearLevel, setSelectedYearLevel] = useState<YearLevel | ''>('primary');
   const [selectedChallengeMode, setSelectedChallengeMode] = useState<string>('');
@@ -122,26 +124,10 @@ export default function Home() {
   };
 
   const handleMathOperationToggle = (operation: MathOperation) => {
-    setFormData(prev => {
-      const currentOperations = prev.mathOperations;
-      const isSelected = currentOperations.includes(operation);
-
-      if (isSelected) {
-        // Don't allow removing the last operation
-        if (currentOperations.length === 1) {
-          return prev;
-        }
-        return {
-          ...prev,
-          mathOperations: currentOperations.filter(op => op !== operation)
-        };
-      } else {
-        return {
-          ...prev,
-          mathOperations: [...currentOperations, operation]
-        };
-      }
-    });
+    setFormData(prev => ({
+      ...prev,
+      mathOperations: handleToggle(prev.mathOperations, operation)
+    }));
 
     // Clear math operations error when user makes a selection
     if (errors.mathOperations) {
@@ -153,26 +139,10 @@ export default function Home() {
   };
 
   const handleNumberTypeToggle = (numberType: NumberType) => {
-    setFormData(prev => {
-      const currentTypes = prev.numberTypes;
-      const isSelected = currentTypes.includes(numberType);
-
-      if (isSelected) {
-        // Don't allow removing the last number type
-        if (currentTypes.length === 1) {
-          return prev;
-        }
-        return {
-          ...prev,
-          numberTypes: currentTypes.filter(type => type !== numberType)
-        };
-      } else {
-        return {
-          ...prev,
-          numberTypes: [...currentTypes, numberType]
-        };
-      }
-    });
+    setFormData(prev => ({
+      ...prev,
+      numberTypes: handleToggle(prev.numberTypes, numberType)
+    }));
 
     // Clear number types error when user makes a selection
     if (errors.numberTypes) {
@@ -185,20 +155,12 @@ export default function Home() {
 
   // Handler for correct answers slider
   const handleCorrectAnswersChange = (min: number, max: number) => {
-    setFormData(prev => ({
-      ...prev,
-      minCorrectAnswers: min,
-      maxCorrectAnswers: max,
-    }));
+    handleSliderChange(min, max, 'correctAnswers', setFormData);
   };
 
   // Handler for incorrect answers slider
   const handleIncorrectAnswersChange = (min: number, max: number) => {
-    setFormData(prev => ({
-      ...prev,
-      minIncorrectAnswers: min,
-      maxIncorrectAnswers: max,
-    }));
+    handleSliderChange(min, max, 'incorrectAnswers', setFormData);
   };
 
   const handleYearLevelChange = (yearLevel: YearLevel) => {
@@ -754,6 +716,13 @@ export default function Home() {
               fullWidth
               onClick={handleStartQuiz}
               icon="🚀"
+              disabled={
+                !formData.username.trim() ||
+                Object.keys(errors).length > 0 ||
+                formData.mathOperations.length === 0 ||
+                formData.numberTypes.length === 0
+                // Challenge mode is optional, do not include in validation
+              }
             >
               Start Quiz!
             </MobileButton>

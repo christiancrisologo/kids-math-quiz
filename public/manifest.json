@@ -1,0 +1,16 @@
+{
+  "name": "Kids Math Quiz",
+  "short_name": "MathQuiz",
+  "description": "A fun and educational math quiz app for kids.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48 64x64 128x128 256x256 512x512",
+      "type": "image/x-icon"
+    }
+  ]
+}

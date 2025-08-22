@@ -7,6 +7,9 @@ import { gameHistoryStorage, GameResult } from '../../utils/storage';
 import { useQuizStore } from '../../store/quiz-store';
 import { useIsMobile } from '../../utils/responsive';
 import { MobileButton } from '../../components/ui/MobileButton';
+import HistoryHeader from '../../components/quiz/HistoryHeader';
+// import GameHistoryTable from '../../components/quiz/GameHistoryTable';
+import NoHistory from '../../components/quiz/NoHistory';
 
 export default function HistoryPage() {
     const router = useRouter();
@@ -33,7 +36,6 @@ export default function HistoryPage() {
                     }
                 }
                 if (!userId) {
-                    setGameHistory([]);
                     setLoading(false);
                     return;
                 }
@@ -129,8 +131,6 @@ export default function HistoryPage() {
         fetchAndMergeHistory();
     }, []);
 
-    // Get unique usernames for filter dropdown - removed since we're showing single user history
-
     // Sort history based on selected sort option
     const sortedHistory = [...gameHistory].sort((a, b) => {
         if (sortBy === 'date') {
@@ -188,15 +188,7 @@ export default function HistoryPage() {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900 dark:to-purple-900">
             <div className={`container mx-auto px-4 py-8 ${isMobile ? 'max-w-full' : 'max-w-6xl'}`}>
                 {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
-                        🏆 {settings.username ? `${settings.username} Game History` : 'Game History'}
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-300">
-                        Review your quiz performance and track your progress
-                    </p>
-                </div>
-
+                <HistoryHeader username={settings.username} />
                 {/* Controls */}
                 <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 ${isMobile ? 'space-y-4' : 'flex justify-between items-center'
                     }`}>
@@ -232,23 +224,7 @@ export default function HistoryPage() {
 
                 {/* Game History List */}
                 {sortedHistory.length === 0 ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-                        <div className="text-6xl mb-4">📊</div>
-                        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            No Game History Found
-                        </h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">
-                            Start playing quizzes to see your history here!
-                        </p>
-                        <MobileButton
-                            variant="primary"
-                            size="lg"
-                            onClick={() => router.push('/')}
-                            icon="🎯"
-                        >
-                            Start a Quiz
-                        </MobileButton>
-                    </div>
+                    <NoHistory />
                 ) : (
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                         {/* Table Header */}

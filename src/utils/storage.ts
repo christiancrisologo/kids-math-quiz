@@ -2,6 +2,7 @@ import { QuizSettings } from '../store/quiz-store';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface GameResult {
+  created_at: string;
   id: string;
   userId?: string;
   settings: QuizSettings;
