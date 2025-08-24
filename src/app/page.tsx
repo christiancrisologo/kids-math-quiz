@@ -522,7 +522,7 @@ export default function Home() {
                             label=""
                             placeholder="Minimum 5"
                             value={formData.numberOfQuestions}
-                            onChange={(value) => handleInputChange('numberOfQuestions', parseInt(value) || 5)}
+                            onChange={(value) => handleInputChange('numberOfQuestions', value)}
                             error={errors.numberOfQuestions}
                             inputMode="numeric"
                           />
@@ -548,7 +548,7 @@ export default function Home() {
                             label=""
                             placeholder="Minimum 5 seconds"
                             value={formData.timerPerQuestion}
-                            onChange={(value) => handleInputChange('timerPerQuestion', parseInt(value) || 10)}
+                            onChange={(value) => handleInputChange('timerPerQuestion', value)}
                             error={errors.timerPerQuestion}
                             inputMode="numeric"
                           />
@@ -586,7 +586,7 @@ export default function Home() {
                                 label=""
                                 placeholder="Duration in minutes"
                                 value={Math.round(formData.overallTimerDuration / 60)}
-                                onChange={(value) => handleInputChange('overallTimerDuration', (parseInt(value) || 5) * 60)}
+                                onChange={(value) => handleInputChange('overallTimerDuration', value ? parseInt(value) * 60 : 0)}
                                 inputMode="numeric"
                               />
                             </div>
