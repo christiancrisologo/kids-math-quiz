@@ -35,8 +35,8 @@ export default function Home() {
   const [formData, setFormData] = useState({
     username: '',
     difficulty: 'easy' as Difficulty,
-    numberOfQuestions: 5,
-    timerPerQuestion: 10,
+    numberOfQuestions: 20,
+    timerPerQuestion: 60,
     questionType: 'expression' as QuestionType,
     mathOperations: ['addition'] as MathOperation[],
     numberTypes: ['integers'] as NumberType[],
