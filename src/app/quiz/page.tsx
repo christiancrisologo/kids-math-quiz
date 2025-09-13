@@ -59,10 +59,11 @@ export default function QuizPage() {
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    // Helper functions to check question types
-    const isFractionQuestion = currentQuestion && currentQuestion.fractionAnswer !== undefined;
-    const isCurrencyQuestion = currentQuestion && currentQuestion.currencyOptions !== undefined;
-    const isTimeQuestion = currentQuestion && currentQuestion.timeOptions !== undefined;
+    // Cleaner number type detection using numberType property on question
+    const numberType = currentQuestion?.numberType;
+    const isFractionQuestion = numberType === 'fractions';
+    const isCurrencyQuestion = numberType === 'currency';
+    const isTimeQuestion = numberType === 'time';
 
     // Start quiz when component mounts
     useEffect(() => {
@@ -418,8 +419,28 @@ export default function QuizPage() {
                         </div>
                     </div>
 
-                    {/* Answer Input */}
+                    {/* Answer Type Indicator & Input */}
                     <div className={`mb-8 ${getBlockingOverlayClasses(isUserInteractionBlocked)}`}>
+                        {/* Type Indicator */}
+                        {settings.questionType === 'expression' && numberType && (
+                            <div className="mb-2 flex justify-center">
+                                {numberType === 'time' && (
+                                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-sm font-semibold">
+                                        ⏰ Answer format: <span className="font-mono">HH:MM</span>
+                                    </span>
+                                )}
+                                {numberType === 'currency' && (
+                                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 text-sm font-semibold">
+                                        💵 Answer format: <span className="font-mono">$ Decimal</span>
+                                    </span>
+                                )}
+                                {numberType === 'fractions' && (
+                                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 text-sm font-semibold">
+                                        ➗ Answer format: <span className="font-mono">Fraction (e.g., 1/2)</span>
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         {settings.questionType === 'expression' ? (
                             <div>
                                 {isFractionQuestion ? (
@@ -430,6 +451,46 @@ export default function QuizPage() {
                                         placeholder="Enter fraction (e.g., 3/4 or 1 2/3)"
                                         fullWidth
                                     />
+                                ) : isCurrencyQuestion ? (
+                                    <div className="relative">
+                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-green-500 pointer-events-none select-none">$</span>
+                                        <input
+                                            ref={inputRef}
+                                            type="text"
+                                            value={userInput}
+                                            onChange={(e) => {
+                                                // Only allow numbers and one dot
+                                                const val = e.target.value.replace(/[^\d.]/g, '');
+                                                setUserInput(val);
+                                            }}
+                                            onKeyDown={handleKeyPress}
+                                            className="w-full pl-10 pr-6 py-4 text-3xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+                                            placeholder="Enter amount (e.g., 12.50)"
+                                            autoFocus
+                                            inputMode="decimal"
+                                        />
+                                    </div>
+                                ) : isTimeQuestion ? (
+                                    <div>
+                                        <input
+                                            ref={inputRef}
+                                            type="text"
+                                            value={userInput}
+                                            onChange={(e) => {
+                                                // Allow only numbers and colon
+                                                const val = e.target.value.replace(/[^\d:]/g, '');
+                                                setUserInput(val);
+                                            }}
+                                            onKeyDown={handleKeyPress}
+                                            className="w-full px-6 py-4 text-3xl text-center border-2 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent"
+                                            placeholder="Enter time (e.g., 02:30)"
+                                            autoFocus
+                                            inputMode="text"
+                                        />
+                                        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                                            Example: 02:30, 12:00, 0:45
+                                        </div>
+                                    </div>
                                 ) : (
                                     <input
                                         ref={inputRef}
