@@ -732,6 +732,7 @@ export const generateQuestions = (
       id,
       question: result.question,
       answer: result.answer,
+      numberType: randomNumberType,
     };
     
     // For fraction questions, add fraction-specific properties

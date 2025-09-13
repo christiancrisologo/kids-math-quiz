@@ -13,6 +13,7 @@ export interface Question {
   id: string;
   question: string;
   answer: number;
+  numberType?: NumberType; // Add numberType for robust detection
   variable?: string; // e.g., "x", "y" for algebraic questions, or "x,y" for binomial
   variables?: string[]; // Array of variables for multi-variable equations like binomials
   equation?: string; // Original equation for display

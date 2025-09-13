@@ -1,19 +1,21 @@
 {
     "challenges": [
         {
-            "name": "No Challenge",
-            "description": "Standard quiz with no special restrictions",
+            "name": "50 correct 10 incorrects allowed",
+            "description": "Try to have 50 corrects with just 10 incorrects ",
             "settings": {
                 "timerEnabled": true,
                 "questionsEnabled": true,
                 "minCorrectAnswers": 0,
-                "maxCorrectAnswers": 10,
-                "correctAnswersEnabled": false,
+                "maxCorrectAnswers": 50,
+                "correctAnswersEnabled": true,
                 "minIncorrectAnswers": 0,
                 "maxIncorrectAnswers": 10,
-                "incorrectAnswersEnabled": false,
+                "incorrectAnswersEnabled": true,
                 "overallTimerEnabled": false,
-                "overallTimerDuration": 0
+                "overallTimerDuration": 0,
+                "timerPerQuestion": 50,
+                "numberOfQuestions": 60
             }
         },
         {
@@ -274,7 +276,7 @@
             "name": "primary",
             "label": "🎒 Primary School",
             "difficulty": "easy",
-            "numberOfQuestions": 20,
+            "numberOfQuestions": 40,
             "timerPerQuestion": 60,
             "questionType": ["multiple-choice"],
             "mathOperations": ["addition", "subtraction", "multiplication", "division"],
@@ -283,10 +285,10 @@
             "timerEnabled": true,
             "questionsEnabled": true,
             "minCorrectAnswers": 0,
-            "maxCorrectAnswers": 5,
-            "correctAnswersEnabled": false,
+            "maxCorrectAnswers": 40,
+            "correctAnswersEnabled": true,
             "minIncorrectAnswers": 0,
-            "maxIncorrectAnswers": 3,
+            "maxIncorrectAnswers": 10,
             "incorrectAnswersEnabled": false,
             "overallTimerEnabled": false,
             "overallTimerDuration": 180
@@ -295,8 +297,8 @@
             "name": "junior-high",
             "label": "📚 Junior High School",
             "difficulty": "easy",
-            "numberOfQuestions": 10,
-            "timerPerQuestion": 10,
+            "numberOfQuestions": 60,
+            "timerPerQuestion": 60,
             "questionType": ["expression", "multiple-choice"],
             "mathOperations": ["addition", "subtraction", "multiplication", "division", "algebraic"],
             "numberTypes": ["integers", "decimals", "fractions", "currency", "time"],
@@ -304,13 +306,13 @@
             "timerEnabled": true,
             "questionsEnabled": true,
             "minCorrectAnswers": 0,
-            "maxCorrectAnswers": 10,
-            "correctAnswersEnabled": false,
+            "maxCorrectAnswers": 50,
+            "correctAnswersEnabled": true,
             "minIncorrectAnswers": 0,
-            "maxIncorrectAnswers": 5,
-            "incorrectAnswersEnabled": false,
-            "overallTimerEnabled": false,
-            "overallTimerDuration": 600
+            "maxIncorrectAnswers": 10,
+            "incorrectAnswersEnabled": true,
+            "overallTimerEnabled": true,
+            "overallTimerDuration": 1600
         },
         {
             "name": "senior-high",
