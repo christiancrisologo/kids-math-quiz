@@ -14,6 +14,8 @@ import { FractionInput } from '../../components/ui/FractionInput';
 import { MobileTile } from '../../components/ui/MobileTile';
 
 export default function QuizPage() {
+    // Flash background state must be inside the component
+    const [flashBg, setFlashBg] = useState<'none' | 'green' | 'red'>('none');
     const router = useRouter();
     const isMobile = useIsMobile();
     const { settings: systemSettings } = useSystemSettings();
@@ -297,10 +299,14 @@ export default function QuizPage() {
                 if (isCorrect) {
                     playSound('correct', systemSettings);
                     vibrate([100, 50, 100], systemSettings);
+                    setFlashBg('green');
                 } else {
                     playSound('incorrect', systemSettings);
                     vibrate(200, systemSettings);
+                    setFlashBg('red');
                 }
+                // Remove flash after 600ms
+                setTimeout(() => setFlashBg('none'), 600);
             }, 100);
         }
 
@@ -391,7 +397,25 @@ export default function QuizPage() {
     />);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-blue-500 dark:from-violet-900 dark:via-purple-800 dark:to-indigo-900">
+        <div className={`min-h-screen bg-gradient-to-br from-orange-400 via-pink-500 to-blue-500 dark:from-violet-900 dark:via-purple-800 dark:to-indigo-900 transition-colors duration-500 ${flashBg === 'green' ? 'flash-green' : ''} ${flashBg === 'red' ? 'flash-red' : ''}`}>
+            <style jsx global>{`
+                .flash-green {
+                    animation: flashGreenBg 0.6s;
+                    background: #22c55e !important;
+                }
+                .flash-red {
+                    animation: flashRedBg 0.6s;
+                    background: #ef4444 !important;
+                }
+                @keyframes flashGreenBg {
+                    0% { background: #22c55e; }
+                    100% { background: inherit; }
+                }
+                @keyframes flashRedBg {
+                    0% { background: #ef4444; }
+                    100% { background: inherit; }
+                }
+                `}</style>
             {/* Header: mobile and desktop differ, rest is unified */}
 
             {isMobile && (<div className="bg-white dark:bg-slate-800 shadow-lg p-4 sticky top-0 z-10">{headerContent}</div>)}
