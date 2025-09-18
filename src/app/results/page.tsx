@@ -209,7 +209,7 @@ export default function ResultsPage() {
                                 Try Again!
                             </h2>
                             <p className={`text-red-700 dark:text-red-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
-                                You didn't meet the achievement requirements. Practice more and try again!
+                                You didn&apos;t meet the achievement requirements. Practice more and try again!
                             </p>
                             <div className="mt-4">
                                 <MobileButton
