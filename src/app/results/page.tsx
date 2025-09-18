@@ -67,6 +67,14 @@ export default function ResultsPage() {
         quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : undefined
     ) : false;
 
+    // Determine if failed (achievement not met, timer out, or too many incorrect)
+    const failed = (
+        (settings.challengeMode && !challengeCompleted) ||
+        (settings.correctAnswersEnabled && correctAnswers < settings.minCorrectAnswers) ||
+        (settings.incorrectAnswersEnabled && incorrectAnswers > settings.maxIncorrectAnswers) ||
+        (settings.overallTimerEnabled && quizStartTime && (Date.now() - quizStartTime) / 1000 > settings.overallTimerDuration)
+    );
+
     // Determine confetti intensity based on performance
     const getConfettiIntensity = (percentage: number): 'low' | 'medium' | 'high' => {
         if (percentage >= 90) return 'high';
@@ -194,15 +202,26 @@ export default function ResultsPage() {
                         </div>
                     )}
 
-                    {settings.challengeMode && !challengeCompleted && (
-                        <div className={`bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-4 mb-8 text-center border-2 border-blue-300 dark:border-blue-600`}>
-                            <div className="text-2xl mb-2">💪</div>
-                            <h2 className={`font-bold text-blue-800 dark:text-blue-300 mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>
-                                Challenge Attempted
+                    {failed && (
+                        <div className={`bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl p-4 mb-8 text-center border-2 border-red-400 dark:border-red-600 animate-pulse`}>
+                            <div className="text-3xl mb-2">❌</div>
+                            <h2 className={`font-bold text-red-800 dark:text-red-300 mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>
+                                Try Again!
                             </h2>
-                            <p className={`text-blue-700 dark:text-blue-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
-                                You tried the {settings.challengeMode} challenge! Keep practicing to complete it!
+                            <p className={`text-red-700 dark:text-red-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
+                                You didn't meet the achievement requirements. Practice more and try again!
                             </p>
+                            <div className="mt-4">
+                                <MobileButton
+                                    variant="primary"
+                                    size="lg"
+                                    fullWidth
+                                    onClick={handleRetryQuiz}
+                                    icon="🔄"
+                                >
+                                    TRY AGAIN
+                                </MobileButton>
+                            </div>
                         </div>
                     )}
 
